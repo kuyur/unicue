@@ -1,11 +1,13 @@
-unicue
+Unicue
 ======
 
-Tools for converting character encodings
+Tools for converting character encodings.
 
 ##How to build
 
 The solution file(Unicue.sln) is for Visual C++ 2010.
+Make sure you have add [WTL](http://sourceforge.net/projects/wtl/files/WTL%208.1/)'s header files into including folder of VC++, or 
+you might add path of WTL's header files into project.
 
 #####If your Visual C++ 2010 is Express version, you need to own a copy of *ATL*.
 
