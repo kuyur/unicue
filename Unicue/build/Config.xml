@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<config>
+    <TemplateStr>.utf-8</TemplateStr>
+    <AutoFixCue>true</AutoFixCue>
+    <AutoFixTTA>false</AutoFixTTA>
+    <AcceptDragAudioFile>true</AcceptDragAudioFile>
+    <CloseCuePrompt>false</CloseCuePrompt>
+    <AutoCheckCode>true</AutoCheckCode>
+    <AlwaysOnTop>true</AlwaysOnTop>
+    <CharmapConfPath>charmap-anisong.xml</CharmapConfPath>
+</config>
