@@ -34,4 +34,4 @@ Go to property page of project to remvoe needless path of ATL:
     Configuration Properties -> VC++ Directories -> Include Directories
     Configuration Properties -> VC++ Directories -> Library Directories
 
-
+Good luck!
