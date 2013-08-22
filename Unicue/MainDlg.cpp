@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "file.h"
+#include "utils.h"
 #include "resource.h"
 #include "aboutdlg.h"
 #include "SettingDlg.h"
@@ -80,6 +81,10 @@ CMainDlg::CMainDlg()
     m_context = new CC4Context(m_Config.MapConfName, processPath);
     if (!m_context->init())
         MessageBox(_T("Failed to load charmaps!"), _T("Unicue"));
+    // set local here
+    //SetThreadLocale(MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US));
+    SetThreadLocale(MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED));
+    //SetThreadLocale(MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_TRADITIONAL));
 }
 
 CMainDlg::~CMainDlg()
@@ -180,7 +185,7 @@ BOOL CMainDlg::LoadConfigFile(TiXmlDocument *xmlfile)
     pElem=hXmlHandle.FirstChild("CharmapConfPath").Element();
     if (!pElem) return FALSE;
     if (!pElem->GetText()) return FALSE;
-    m_Config.MapConfName = CC4EncodeUTF8::convert2unicode(pElem->GetText(), strlen(pElem->GetText())).c_str();
+    m_Config.MapConfName = CC4EncodeUTF8::convert2unicode(pElem->GetText(), strlen(pElem->GetText()));
 
     return TRUE;
 }
@@ -782,124 +787,132 @@ void CMainDlg::FixCue()
         hFind=FindFirstFile(FindFilePath.c_str(), &FindFileData);
         if (hFind!=INVALID_HANDLE_VALUE)
         {
-            // TODO
-            //CueString.replace(MusicFileName,FindFileData.cFileName);
+            replace(CueString, MusicFileName, FindFileData.cFileName);
             GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString.c_str());
             FindClose(hFind);
             return;
         }
-        /*
+
         FindFilePath.clear();
         FindFilePath.append(MusicFilePath).append(_T(".mac")); //mac
         hFind=FindFirstFile(FindFilePath.c_str(), &FindFileData);
         if (hFind!=INVALID_HANDLE_VALUE)
         {
-            CueString.Replace(MusicFileName,FindFileData.cFileName);
-            GetDlgItem(IDC_EDIT_UNICODE)->SetWindowText(CueString);
+            replace(CueString, MusicFileName, FindFileData.cFileName);
+            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString.c_str());
             FindClose(hFind);
             return;
         }
 
-        FindFilePath=MusicFilePath+_T(".flac"); //flac
-        hFind=FindFirstFile(FindFilePath, &FindFileData);
+        FindFilePath.clear();
+        FindFilePath.append(MusicFilePath).append(_T(".flac")); //flac
+        hFind=FindFirstFile(FindFilePath.c_str(), &FindFileData);
         if (hFind!=INVALID_HANDLE_VALUE)
         {
-            CueString.Replace(MusicFileName,FindFileData.cFileName);
-            GetDlgItem(IDC_EDIT_UNICODE)->SetWindowText(CueString);
+            replace(CueString, MusicFileName, FindFileData.cFileName);
+            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString.c_str());
             FindClose(hFind);
             return;
         }
 
-        FindFilePath=MusicFilePath+_T(".fla"); //flac
-        hFind=FindFirstFile(FindFilePath, &FindFileData);
+        FindFilePath.clear();
+        FindFilePath.append(MusicFilePath).append(_T(".fla")); //flac
+        hFind=FindFirstFile(FindFilePath.c_str(), &FindFileData);
         if (hFind!=INVALID_HANDLE_VALUE)
         {
-            CueString.Replace(MusicFileName,FindFileData.cFileName);
-            GetDlgItem(IDC_EDIT_UNICODE)->SetWindowText(CueString);
+            replace(CueString, MusicFileName, FindFileData.cFileName);
+            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString.c_str());
             FindClose(hFind);
             return;
         }
 
-        FindFilePath=MusicFilePath+_T(".tta"); //tta
-        hFind=FindFirstFile(FindFilePath, &FindFileData);
+        FindFilePath.clear();
+        FindFilePath.append(MusicFilePath).append(_T(".tta")); //tta
+        hFind=FindFirstFile(FindFilePath.c_str(), &FindFileData);
         if (hFind!=INVALID_HANDLE_VALUE)
         {
-            CueString.Replace(MusicFileName,FindFileData.cFileName);
-            GetDlgItem(IDC_EDIT_UNICODE)->SetWindowText(CueString);
+            replace(CueString, MusicFileName, FindFileData.cFileName);
+            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString.c_str());
             FindClose(hFind);
             return;
         }
 
-        FindFilePath=MusicFilePath+_T(".tak"); //tak
-        hFind=FindFirstFile(FindFilePath, &FindFileData);
+        FindFilePath.clear();
+        FindFilePath.append(MusicFilePath).append(_T(".tak")); //tak
+        hFind=FindFirstFile(FindFilePath.c_str(), &FindFileData);
         if (hFind!=INVALID_HANDLE_VALUE)
         {
-            CueString.Replace(MusicFileName,FindFileData.cFileName);
-            GetDlgItem(IDC_EDIT_UNICODE)->SetWindowText(CueString);
+            replace(CueString, MusicFileName, FindFileData.cFileName);
+            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString.c_str());
             FindClose(hFind);
             return;
         }
 
-        FindFilePath=MusicFilePath+_T(".wv"); //wv
-        hFind=FindFirstFile(FindFilePath, &FindFileData);
+        FindFilePath.clear();
+        FindFilePath.append(MusicFilePath).append(_T(".wv")); //wv
+        hFind=FindFirstFile(FindFilePath.c_str(), &FindFileData);
         if (hFind!=INVALID_HANDLE_VALUE)
         {
-            CueString.Replace(MusicFileName,FindFileData.cFileName);
-            GetDlgItem(IDC_EDIT_UNICODE)->SetWindowText(CueString);
+            replace(CueString, MusicFileName, FindFileData.cFileName);
+            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString.c_str());
             FindClose(hFind);
             return;
         }
 
-        FindFilePath=MusicFilePath+_T(".m4a"); //apple lossless
-        hFind=FindFirstFile(FindFilePath, &FindFileData);
+        FindFilePath.clear();
+        FindFilePath.append(MusicFilePath).append(_T(".m4a")); //apple lossless
+        hFind=FindFirstFile(FindFilePath.c_str(), &FindFileData);
         if (hFind!=INVALID_HANDLE_VALUE)
         {
-            CueString.Replace(MusicFileName,FindFileData.cFileName);
-            GetDlgItem(IDC_EDIT_UNICODE)->SetWindowText(CueString);
+            replace(CueString, MusicFileName, FindFileData.cFileName);
+            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString.c_str());
             FindClose(hFind);
             return;
         }
 
-        FindFilePath=MusicFilePath+_T(".wma"); //wma
-        hFind=FindFirstFile(FindFilePath, &FindFileData);
+        FindFilePath.clear();
+        FindFilePath.append(MusicFilePath).append(_T(".wma")); //wma
+        hFind=FindFirstFile(FindFilePath.c_str(), &FindFileData);
         if (hFind!=INVALID_HANDLE_VALUE)
         {
-            CueString.Replace(MusicFileName,FindFileData.cFileName);
-            GetDlgItem(IDC_EDIT_UNICODE)->SetWindowText(CueString);
+            replace(CueString, MusicFileName, FindFileData.cFileName);
+            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString.c_str());
             FindClose(hFind);
             return;
         }
 
-        FindFilePath=MusicFilePath+_T(".wav"); //wav
-        hFind=FindFirstFile(FindFilePath, &FindFileData);
+        FindFilePath.clear();
+        FindFilePath.append(MusicFilePath).append(_T(".wav")); //wav
+        hFind=FindFirstFile(FindFilePath.c_str(), &FindFileData);
         if (hFind!=INVALID_HANDLE_VALUE)
         {
-            CueString.Replace(MusicFileName,FindFileData.cFileName);
-            GetDlgItem(IDC_EDIT_UNICODE)->SetWindowText(CueString);
+            replace(CueString, MusicFileName, FindFileData.cFileName);
+            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString.c_str());
             FindClose(hFind);
             return;
         }
 
-        FindFilePath=MusicFilePath+_T(".wave"); //wav
-        hFind=FindFirstFile(FindFilePath, &FindFileData);
+        FindFilePath.clear();
+        FindFilePath.append(MusicFilePath).append(_T(".wave")); //wav
+        hFind=FindFirstFile(FindFilePath.c_str(), &FindFileData);
         if (hFind!=INVALID_HANDLE_VALUE)
         {
-            CueString.Replace(MusicFileName,FindFileData.cFileName);
-            GetDlgItem(IDC_EDIT_UNICODE)->SetWindowText(CueString);
+            replace(CueString, MusicFileName, FindFileData.cFileName);
+            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString.c_str());
             FindClose(hFind);
             return;
         }
 
-        FindFilePath=MusicFilePath+_T(".mp3"); //mp3
-        hFind=FindFirstFile(FindFilePath, &FindFileData);
+        FindFilePath.clear();
+        FindFilePath.append(MusicFilePath).append(_T(".mp3")); //mp3
+        hFind=FindFirstFile(FindFilePath.c_str(), &FindFileData);
         if (hFind!=INVALID_HANDLE_VALUE)
         {
-            CueString.Replace(MusicFileName,FindFileData.cFileName);
-            GetDlgItem(IDC_EDIT_UNICODE)->SetWindowText(CueString);
+            replace(CueString, MusicFileName, FindFileData.cFileName);
+            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString.c_str());
             FindClose(hFind);
             return;
         }
-        */
 
         //最后还是没找到
         FindClose(hFind);
