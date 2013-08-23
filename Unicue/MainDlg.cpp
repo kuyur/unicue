@@ -740,18 +740,19 @@ void CMainDlg::FixCue()
 
     int len = GetDlgItem(IDC_EDIT_UNICODE).GetWindowTextLengthW();
     wchar_t * cueStringBuffer = new wchar_t[len+1];
+    cueStringBuffer[len] = L'\0';
     GetDlgItem(IDC_EDIT_UNICODE).GetWindowText(cueStringBuffer, len);
     std::wstring CueString(cueStringBuffer);
     delete []cueStringBuffer;
 
-    std::string::size_type BeginPos = CueString.find(_T("FILE \""));
-    if (BeginPos == std::string::npos)
+    std::wstring::size_type BeginPos = CueString.find(_T("FILE \""));
+    if (BeginPos == std::wstring::npos)
     {
         if (!m_Config.CloseCuePrompt) MessageBox(_T("cue文件异常"));
         return;
     }
-    std::string::size_type EndPos = CueString.find(_T("\" WAVE"));
-    if (EndPos == std::string::npos)
+    std::wstring::size_type EndPos = CueString.find(_T("\" WAVE"));
+    if (EndPos == std::wstring::npos)
     {
         if (!m_Config.CloseCuePrompt) MessageBox(_T("cue文件异常"));
         return;
@@ -763,12 +764,11 @@ void CMainDlg::FixCue()
         return;
     }
 
-    std::wstring MusicFileName,MusicFilePath; //音频文件名，路径
-    MusicFileName=CueString.substr(BeginPos,EndPos - BeginPos);
+    std::wstring MusicFileName(CueString.substr(BeginPos,EndPos - BeginPos)), MusicFilePath; //音频文件名，路径
 
     //依据文档路径：m_FilePathName查找音频文件
-    std::string::size_type pos=m_FilePathName.rfind('\\');
-    MusicFilePath=m_FilePathName.substr(0, pos);
+    std::wstring::size_type pos=m_FilePathName.rfind('\\');
+    MusicFilePath.append(m_FilePathName.substr(0, pos));
     MusicFilePath.append(_T("\\"));
     MusicFilePath.append(MusicFileName);
 
@@ -927,33 +927,35 @@ void CMainDlg::FixCue()
 
 void CMainDlg::FixInternalCue(std::wstring AudioFileName)
 {
-    /*
-    CString CueString;
-    GetDlgItem(IDC_EDIT_UNICODE)->GetWindowText(CueString);
-    int BeginPos=CueString.Find(_T("FILE \""));
-    if (BeginPos==-1)
+    int len = GetDlgItem(IDC_EDIT_UNICODE).GetWindowTextLengthW();
+    wchar_t * cueStringBuffer = new wchar_t[len+1];
+    cueStringBuffer[len] = L'\0';
+    GetDlgItem(IDC_EDIT_UNICODE).GetWindowText(cueStringBuffer, len);
+    std::wstring CueString(cueStringBuffer);
+    delete []cueStringBuffer;
+
+    std::wstring::size_type BeginPos=CueString.find(_T("FILE \""));
+    if (BeginPos == std::wstring::npos)
     {
         if (!m_Config.CloseCuePrompt) MessageBox(_T("cue文件异常"));
         return;
     }
-    int EndPos=CueString.Find(_T("\" WAVE"));
-    if (EndPos==-1)
+    std::wstring::size_type EndPos = CueString.find(_T("\" WAVE"));
+    if (EndPos == std::wstring::npos)
     {
         if (!m_Config.CloseCuePrompt) MessageBox(_T("cue文件异常"));
         return;
     }
     BeginPos+=6;
-    if (BeginPos>=EndPos)
+    if (BeginPos >= EndPos)
     {
         if (!m_Config.CloseCuePrompt) MessageBox(_T("cue文件异常"));
         return;
     }
 
-    CString OldFileName; //音频文件名
-    OldFileName=CueString.Mid(BeginPos,EndPos-BeginPos);
-    CueString.Replace(OldFileName,AudioFileName);
-    GetDlgItem(IDC_EDIT_UNICODE)->SetWindowText(CueString);
-    */
+    std::wstring OldFileName(CueString.substr(BeginPos, EndPos - BeginPos)); //音频文件名
+    replace(CueString, OldFileName, AudioFileName);
+    GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString.c_str());
 }
 
 void CMainDlg::FixTTACue()
@@ -961,18 +963,22 @@ void CMainDlg::FixTTACue()
     if (!m_bCueFile)
         return;
 
-    /*
-    CString OldCueString;
-    GetDlgItem(IDC_EDIT_UNICODE)->GetWindowText(OldCueString);
-    OldCueString.MakeLower(); //转换为小写
-    int Pos=OldCueString.Find(_T("the true audio"));
-    if (Pos<=0)
-        return;
-    GetDlgItem(IDC_EDIT_UNICODE)->GetWindowText(OldCueString);
-    CString NewCueString;
-    NewCueString=OldCueString.Left(Pos)+_T("WAVE")+OldCueString.Right(OldCueString.GetLength()-Pos-14);
-    GetDlgItem(IDC_EDIT_UNICODE)->SetWindowText(NewCueString);
-    */
+    int len = GetDlgItem(IDC_EDIT_UNICODE).GetWindowTextLengthW();
+    wchar_t * cueStringBuffer = new wchar_t[len+1];
+    cueStringBuffer[len] = L'\0';
+    GetDlgItem(IDC_EDIT_UNICODE).GetWindowText(cueStringBuffer, len);
+
+    _wcslwr(cueStringBuffer);
+    wchar_t *pos = wcsstr(cueStringBuffer, L"the true audio");
+    if (pos)
+    {
+        GetDlgItem(IDC_EDIT_UNICODE).GetWindowText(cueStringBuffer, len);
+        std::wstring newCueString(cueStringBuffer);
+        newCueString.replace(pos - cueStringBuffer, 14, L"WAVE");
+        GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(newCueString.c_str());
+    }
+
+    delete []cueStringBuffer;
 }
 
 BOOL CMainDlg::OnIdle()
