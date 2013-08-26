@@ -20,18 +20,12 @@ You might find lib files of ATL in such folder:
 
     D:\WinDDK\7600.16385.1\lib\ATL\i386
 
-Now, go to property page of project to change path of ATL:
+Now, go to property page of project to add path of ATL:
 
     Configuration Properties -> VC++ Directories -> Include Directories
     Configuration Properties -> VC++ Directories -> Library Directories
 
-
-#####If your Visual C++ 2010 is Professional version, you might need to remove needless ATL path.
-(ATL has been included in Professional version.)
-
-Go to property page of project to remvoe needless path of ATL:
-
-    Configuration Properties -> VC++ Directories -> Include Directories
-    Configuration Properties -> VC++ Directories -> Library Directories
+But the version of ATL in WDK is too old to run the compiled exe in Windows7.
+It is recommended to get a copy as same as that in VC2010 Professional, no matter how you get.
 
 Good luck!
