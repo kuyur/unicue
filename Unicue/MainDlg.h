@@ -73,6 +73,8 @@ public:
         COMMAND_ID_HANDLER(IDM_FILE_OPEN, OnFileOpen)
         COMMAND_ID_HANDLER(IDM_FILE_SAVE, OnFileSave)
         COMMAND_ID_HANDLER(IDM_FILE_OPTION, OnFileOption)
+        COMMAND_HANDLER(IDC_CHECK_AUTOCHECKCODE, BN_CLICKED, OnBnClickedCheckAutocheckcode)
+        COMMAND_HANDLER(IDC_CHECK_ALWAYSONTOP, BN_CLICKED, OnBnClickedCheckAlwaysontop)
     END_MSG_MAP()
 
 // Handler prototypes (uncomment arguments if needed):

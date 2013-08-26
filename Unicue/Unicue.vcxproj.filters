@@ -30,7 +30,7 @@
     <ClCompile Include="SettingDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="file.cpp">
+    <ClCompile Include="winfile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -65,10 +65,10 @@
     <ClInclude Include="..\c4-lib\tinyxml.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="file.h">
+    <ClInclude Include="utils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="utils.h">
+    <ClInclude Include="winfile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

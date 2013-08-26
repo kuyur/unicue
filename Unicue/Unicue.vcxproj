@@ -120,10 +120,13 @@
       <DllDataFileName>
       </DllDataFileName>
     </Midl>
+    <PostBuildEvent>
+      <Command>cp -f Release\Unicue.exe build\Unicue.exe</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AboutDlg.cpp" />
-    <ClCompile Include="file.cpp" />
+    <ClCompile Include="winfile.cpp" />
     <ClCompile Include="MainDlg.cpp" />
     <ClCompile Include="SettingDlg.cpp" />
     <ClCompile Include="stdafx.cpp">
@@ -139,7 +142,7 @@
     <ClInclude Include="..\c4-lib\c4segment.h" />
     <ClInclude Include="..\c4-lib\tinyxml.h" />
     <ClInclude Include="AboutDlg.h" />
-    <ClInclude Include="file.h" />
+    <ClInclude Include="winfile.h" />
     <ClInclude Include="MainDlg.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="SettingDlg.h" />

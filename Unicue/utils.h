@@ -6,6 +6,7 @@
 #define UTILS_H_
 
 #include <string.h>
+#include <algorithm>
 #include <string>
 
 template <typename T>
@@ -40,6 +41,18 @@ inline size_t strlen_t(const T* str)
     size_t i = 0;
     while (str[i] != 0) ++i;
     return i;
+}
+
+inline wchar_t _wchartolower(wchar_t chr)
+{
+    if (chr <= L'Z' && chr >= L'A')
+        return chr - (L'Z' - L'z');
+    return chr;
+}
+
+inline void toLower(std::wstring &str)
+{
+    std::transform(str.begin(), str.end(), str.begin(), _wchartolower);
 }
 
 #endif // UTILS_H_
