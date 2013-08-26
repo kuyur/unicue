@@ -27,4 +27,6 @@ Now, go to property page of project to add path of ATL:
 
 But the version of ATL in WDK is too old to run the compiled exe in Windows7. It is recommended to get a copy as same as that in VC2010 Professional, no matter how you get.
 
+#####If your Visual C++ is 2012 Express version, you may get ATL library from [Visual Studio Professional 2012 90-day trial](http://www.microsoft.com/visualstudio/eng/downloads).
+
 Good luck!
