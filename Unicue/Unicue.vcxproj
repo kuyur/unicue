@@ -40,16 +40,16 @@
     <IntDir>Debug\</IntDir>
     <OutDir>Debug\</OutDir>
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>D:\WinDDK\7600.16385.1\inc\atl71;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\WinDDK\7600.16385.1\lib\ATL\i386;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
     <GenerateManifest>false</GenerateManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IntDir>Release\</IntDir>
     <OutDir>Release\</OutDir>
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>D:\WinDDK\7600.16385.1\inc\atl71;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\WinDDK\7600.16385.1\lib\ATL\i386;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
     <EmbedManifest>true</EmbedManifest>
     <GenerateManifest>false</GenerateManifest>
   </PropertyGroup>
