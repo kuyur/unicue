@@ -57,10 +57,13 @@ extern CAppModule _Module;
 #include <atlframe.h>
 #include <atlctrls.h>
 #include <atldlgs.h>
+#include <atlimage.h>
+#include <atlmisc.h>
+#include <atlddx.h>
 
 // for memory leak debug
-#if defined( _DEBUG )
+#if defined( WIN32 ) && defined( _DEBUG )
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
 #include <crtdbg.h>
-_CrtMemState startMemState;
-_CrtMemState endMemState;
 #endif

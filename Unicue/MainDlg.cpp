@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "winfile.h"
 #include "utils.h"
+#include "wtlhelper.h"
 #include "resource.h"
 #include "aboutdlg.h"
 #include "SettingDlg.h"
@@ -36,8 +37,7 @@ CMainDlg::CMainDlg()
     m_ConfigPath.append(L"Config.xml");
 
     // Because TiXml does not support wchar_t file name,
-    // use stream to load xml file.
-    //CWinFile file(m_ConfigPath, CFile::READ);
+    // use Win32 File Api to load xml file.
     CWinFile file(m_ConfigPath, CWinFile::modeRead | CWinFile::shareDenyWrite);
     if (!file.open())
     {
@@ -80,9 +80,9 @@ CMainDlg::CMainDlg()
         fileBuffer = NULL;
         delete doc;
     }
-    m_context = new CC4Context(m_Config.MapConfName, processPath);
+    m_context = new CC4Context(std::wstring(m_Config.MapConfName), processPath);
     if (!m_context->init())
-        MessageBox(_T("Failed to load charmaps!"), _T("Unicue"));
+        MessageBox(_T("Failed to load charmaps!"), _T("Unicue"), MB_OK);
     // set local here
     //SetThreadLocale(MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US));
     SetThreadLocale(MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED));
@@ -109,6 +109,668 @@ CMainDlg::~CMainDlg()
     }
 }
 
+BOOL CMainDlg::OnIdle()
+{
+    return FALSE;
+}
+
+LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
+{
+    // center the dialog on the screen
+    CenterWindow();
+    DoDataExchange(FALSE);
+    // init menu
+    CMenu menu;
+    menu.LoadMenu(IDR_MENU1);
+    CWindow::SetMenu(menu);
+    // set icons
+    HICON hIcon = AtlLoadIconImage(IDR_MAINFRAME_BIG, LR_DEFAULTCOLOR, ::GetSystemMetrics(SM_CXICON), ::GetSystemMetrics(SM_CYICON));
+    SetIcon(hIcon, TRUE);
+    HICON hIconSmall = AtlLoadIconImage(IDR_MAINFRAME_LITTLE, LR_DEFAULTCOLOR, ::GetSystemMetrics(SM_CXSMICON), ::GetSystemMetrics(SM_CYSMICON));
+    SetIcon(hIconSmall, FALSE);
+
+    // register object for message filtering and idle updates
+    CMessageLoop* pLoop = _Module.GetMessageLoop();
+    ATLASSERT(pLoop != NULL);
+    pLoop->AddMessageFilter(this);
+    pLoop->AddIdleHandler(this);
+
+    UIAddChildWindowContainer(m_hWnd);
+
+    // add encode items
+    CComboBox &theCombo = (CComboBox)GetDlgItem(IDC_COMBO_SELECTCODE);
+    std::list<std::wstring> &encodeList = m_context->getEncodesNameList();
+    std::list<std::wstring>::iterator iter;
+    theCombo.InsertString(-1, _T("Local Codepage"));
+    for (iter = encodeList.begin(); iter != encodeList.end(); iter++)
+        theCombo.InsertString(-1, iter->c_str());
+    theCombo.SetCurSel(0);
+
+    // when called from command line
+    LPWSTR *szArglist;
+    int nArgs;
+    szArglist = CommandLineToArgvW(GetCommandLineW(), &nArgs);
+    if ((NULL != szArglist) && (nArgs >= 1) && (wcslen(szArglist[1]) >= 1))
+    {
+        // 0 is execution path
+        WTL::CString filePath(szArglist[1]);
+        if (filePath.GetAt(0) == _T('\"'))
+            filePath.Delete(0);
+        if (filePath.GetAt(filePath.GetLength() - 1) == _T('\"'))
+            filePath.Delete(filePath.GetLength() -1);
+        m_FilePathName = filePath;
+        WTL::CString &ExtensionName = filePath.Right(filePath.GetLength() - filePath.ReverseFind('.') - 1);
+        ExtensionName.MakeLower();
+        WTL::CString &FileName = filePath.Right(filePath.GetLength() - filePath.ReverseFind('\\') - 1);
+        if ((ExtensionName==_T("tak"))||(ExtensionName==_T("flac"))||(ExtensionName==_T("ape")))
+        {
+            if (m_Config.AcceptDragAudioFile)
+            {
+                if (ExtensionName==_T("flac"))
+                    ExtractFlacInternalCue(std::wstring(FileName));
+                else if ((ExtensionName==_T("tak"))||(ExtensionName==_T("ape")))
+                    ExtractTakInternalCue(std::wstring(FileName));
+            }
+            else
+            {
+                if (TRUE==DealFile())
+                {
+                    if (m_Config.AutoFixTTA) FixTTACue();
+                    if (m_Config.AutoFixCue) FixCue();
+                }
+            }
+        }
+        else
+        {
+            if (TRUE==DealFile())
+            {
+                if (m_Config.AutoFixTTA) FixTTACue();
+                if (m_Config.AutoFixCue) FixCue();
+            }
+        }
+    }
+    LocalFree(szArglist);
+
+    return TRUE;
+}
+
+BOOL CMainDlg::SetDialogPos()
+{
+    RECT rc;
+    GetWindowRect(&rc);
+
+    if (m_Config.AlwaysOnTop)
+        return SetWindowPos(HWND_TOPMOST, &rc, SWP_NOMOVE|SWP_NOSIZE);
+    else
+        return SetWindowPos(HWND_NOTOPMOST, &rc, SWP_NOMOVE|SWP_NOSIZE);
+}
+
+
+BOOL CMainDlg::DealFile()
+{
+    int length = m_FilePathName.length();
+    if (length <= 0) return FALSE;
+
+    m_bCueFile = FALSE;
+    std::wstring filepath(m_FilePathName);
+    toLower(filepath);
+    if (filepath.length() >= 4 && filepath.substr(filepath.length() - 4, 4) == L".cue")
+    {
+        m_bCueFile = TRUE;
+    }
+
+    CWinFile openFile(m_FilePathName, CWinFile::modeRead | CWinFile::shareDenyWrite);
+    if (!openFile.open())
+    {
+        MessageBox(_T("打开失败！"), L"Unicue", MB_OK);
+        return FALSE;
+    }
+    m_bNeedConvert = TRUE;
+    if (m_RawString)
+    {
+        delete []m_RawString;
+        m_RawString = NULL;
+        m_String = NULL;
+    }
+    if (m_UnicodeString)
+    {
+        delete []m_UnicodeString;
+        m_UnicodeString = NULL;
+    }
+    m_RawStringLength = openFile.length();
+    m_RawString = new char[m_RawStringLength + 1];
+    openFile.seek(0, CWinFile::begin);
+    if (openFile.read(m_RawString, m_RawStringLength) == (DWORD)-1)
+    {
+        MessageBox(_T("读取文件失败！"), L"Unicue", MB_OK);
+    }
+    openFile.close();
+    m_RawString[m_RawStringLength] = '\0';
+    m_String = m_RawString;
+    m_StringLength = m_RawStringLength;
+
+    CComboBox &theCombo  = (CComboBox)GetDlgItem(IDC_COMBO_SELECTCODE);
+    CStatic   &theStatic = (CStatic)GetDlgItem(IDC_STATIC_STAT);
+    m_CodeStatus = _T("未知编码");
+    CEdit &LeftEdit  = (CEdit)GetDlgItem(IDC_EDIT_ANSI);
+    CEdit &RightEdit = (CEdit)GetDlgItem(IDC_EDIT_UNICODE);
+
+    // Unicode(little-endian)
+    if (((unsigned char)m_RawString[0] == 0xFF) && ((unsigned char)m_RawString[1] == 0xFE))
+    {
+        m_CodeStatus = _T("Unicode (little endian)");
+        m_bNeedConvert = FALSE;
+        m_StringCodeType = CC4EncodeUTF16::_getName();
+        int nIndex = theCombo.FindStringExact(0, m_StringCodeType.c_str());
+        theCombo.SetCurSel(nIndex);
+        m_String = m_RawString + 2; // 真正的起始地址
+        m_StringLength = m_RawStringLength - 2; // 真正的长度
+        if ((m_RawStringLength%2) != 0)
+        {
+            MessageBox(_T("文本错误！"));
+            return FALSE;
+        }
+        m_UnicodeLength = m_StringLength>>1;
+        m_UnicodeString = new wchar_t[m_UnicodeLength+1];
+        memcpy((void*)m_UnicodeString, m_String, m_StringLength);
+        m_UnicodeString[m_UnicodeLength] = '\0';
+    }
+    // Unicode(big-endian)
+    if (((unsigned char)m_RawString[0]==0xFE)&&((unsigned char)m_RawString[1]==0xFF))
+    {
+        m_CodeStatus = _T("Unicode (big endian)");
+        m_bNeedConvert = FALSE;
+        m_StringCodeType = CC4EncodeUTF16::_getName();
+        int nIndex = theCombo.FindStringExact(0, m_StringCodeType.c_str());
+        theCombo.SetCurSel(nIndex);
+        m_String = m_RawString+2; // 真正的起始地址
+        m_StringLength = m_RawStringLength - 2; //真正的长度
+        if ((m_RawStringLength%2) != 0)
+        {
+            MessageBox(_T("文本错误！"));
+            return FALSE;
+        }
+        m_UnicodeLength = m_StringLength>>1;
+        m_UnicodeString = new wchar_t[m_UnicodeLength + 1];
+        memcpy((void*)m_UnicodeString, m_String, m_StringLength);
+        m_UnicodeString[m_UnicodeLength] = '\0';
+        // 调整高低位顺序
+        for (UINT i=0; i<m_UnicodeLength; i++)
+        {
+            unsigned char chars[2];
+            memcpy(chars,(void*)(m_UnicodeString+i),2);
+            wchar_t theChr=chars[0]*256+chars[1];
+            m_UnicodeString[i]=theChr;
+        }
+    }
+    // UTF-8(with BOM)
+    if (((unsigned char)m_RawString[0]==0xEF)&&((unsigned char)m_RawString[1]==0xBB)&&((unsigned char)m_RawString[2]==0xBF))
+    {
+        m_CodeStatus = _T("UTF-8 (with BOM)");
+        m_bNeedConvert = FALSE;
+        m_StringCodeType = CC4EncodeUTF8::_getName();
+        int nIndex = theCombo.FindStringExact(0, m_StringCodeType.c_str());
+        theCombo.SetCurSel(nIndex);
+        m_String = m_RawString + 3; // 真正的起始地址
+        m_StringLength = m_RawStringLength - 3; // 真正的长度
+    }
+
+    if (!m_bNeedConvert)
+    {
+        std::wstring statusstring;
+        statusstring.append(_T("文档编码检测结果：")).append(m_CodeStatus).append(_T("\n\n文档路径：")).append(m_FilePathName);
+        theStatic.SetWindowText(statusstring.c_str());
+        if (m_StringCodeType == CC4EncodeUTF16::_getName())
+        {
+            RightEdit.SetWindowText(m_UnicodeString);
+            LeftEdit.SetWindowText(_T(""));
+        }
+        if (m_StringCodeType==CC4EncodeUTF8::_getName().c_str())
+        {
+            RightEdit.SetWindowText(CC4EncodeUTF8::convert2unicode(m_String,m_StringLength).c_str());
+            LeftEdit.SetWindowText(_T(""));
+        }
+    }
+    else
+    {
+        // 检测编码
+        if (m_Config.AutoCheckCode)
+        {
+            const CC4Encode *encode = m_context->getMostPossibleEncode(m_String);
+            if (encode)
+            {
+                m_StringCodeType = encode->getName();
+                int nIndex = theCombo.FindStringExact(0, m_StringCodeType.c_str());
+                theCombo.SetCurSel(nIndex);
+                m_CodeStatus = encode->getName();
+            }
+            else
+            {
+                int lbTextLength = theCombo.GetLBTextLen(0);
+                wchar_t *lbText = new wchar_t[lbTextLength + 1];
+                lbText[lbTextLength] = L'\0';
+                theCombo.GetLBText(0,lbText);
+                theCombo.SetCurSel(0);
+                m_CodeStatus = _T("未知编码");
+                m_StringCodeType.clear();
+                m_StringCodeType.append(lbText);
+                delete []lbText;
+                lbText = NULL;
+            }
+        }
+        else
+            m_CodeStatus = _T("已经关闭编码自动检测");
+
+        std::wstring statusstring;
+        statusstring.append(_T("文档编码检测结果：")).append(m_CodeStatus).append(_T("\n\n文档路径：")).append(m_FilePathName);
+        theStatic.SetWindowText(statusstring.c_str());
+
+        // 左
+        /*
+        _locale_t locale = _create_locale(LC_ALL, "Japan");
+        size_t requiredSize = _mbstowcs_l(NULL, m_String, 0, locale);
+        wchar_t *localString = new wchar_t[requiredSize + 1];
+        size_t result = _mbstowcs_l(localString, m_String, requiredSize + 1, locale);
+        */
+        int requiredSize = MultiByteToWideChar(CP_ACP, 0, m_String, strlen(m_String)+1, NULL, 0);
+        wchar_t *localString = new wchar_t[requiredSize + 1];
+        localString[requiredSize] = L'\0';
+        int result = MultiByteToWideChar(CP_ACP, 0, m_String, strlen(m_String)+1, localString, requiredSize + 1);
+        if (result == 0)
+            LeftEdit.SetWindowText(L"");
+        else
+            LeftEdit.SetWindowText(localString);
+
+        // 右
+        const CC4Encode *encode = m_context->getEncode(m_StringCodeType);
+        if (encode)
+            RightEdit.SetWindowText(encode->wconvertText(m_String, m_StringLength).c_str());
+        else
+        {
+            if (result == 0)
+                RightEdit.SetWindowText(L"");
+            else
+                RightEdit.SetWindowText(localString);
+        }
+        WTL::CString str;
+        // release memory
+        delete []localString;
+    }
+
+    return TRUE;
+}
+
+LRESULT CMainDlg::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
+{
+    SaveConfigFile();
+    // unregister message filtering and idle updates
+    CMessageLoop* pLoop = _Module.GetMessageLoop();
+    ATLASSERT(pLoop != NULL);
+    pLoop->RemoveMessageFilter(this);
+    pLoop->RemoveIdleHandler(this);
+
+    return 0;
+}
+
+LRESULT CMainDlg::OnAbout(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+    CAboutDlg dlg;
+    dlg.DoModal();
+    return 0;
+}
+
+LRESULT CMainDlg::OnOK(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+    // TODO: Add validation code 
+    CloseDialog(wID);
+    return 0;
+}
+
+LRESULT CMainDlg::OnCancel(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+    CloseDialog(wID);
+    return 0;
+}
+
+void CMainDlg::CloseDialog(int nVal)
+{
+    DestroyWindow();
+    ::PostQuitMessage(nVal);
+}
+
+LRESULT CMainDlg::OnFileExit(WORD, WORD wID, HWND, BOOL&)
+{
+    CloseDialog(wID);
+    return 0;
+}
+
+LRESULT CMainDlg::OnFileOpen(WORD, WORD, HWND, BOOL&)
+{
+    CFileDialog openFile(TRUE, _T("*.txt"), NULL, OFN_EXTENSIONDIFFERENT|OFN_FILEMUSTEXIST|OFN_PATHMUSTEXIST,
+        _T("文本文件(*.txt;*.cue;*.log)\0*.txt;*.cue;*.log\0txt文本文件(*.txt)\0*.txt\0cue文件(*.cue)\0*.cue\0log文件(*.log)\0*.log\0All Files (*.*)\0*.*\0\0"));
+    if (openFile.DoModal() == IDOK)
+    {
+        m_FilePathName = openFile.m_szFileName;
+        WTL::CString FilePath(m_FilePathName.c_str());
+        WTL::CString &ExtensionName = FilePath.Right(FilePath.GetLength() - FilePath.ReverseFind('.') - 1);
+        ExtensionName.MakeLower();
+        WTL::CString &FileName = FilePath.Right(FilePath.GetLength() - FilePath.ReverseFind('\\')-1);
+        if ((ExtensionName==_T("tak"))||(ExtensionName==_T("flac"))||(ExtensionName==_T("ape")))
+        {
+            if (m_Config.AcceptDragAudioFile)
+            {
+                if (ExtensionName==_T("flac"))
+                    ExtractFlacInternalCue(std::wstring(FileName));
+                else if ((ExtensionName==_T("tak"))||(ExtensionName==_T("ape")))
+                    ExtractTakInternalCue(std::wstring(FileName));
+            }
+            else
+            {
+                if (DealFile())
+                {
+                    if (m_Config.AutoFixTTA) FixTTACue();
+                    if (m_Config.AutoFixCue) FixCue();
+                }
+            }
+        }
+        else
+        {
+            if (DealFile())
+            {
+                if (m_Config.AutoFixTTA) FixTTACue();
+                if (m_Config.AutoFixCue) FixCue();
+            }
+        }
+    }
+    return 0;
+}
+
+LRESULT CMainDlg::OnFileSave(WORD, WORD, HWND, BOOL&)
+{
+    CFileDialog saveFile(FALSE, _T("*.txt"), NULL, OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT|OFN_PATHMUSTEXIST,
+        _T("txt文本文件(*.txt)\0*.txt\0cue文件(*.cue)\0*.cue\0log文件(*.log)\0*.log\0All Files (*.*)\0*.*\0\0"));
+    if (saveFile.DoModal() == IDOK)
+    {
+        CWinFile file(saveFile.m_szFileName, CWinFile::modeCreate|CWinFile::modeWrite|CWinFile::shareExclusive);
+        if (!file.open())
+        {
+            MessageBox(_T("无法写入文件！"), _T("Unicue"), MB_OK);
+            return 0;
+        }
+        WTL::CString UnicodeStr;
+        getWindowText(GetDlgItem(IDC_EDIT_UNICODE), UnicodeStr);
+        std::string &utf8str = CC4EncodeUTF16::convert2utf8((LPCTSTR)UnicodeStr, UnicodeStr.GetLength());
+        file.write(CC4Encode::UTF_8_BOM, 3);
+        file.write(utf8str.c_str(), utf8str.length());
+        file.close();
+    }
+
+    return 0;
+}
+
+LRESULT CMainDlg::OnFileOption(WORD, WORD, HWND, BOOL&)
+{
+    CSettingDlg dlg(m_Config);
+    if (dlg.DoModal() == IDOK)
+    {
+        m_Config = dlg.m_Config;
+    }
+    return 0;
+}
+
+LRESULT CMainDlg::OnDropFiles(UINT, WPARAM wParam, LPARAM, BOOL&)
+{
+    HDROP hDrop = (HDROP)wParam;
+    int nFileCount = DragQueryFile(hDrop, 0xFFFFFFFF, NULL, MAX_PATH);
+    if (!m_bTransferString)
+    {
+        if (nFileCount == 1)
+        {
+            TCHAR szFileName[MAX_PATH + 1] = {0};
+            DragQueryFile(hDrop, 0, szFileName, MAX_PATH);
+            m_FilePathName.clear();
+            m_FilePathName.append(szFileName);
+            std::wstring ExtensionName, FileName;
+            std::wstring::size_type pos = m_FilePathName.rfind(L'.');
+            if (pos != std::wstring::npos)
+            {
+                ExtensionName.append(m_FilePathName.substr(pos + 1, m_FilePathName.length() - pos -1));
+                toLower(ExtensionName);
+            }
+            pos = m_FilePathName.rfind(L'\\');
+            if (pos != std::wstring::npos)
+            {
+                FileName.append(m_FilePathName.substr(pos + 1, m_FilePathName.length() - pos -1));
+            }
+            if ((ExtensionName == L"tak") || (ExtensionName == L"flac") || (ExtensionName == L"ape"))
+            {
+                if (m_Config.AcceptDragAudioFile)
+                {
+                    if (ExtensionName == L"flac")
+                        ExtractFlacInternalCue(FileName);
+                    else
+                        ExtractTakInternalCue(FileName);
+                }
+                else
+                {
+                    if (DealFile())
+                    {
+                        if (m_Config.AutoFixTTA) FixTTACue();
+                        if (m_Config.AutoFixCue) FixCue();
+                    }
+                }
+            }
+            else
+            {
+                if (DealFile())
+                {
+                    if (m_Config.AutoFixTTA) FixTTACue();
+                    if (m_Config.AutoFixCue) FixCue();
+                }
+            }
+        }
+        else
+            MessageBox(_T(" 只能同时打开一个文件"), _T("Unicue"), MB_OK);
+    }
+    else
+    {
+        // 抓取文件名
+        WTL::CString LeftStr;
+        for (int i = 0; i < nFileCount; i++)
+        {
+            TCHAR szFileName[MAX_PATH+1];
+            ::DragQueryFile(hDrop, i, szFileName, MAX_PATH);
+            TCHAR *pdest = wcsrchr(szFileName, L'\\');
+            if (pdest)
+            {
+                pdest++;
+                LeftStr += pdest;
+                LeftStr += _T("\x0D\x0A");
+            }
+        }
+
+        GetDlgItem(IDC_EDIT_ANSI).SetWindowText(LeftStr);
+    }
+
+    ::DragFinish(hDrop);
+    return 0;
+}
+
+LRESULT CMainDlg::OnCbnSelchangeComboSelectcode(WORD, WORD, HWND, BOOL&)
+{
+    CComboBox &theCombo = (CComboBox)GetDlgItem(IDC_COMBO_SELECTCODE);
+
+    if (m_bTransferString)
+    {
+        getWindowText(theCombo, m_StringCodeType);
+
+        // 左
+        WTL::CString LeftStr;
+        getWindowText(GetDlgItem(IDC_EDIT_ANSI), LeftStr);
+        std::string &LeftAnsiStr = msConvertBack(LeftStr);
+        // 右
+        const CC4Encode *encode = m_context->getEncode(m_StringCodeType);
+        if (encode)
+            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(encode->wconvertText(LeftAnsiStr.c_str(),LeftAnsiStr.length()).c_str());
+        else
+            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(LeftStr);
+        return 0;
+    }
+
+    if (m_bNeedConvert)
+    {
+        getWindowText(theCombo, m_StringCodeType);
+        const CC4Encode *encode = m_context->getEncode(m_StringCodeType);
+        if (encode)
+            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(encode->wconvertText(m_String, m_StringLength).c_str());
+        else
+            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(msConvert(m_String).c_str());
+        if (m_Config.AutoFixTTA) FixTTACue();
+        if (m_Config.AutoFixCue) FixCue();
+    }
+
+    return 0;
+}
+
+LRESULT CMainDlg::OnBnClickedButtonDo(WORD, WORD, HWND, BOOL&)
+{
+    // 只有转换字符串时才有效
+    if (m_bTransferString)
+    {
+        // 左
+        WTL::CString LeftStr;
+        getWindowText(GetDlgItem(IDC_EDIT_ANSI), LeftStr);
+        std::string &LeftAnsiStr = msConvertBack(LeftStr);
+
+        CComboBox &theCombo  =(CComboBox)GetDlgItem(IDC_COMBO_SELECTCODE);
+        CStatic   &theStatic =(CStatic)GetDlgItem(IDC_STATIC_STAT);
+        getWindowText(theCombo, m_StringCodeType);
+        m_CodeStatus = _T("未知编码");
+
+        // 检测编码
+        if (m_Config.AutoCheckCode)
+        {
+            const CC4Encode *encode = m_context->getMostPossibleEncode(LeftAnsiStr);
+            if (encode)
+            {
+                m_StringCodeType = encode->getName();
+                int nIndex = theCombo.FindStringExact(0, m_StringCodeType.c_str());
+                theCombo.SetCurSel(nIndex);
+                m_CodeStatus = encode->getName();
+            } else {
+                getLBText(theCombo, 0, m_StringCodeType);
+                theCombo.SetCurSel(0);
+                m_CodeStatus = _T("未知编码");
+            }
+        }
+        else
+            m_CodeStatus = _T("已经关闭编码自动检测");
+        std::wstring status(_T("编码检测结果："));
+        status.append(m_CodeStatus);
+        theStatic.SetWindowText(status.c_str());
+
+        //右
+        const CC4Encode *encode = m_context->getEncode(m_StringCodeType);
+        if (encode)
+            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(encode->wconvertText(LeftAnsiStr.c_str(), LeftAnsiStr.length()).c_str());
+        else
+            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(LeftStr);
+    }
+    return 0;
+}
+
+LRESULT CMainDlg::OnBnClickedButtonSave(WORD, WORD, HWND, BOOL&)
+{
+    CWinFile file(m_FilePathName,CWinFile::modeCreate|CWinFile::modeWrite|CWinFile::shareExclusive);
+    if (!file.open())
+    {
+        MessageBox(_T("无法写入文件！"), _T("Unicue"), MB_OK);
+        return 0;
+    }
+    WTL::CString UnicodeStr;
+    getWindowText(GetDlgItem(IDC_EDIT_UNICODE), UnicodeStr);
+    std::string &utf8str = CC4EncodeUTF16::convert2utf8((LPCTSTR)UnicodeStr, UnicodeStr.GetLength());
+    file.write(CC4Encode::UTF_8_BOM, 3);
+    file.write(utf8str.c_str(), utf8str.length());
+    file.close();
+
+    return 0;
+}
+
+LRESULT CMainDlg::OnBnClickedButtonSaveas(WORD, WORD, HWND, BOOL&)
+{
+    WTL::CString FilePath(m_FilePathName.c_str());
+    int position = FilePath.ReverseFind('.');
+    WTL::CString &FileType = FilePath.Right(FilePath.GetLength() - position);
+    FilePath = FilePath.Left(position);
+    FilePath += m_Config.TemplateStr;
+    FilePath += FileType;
+
+    CWinFile file(FilePath, CWinFile::modeCreate|CWinFile::modeWrite|CWinFile::shareExclusive);
+    if (!file.open())
+    {
+        MessageBox(_T("无法写入文件！"), _T("Unicue"), MB_OK);
+        return 0;
+    }
+    WTL::CString UnicodeStr;
+    getWindowText(GetDlgItem(IDC_EDIT_UNICODE), UnicodeStr);
+    std::string &utf8str = CC4EncodeUTF16::convert2utf8((LPCTSTR)UnicodeStr, UnicodeStr.GetLength());
+    file.write(CC4Encode::UTF_8_BOM, 3);
+    file.write(utf8str.c_str(), utf8str.length());
+    file.close();
+
+    return 0;
+}
+
+LRESULT CMainDlg::OnBnClickedCheckAutocheckcode(WORD, WORD, HWND, BOOL&)
+{
+    m_Config.AutoCheckCode = !m_Config.AutoCheckCode;
+    return 0;
+}
+
+LRESULT CMainDlg::OnBnClickedCheckAlwaysontop(WORD, WORD, HWND, BOOL&)
+{
+    m_Config.AlwaysOnTop = !m_Config.AlwaysOnTop;
+    SetDialogPos();
+    return 0;
+}
+
+LRESULT CMainDlg::OnBnClickedButtonTransferstring(WORD, WORD, HWND, BOOL&)
+{
+    m_bTransferString = !m_bTransferString;
+    if (m_bTransferString)
+    {
+        GetDlgItem(IDC_BUTTON_TRANSFERSTRING).SetWindowText(_T("切换到转换文档"));
+        GetDlgItem(IDC_BUTTON_SAVE).EnableWindow(FALSE);
+        GetDlgItem(IDC_BUTTON_SAVEAS).EnableWindow(FALSE);
+        GetDlgItem(IDC_BUTTON_DO).EnableWindow(TRUE);
+        GetDlgItem(IDC_STATIC_STAT).SetWindowText(_T("编码检测结果："));
+        UIEnable(IDM_FILE_OPEN, FALSE);
+    }
+    else
+    {
+        GetDlgItem(IDC_BUTTON_TRANSFERSTRING).SetWindowText(_T("切换到转换字符串"));
+        GetDlgItem(IDC_BUTTON_SAVE).EnableWindow(TRUE);
+        GetDlgItem(IDC_BUTTON_SAVEAS).EnableWindow(TRUE);
+        GetDlgItem(IDC_BUTTON_DO).EnableWindow(FALSE);
+        GetDlgItem(IDC_STATIC_STAT).SetWindowText(_T("文档编码检测结果：\n\n文档路径："));
+        // 恢复
+        UIEnable(IDM_FILE_OPEN, TRUE);
+        GetDlgItem(IDC_EDIT_ANSI).SetWindowText(_T(""));
+        GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(_T(""));
+        m_FilePathName = _T("");
+        m_bNeedConvert = FALSE;
+        /*
+        if (DealFile())
+        {
+            if (m_Config.AutoFixTTA) FixTTACue();
+            if (m_Config.AutoFixCue) FixCue();
+        }
+        */
+    }
+
+    return 0;
+}
 
 BOOL CMainDlg::LoadConfigFile(TiXmlDocument *xmlfile)
 {
@@ -127,7 +789,7 @@ BOOL CMainDlg::LoadConfigFile(TiXmlDocument *xmlfile)
     pElem=hXmlHandle.FirstChild("TemplateStr").Element();
     if (!pElem) return FALSE;
     if (!pElem->GetText()) return FALSE;
-    m_Config.TemplateStr=CC4EncodeUTF8::convert2unicode(pElem->GetText(), strlen(pElem->GetText())).c_str();
+    m_Config.TemplateStr = CC4EncodeUTF8::convert2unicode(pElem->GetText(), strlen(pElem->GetText())).c_str();
 
     //AutoFixCue节点
     pElem=hXmlHandle.FirstChild("AutoFixCue").Element();
@@ -187,7 +849,7 @@ BOOL CMainDlg::LoadConfigFile(TiXmlDocument *xmlfile)
     pElem=hXmlHandle.FirstChild("CharmapConfPath").Element();
     if (!pElem) return FALSE;
     if (!pElem->GetText()) return FALSE;
-    m_Config.MapConfName = CC4EncodeUTF8::convert2unicode(pElem->GetText(), strlen(pElem->GetText()));
+    m_Config.MapConfName = CC4EncodeUTF8::convert2unicode(pElem->GetText(), strlen(pElem->GetText())).c_str();
 
     return TRUE;
 }
@@ -244,7 +906,7 @@ BOOL CMainDlg::CreateConfigFile()
     TiXmlPrinter printer;
     configdoc.Accept(&printer);
 
-    CWinFile file(m_ConfigPath, CWinFile::modeWrite | CWinFile::shareExclusive);
+    CWinFile file(m_ConfigPath, CWinFile::modeWrite | CWinFile::modeCreate | CWinFile::shareExclusive);
     if (file.open())
     {
         file.write(CC4Encode::UTF_8_BOM, 3);
@@ -262,7 +924,7 @@ BOOL CMainDlg::SaveConfigFile()
     TiXmlElement *configure=new TiXmlElement("config");
 
     TiXmlElement *TemplateStr=new TiXmlElement("TemplateStr");
-    std::string &UTF8Str = CC4EncodeUTF16::getInstance()->convertWideString(m_Config.TemplateStr.c_str());
+    std::string &UTF8Str = CC4EncodeUTF16::getInstance()->convertWideString(m_Config.TemplateStr);
     TiXmlText *TemplateStrValue=new TiXmlText(UTF8Str.c_str());
     TemplateStr->LinkEndChild(TemplateStrValue);
     configure->LinkEndChild(TemplateStr);
@@ -323,7 +985,7 @@ BOOL CMainDlg::SaveConfigFile()
 
     TiXmlElement *CharmapConfPath = new TiXmlElement("CharmapConfPath");
     TiXmlText *CharmapConfPathValue;
-    CharmapConfPathValue = new TiXmlText(CC4EncodeUTF16::getInstance()->convertWideString(m_Config.MapConfName.c_str()).c_str());
+    CharmapConfPathValue = new TiXmlText(CC4EncodeUTF16::getInstance()->convertWideString(m_Config.MapConfName).c_str());
     CharmapConfPath->LinkEndChild(CharmapConfPathValue);
     configure->LinkEndChild(CharmapConfPath);
 
@@ -332,7 +994,7 @@ BOOL CMainDlg::SaveConfigFile()
 
     TiXmlPrinter printer;
     configdoc.Accept(&printer);
-    CWinFile file(m_ConfigPath, CWinFile::modeWrite | CWinFile::shareExclusive);
+    CWinFile file(m_ConfigPath, CWinFile::modeWrite | CWinFile::modeCreate | CWinFile::shareExclusive);
     if (file.open())
     {
         file.write(CC4Encode::UTF_8_BOM, 3);
@@ -740,12 +1402,8 @@ void CMainDlg::FixCue()
 
     FixTTACue();
 
-    int len = GetDlgItem(IDC_EDIT_UNICODE).GetWindowTextLengthW();
-    wchar_t * cueStringBuffer = new wchar_t[len+1];
-    cueStringBuffer[len] = L'\0';
-    GetDlgItem(IDC_EDIT_UNICODE).GetWindowText(cueStringBuffer, len);
-    std::wstring CueString(cueStringBuffer);
-    delete []cueStringBuffer;
+    std::wstring CueString;
+    getWindowText(GetDlgItem(IDC_EDIT_UNICODE), CueString);
 
     std::wstring::size_type BeginPos = CueString.find(_T("FILE \""));
     if (BeginPos == std::wstring::npos)
@@ -929,12 +1587,8 @@ void CMainDlg::FixCue()
 
 void CMainDlg::FixInternalCue(std::wstring AudioFileName)
 {
-    int len = GetDlgItem(IDC_EDIT_UNICODE).GetWindowTextLengthW();
-    wchar_t * cueStringBuffer = new wchar_t[len+1];
-    cueStringBuffer[len] = L'\0';
-    GetDlgItem(IDC_EDIT_UNICODE).GetWindowText(cueStringBuffer, len);
-    std::wstring CueString(cueStringBuffer);
-    delete []cueStringBuffer;
+    std::wstring CueString;
+    getWindowText(GetDlgItem(IDC_EDIT_UNICODE), CueString);
 
     std::wstring::size_type BeginPos=CueString.find(_T("FILE \""));
     if (BeginPos == std::wstring::npos)
@@ -965,423 +1619,13 @@ void CMainDlg::FixTTACue()
     if (!m_bCueFile)
         return;
 
-    int len = GetDlgItem(IDC_EDIT_UNICODE).GetWindowTextLengthW();
-    wchar_t * cueStringBuffer = new wchar_t[len+1];
-    cueStringBuffer[len] = L'\0';
-    GetDlgItem(IDC_EDIT_UNICODE).GetWindowText(cueStringBuffer, len);
+    WTL::CString cueString;
+    getWindowText(GetDlgItem(IDC_EDIT_UNICODE), cueString);
+    cueString.MakeLower();
 
-    _wcslwr(cueStringBuffer);
-    wchar_t *pos = wcsstr(cueStringBuffer, L"the true audio");
-    if (pos)
-    {
-        GetDlgItem(IDC_EDIT_UNICODE).GetWindowText(cueStringBuffer, len);
-        std::wstring newCueString(cueStringBuffer);
-        newCueString.replace(pos - cueStringBuffer, 14, L"WAVE");
-        GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(newCueString.c_str());
-    }
-
-    delete []cueStringBuffer;
-}
-
-BOOL CMainDlg::OnIdle()
-{
-    return FALSE;
-}
-
-LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
-{
-    // center the dialog on the screen
-    CenterWindow();
-    // init menu
-    m_menu.LoadMenu(IDR_MENU1);
-    CWindow::SetMenu(m_menu);
-    // set icons
-    HICON hIcon = AtlLoadIconImage(IDR_MAINFRAME_BIG, LR_DEFAULTCOLOR, ::GetSystemMetrics(SM_CXICON), ::GetSystemMetrics(SM_CYICON));
-    SetIcon(hIcon, TRUE);
-    HICON hIconSmall = AtlLoadIconImage(IDR_MAINFRAME_LITTLE, LR_DEFAULTCOLOR, ::GetSystemMetrics(SM_CXSMICON), ::GetSystemMetrics(SM_CYSMICON));
-    SetIcon(hIconSmall, FALSE);
-
-    // register object for message filtering and idle updates
-    CMessageLoop* pLoop = _Module.GetMessageLoop();
-    ATLASSERT(pLoop != NULL);
-    pLoop->AddMessageFilter(this);
-    pLoop->AddIdleHandler(this);
-
-    UIAddChildWindowContainer(m_hWnd);
-
-    // add encode items
-    CComboBox theCombo = (CComboBox)GetDlgItem(IDC_COMBO_SELECTCODE);
-    std::list<std::wstring> &encodeList = m_context->getEncodesNameList();
-    std::list<std::wstring>::iterator iter;
-    theCombo.InsertString(-1, _T("Local Codepage"));
-    for (iter = encodeList.begin(); iter != encodeList.end(); iter++)
-        theCombo.InsertString(-1, iter->c_str());
-    theCombo.SetCurSel(0);
-
-    // when called from command line
-    LPWSTR *szArglist;
-    int nArgs;
-    szArglist = CommandLineToArgvW(GetCommandLineW(), &nArgs);
-    if(NULL != szArglist )
-    {
-        for (int i=0; i < nArgs; i++)
-        {
-            // TODO
-            //MessageBox(szArglist[i]); // 0 is execution path
-        }
-    }
-    LocalFree(szArglist);
-
-    return TRUE;
-}
-
-BOOL CMainDlg::SetDialogPos()
-{
-    RECT rc;
-    GetWindowRect(&rc);
-
-    if (m_Config.AlwaysOnTop)
-        return SetWindowPos(HWND_TOPMOST, &rc, SWP_NOMOVE|SWP_NOSIZE);
-    else
-        return SetWindowPos(HWND_NOTOPMOST, &rc, SWP_NOMOVE|SWP_NOSIZE);
-}
-
-
-BOOL CMainDlg::DealFile()
-{
-    int length = m_FilePathName.length();
-    if (length <= 0) return FALSE;
-
-    m_bCueFile = FALSE;
-    std::wstring filepath(m_FilePathName);
-    toLower(filepath);
-    if (filepath.length() >= 4 && filepath.substr(filepath.length() - 4, 4) == L".cue")
-    {
-        m_bCueFile = TRUE;
-    }
-
-    CWinFile openFile(m_FilePathName, CWinFile::modeRead | CWinFile::shareDenyWrite);
-    if (!openFile.open())
-    {
-        MessageBox(_T("打开失败！"), L"Unicue", MB_OK);
-        return FALSE;
-    }
-    m_bNeedConvert = TRUE;
-    if (m_RawString)
-    {
-        delete []m_RawString;
-        m_RawString = NULL;
-        m_String = NULL;
-    }
-    if (m_UnicodeString)
-    {
-        delete []m_UnicodeString;
-        m_UnicodeString = NULL;
-    }
-    m_RawStringLength = openFile.length();
-    m_RawString = new char[m_RawStringLength + 1];
-    openFile.seek(0, CWinFile::begin);
-    if (openFile.read(m_RawString, m_RawStringLength) == (DWORD)-1)
-    {
-        MessageBox(_T("读取文件失败！"), L"Unicue", MB_OK);
-    }
-    openFile.close();
-    m_RawString[m_RawStringLength] = '\0';
-    m_String = m_RawString;
-    m_StringLength = m_RawStringLength;
-
-    CComboBox theCombo  = (CComboBox)GetDlgItem(IDC_COMBO_SELECTCODE);
-    CStatic   theStatic = (CStatic)GetDlgItem(IDC_STATIC_STAT);
-    m_CodeStatus = _T("未知编码");
-    CEdit LeftEdit  = (CEdit)GetDlgItem(IDC_EDIT_ANSI);
-    CEdit RightEdit = (CEdit)GetDlgItem(IDC_EDIT_UNICODE);
-
-    // Unicode(little-endian)
-    if (((unsigned char)m_RawString[0] == 0xFF) && ((unsigned char)m_RawString[1] == 0xFE))
-    {
-        m_CodeStatus = _T("Unicode (little endian)");
-        m_bNeedConvert = FALSE;
-        m_StringCodeType = CC4EncodeUTF16::_getName();
-        int nIndex = theCombo.FindStringExact(0, m_StringCodeType.c_str());
-        theCombo.SetCurSel(nIndex);
-        m_String = m_RawString + 2; // 真正的起始地址
-        m_StringLength = m_RawStringLength - 2; // 真正的长度
-        if ((m_RawStringLength%2) != 0)
-        {
-            MessageBox(_T("文本错误！"));
-            return FALSE;
-        }
-        m_UnicodeLength = m_StringLength>>1;
-        m_UnicodeString = new wchar_t[m_UnicodeLength+1];
-        memcpy((void*)m_UnicodeString, m_String, m_StringLength);
-        m_UnicodeString[m_UnicodeLength] = '\0';
-    }
-    // Unicode(big-endian)
-    if (((unsigned char)m_RawString[0]==0xFE)&&((unsigned char)m_RawString[1]==0xFF))
-    {
-        m_CodeStatus = _T("Unicode (big endian)");
-        m_bNeedConvert = FALSE;
-        m_StringCodeType = CC4EncodeUTF16::_getName();
-        int nIndex = theCombo.FindStringExact(0, m_StringCodeType.c_str());
-        theCombo.SetCurSel(nIndex);
-        m_String = m_RawString+2; // 真正的起始地址
-        m_StringLength = m_RawStringLength - 2; //真正的长度
-        if ((m_RawStringLength%2) != 0)
-        {
-            MessageBox(_T("文本错误！"));
-            return FALSE;
-        }
-        m_UnicodeLength = m_StringLength>>1;
-        m_UnicodeString = new wchar_t[m_UnicodeLength + 1];
-        memcpy((void*)m_UnicodeString, m_String, m_StringLength);
-        m_UnicodeString[m_UnicodeLength] = '\0';
-        // 调整高低位顺序
-        for (UINT i=0; i<m_UnicodeLength; i++)
-        {
-            unsigned char chars[2];
-            memcpy(chars,(void*)(m_UnicodeString+i),2);
-            wchar_t theChr=chars[0]*256+chars[1];
-            m_UnicodeString[i]=theChr;
-        }
-    }
-    // UTF-8(with BOM)
-    if (((unsigned char)m_RawString[0]==0xEF)&&((unsigned char)m_RawString[1]==0xBB)&&((unsigned char)m_RawString[2]==0xBF))
-    {
-        m_CodeStatus = _T("UTF-8 (with BOM)");
-        m_bNeedConvert = FALSE;
-        m_StringCodeType = CC4EncodeUTF8::_getName();
-        int nIndex = theCombo.FindStringExact(0, m_StringCodeType.c_str());
-        theCombo.SetCurSel(nIndex);
-        m_String = m_RawString + 3; // 真正的起始地址
-        m_StringLength = m_RawStringLength - 3; // 真正的长度
-    }
-
-    if (!m_bNeedConvert)
-    {
-        std::wstring statusstring;
-        statusstring.append(_T("文档编码检测结果：")).append(m_CodeStatus).append(_T("\n\n文档路径：")).append(m_FilePathName);
-        theStatic.SetWindowText(statusstring.c_str());
-        if (m_StringCodeType == CC4EncodeUTF16::_getName())
-        {
-            RightEdit.SetWindowText(m_UnicodeString);
-            LeftEdit.SetWindowText(_T(""));
-        }
-        if (m_StringCodeType==CC4EncodeUTF8::_getName().c_str())
-        {
-            RightEdit.SetWindowText(CC4EncodeUTF8::convert2unicode(m_String,m_StringLength).c_str());
-            LeftEdit.SetWindowText(_T(""));
-        }
-    }
-    else
-    {
-        // 检测编码
-        if (m_Config.AutoCheckCode)
-        {
-            const CC4Encode *encode = m_context->getMostPossibleEncode(m_String);
-            if (encode)
-            {
-                m_StringCodeType = encode->getName();
-                int nIndex = theCombo.FindStringExact(0, m_StringCodeType.c_str());
-                theCombo.SetCurSel(nIndex);
-                m_CodeStatus = encode->getName();
-            }
-            else
-            {
-                int lbTextLength = theCombo.GetLBTextLen(0);
-                wchar_t *lbText = new wchar_t[lbTextLength + 1];
-                lbText[lbTextLength] = L'\0';
-                theCombo.GetLBText(0,lbText);
-                theCombo.SetCurSel(0);
-                m_CodeStatus = _T("未知编码");
-                m_StringCodeType.clear();
-                m_StringCodeType.append(lbText);
-                delete []lbText;
-                lbText = NULL;
-            }
-        }
-        else
-            m_CodeStatus = _T("已经关闭编码自动检测");
-
-        std::wstring statusstring;
-        statusstring.append(_T("文档编码检测结果：")).append(m_CodeStatus).append(_T("\n\n文档路径：")).append(m_FilePathName);
-        theStatic.SetWindowText(statusstring.c_str());
-
-        // 左
-        /*
-        _locale_t locale = _create_locale(LC_ALL, "Japan");
-        size_t requiredSize = _mbstowcs_l(NULL, m_String, 0, locale);
-        wchar_t *localString = new wchar_t[requiredSize + 1];
-        size_t result = _mbstowcs_l(localString, m_String, requiredSize + 1, locale);
-        */
-        int requiredSize = MultiByteToWideChar(CP_ACP, 0, m_String, strlen(m_String)+1, NULL, 0);
-        wchar_t *localString = new wchar_t[requiredSize + 1];
-        localString[requiredSize] = L'\0';
-        int result = MultiByteToWideChar(CP_ACP, 0, m_String, strlen(m_String)+1, localString, requiredSize + 1);
-        if (result == 0)
-            LeftEdit.SetWindowText(L"");
-        else
-        {
-            LeftEdit.SetWindowText(localString);
-        }
-
-        // 右
-        const CC4Encode *encode = m_context->getEncode(m_StringCodeType);
-        if (encode)
-            RightEdit.SetWindowText(encode->wconvertText(m_String, m_StringLength).c_str());
-        else
-        {
-            if (result == 0)
-                RightEdit.SetWindowText(L"");
-            else
-                RightEdit.SetWindowText(localString);
-        }
-
-        // release memory
-        delete []localString;
-    }
-
-    return TRUE;
-}
-
-LRESULT CMainDlg::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
-{
-    // unregister message filtering and idle updates
-    CMessageLoop* pLoop = _Module.GetMessageLoop();
-    ATLASSERT(pLoop != NULL);
-    pLoop->RemoveMessageFilter(this);
-    pLoop->RemoveIdleHandler(this);
-
-    return 0;
-}
-
-LRESULT CMainDlg::OnAbout(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
-{
-    CAboutDlg dlg;
-    dlg.DoModal();
-    return 0;
-}
-
-LRESULT CMainDlg::OnOK(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
-{
-    // TODO: Add validation code 
-    CloseDialog(wID);
-    return 0;
-}
-
-LRESULT CMainDlg::OnCancel(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
-{
-    CloseDialog(wID);
-    return 0;
-}
-
-void CMainDlg::CloseDialog(int nVal)
-{
-    DestroyWindow();
-    ::PostQuitMessage(nVal);
-}
-
-LRESULT CMainDlg::OnFileExit(WORD, WORD wID, HWND, BOOL&)
-{
-    CloseDialog(wID);
-    return 0;
-}
-
-LRESULT CMainDlg::OnFileOpen(WORD, WORD, HWND, BOOL&)
-{
-    CFileDialog openFile(TRUE, _T("*.txt"), NULL, OFN_EXTENSIONDIFFERENT|OFN_FILEMUSTEXIST|OFN_PATHMUSTEXIST,_T("文本文件(*.txt;*.cue;*.log)\0*.txt;*.cue;*.log\0txt文本文件(*.txt)\0*.txt\0cue文件(*.cue)\0*.cue\0log文件(*.log)\0*.log\0All Files (*.*)\0*.*\0\0"));
-    if (openFile.DoModal() == IDOK)
-    {
-        // TODO
-    }
-    return 0;
-}
-
-LRESULT CMainDlg::OnFileSave(WORD, WORD, HWND, BOOL&)
-{
-    // TODO
-    return 0;
-}
-
-LRESULT CMainDlg::OnFileOption(WORD, WORD, HWND, BOOL&)
-{
-    CSettingDlg dlg;
-    dlg.DoModal();
-    return 0;
-}
-
-LRESULT CMainDlg::OnDropFiles(UINT, WPARAM wParam, LPARAM, BOOL&)
-{
-    HDROP hDrop = (HDROP)wParam;
-    int nFileCount = DragQueryFile(hDrop, 0xFFFFFFFF, NULL, MAX_PATH);
-    if (!m_bTransferString)
-    {
-        if (nFileCount == 1)
-        {
-            TCHAR szFileName[MAX_PATH + 1] = {0};
-            DragQueryFile(hDrop, 0, szFileName, MAX_PATH);
-            m_FilePathName.clear();
-            m_FilePathName.append(szFileName);
-            std::wstring ExtensionName, FileName;
-            std::wstring::size_type pos = m_FilePathName.rfind(L'.');
-            if (pos != std::wstring::npos)
-            {
-                ExtensionName.append(m_FilePathName.substr(pos + 1, m_FilePathName.length() - pos -1));
-                toLower(ExtensionName);
-            }
-            pos = m_FilePathName.rfind(L'\\');
-            if (pos != std::wstring::npos)
-            {
-                FileName.append(m_FilePathName.substr(pos + 1, m_FilePathName.length() - pos -1));
-            }
-            if ((ExtensionName == L"tak") || (ExtensionName == L"flac") || (ExtensionName == L"ape"))
-            {
-                if (m_Config.AcceptDragAudioFile)
-                {
-                    if (ExtensionName == L"flac")
-                        ExtractFlacInternalCue(FileName);
-                    else
-                        ExtractTakInternalCue(FileName);
-                }
-                else
-                {
-                    if (DealFile())
-                    {
-                        if (m_Config.AutoFixTTA) FixTTACue();
-                        if (m_Config.AutoFixCue) FixCue();
-                    }
-                }
-            }
-            else
-            {
-                if (DealFile())
-                {
-                    if (m_Config.AutoFixTTA) FixTTACue();
-                    if (m_Config.AutoFixCue) FixCue();
-                }
-            }
-        }
-        else
-        {
-            MessageBox(_T(" 只能同时打开一个文件"), _T("Unicue"), MB_OK);
-        }
-    }
-    else
-    {
-        // TODO
-    }
-
-    return 0;
-}
-
-LRESULT CMainDlg::OnBnClickedCheckAutocheckcode(WORD, WORD, HWND, BOOL&)
-{
-    m_Config.AutoCheckCode = !m_Config.AutoCheckCode;
-    return 0;
-}
-
-LRESULT CMainDlg::OnBnClickedCheckAlwaysontop(WORD, WORD, HWND, BOOL&)
-{
-    m_Config.AlwaysOnTop = !m_Config.AlwaysOnTop;
-    SetDialogPos();
-    return 0;
+    int pos=cueString.Find(_T("the true audio"));
+    if (pos <= 0) return;
+    getWindowText(GetDlgItem(IDC_EDIT_UNICODE), cueString);
+    WTL::CString &NewCueString = cueString.Left(pos)+_T("WAVE")+cueString.Right(cueString.GetLength()-pos-14);
+    GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(NewCueString);
 }

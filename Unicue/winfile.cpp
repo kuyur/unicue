@@ -5,7 +5,7 @@
 /* See http://code.google.com/p/win32-standard-expansion/ for detail.   */
 /*                                                                      */
 /* win32-standard-expansion                                             */
-/* Publishedunder New BSD License.                                      */
+/* Published under New BSD License.                                      */
 /* Copyright memleak@darkc.at                                           */
 /*                                                                      */
 /* Author:  kuyur (kuyur@kuyur.info)                                    */

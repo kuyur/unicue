@@ -4,25 +4,12 @@
 
 #pragma once
 
-// 配置
-typedef struct CConfig_tag
-{
-    std::wstring TemplateStr;              // 命名模板
-    BOOL AutoFixCue;                       // 自动修正cue中的音频文件扩展名
-    BOOL AutoFixTTA;                       // 自动修正旧式TTA标签
-    BOOL AcceptDragAudioFile;              // 接受拖曳音频文档提取内嵌cue
-    BOOL AutoCheckCode;                    // 是否自动检查编码
-    BOOL AlwaysOnTop;                      // 是否总在最前
-    BOOL CloseCuePrompt;                   // 是否关闭cue文件有错误的提示
-    BOOL RegNewUniFile;                    // 注册新建uni文件
-    std::wstring MapConfName;              // 字符映射表配置文件路径
-}CConfig;
+#include "config.h"
 
 class CMainDlg : public CDialogImpl<CMainDlg>, public CUpdateUI<CMainDlg>,
-        public CMessageFilter, public CIdleHandler
+        public CMessageFilter, public CIdleHandler, public CWinDataExchange<CMainDlg>
 {
 protected:
-    CMenu m_menu;
     BOOL     m_bNeedConvert;        // 需要转换
     char*    m_RawString;           // 原始字符串（从文本读取，含BOM）
     UINT     m_RawStringLength;     // 原始字符串的长度（从文本获取，含BOM长度)
@@ -60,9 +47,11 @@ public:
     virtual BOOL OnIdle();
 
     BEGIN_UPDATE_UI_MAP(CMainDlg)
+        UPDATE_ELEMENT(IDM_FILE_OPEN, UPDUI_MENUPOPUP)
     END_UPDATE_UI_MAP()
 
     BEGIN_MSG_MAP(CMainDlg)
+        CHAIN_MSG_MAP(CUpdateUI)
         MESSAGE_HANDLER(WM_INITDIALOG, OnInitDialog)
         MESSAGE_HANDLER(WM_DESTROY, OnDestroy)
         MESSAGE_HANDLER(WM_DROPFILES, OnDropFiles)
@@ -75,7 +64,18 @@ public:
         COMMAND_ID_HANDLER(IDM_FILE_OPTION, OnFileOption)
         COMMAND_HANDLER(IDC_CHECK_AUTOCHECKCODE, BN_CLICKED, OnBnClickedCheckAutocheckcode)
         COMMAND_HANDLER(IDC_CHECK_ALWAYSONTOP, BN_CLICKED, OnBnClickedCheckAlwaysontop)
+        COMMAND_HANDLER(IDC_COMBO_SELECTCODE, CBN_SELCHANGE, OnCbnSelchangeComboSelectcode)
+        COMMAND_HANDLER(IDC_BUTTON_DO, BN_CLICKED, OnBnClickedButtonDo)
+        COMMAND_HANDLER(IDC_BUTTON_SAVE, BN_CLICKED, OnBnClickedButtonSave)
+        COMMAND_HANDLER(IDC_BUTTON_SAVEAS, BN_CLICKED, OnBnClickedButtonSaveas)
+        COMMAND_HANDLER(IDC_BUTTON_TRANSFERSTRING, BN_CLICKED, OnBnClickedButtonTransferstring)
     END_MSG_MAP()
+
+    // DDX
+    BEGIN_DDX_MAP(CMainDlg)
+        DDX_CHECK(IDC_CHECK_AUTOCHECKCODE, m_Config.AutoCheckCode)
+        DDX_CHECK(IDC_CHECK_ALWAYSONTOP, m_Config.AlwaysOnTop)
+    END_DDX_MAP()
 
 // Handler prototypes (uncomment arguments if needed):
 //    LRESULT MessageHandler(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
