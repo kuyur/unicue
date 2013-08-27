@@ -150,7 +150,7 @@ LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
     LPWSTR *szArglist;
     int nArgs;
     szArglist = CommandLineToArgvW(GetCommandLineW(), &nArgs);
-    if ((NULL != szArglist) && (nArgs >= 1) && (wcslen(szArglist[1]) >= 1))
+    if ((NULL != szArglist) && (nArgs >= 2) && (wcslen(szArglist[1]) >= 1))
     {
         // 0 is execution path
         WTL::CString filePath(szArglist[1]);
