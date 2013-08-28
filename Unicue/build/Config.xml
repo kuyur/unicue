@@ -8,4 +8,5 @@
     <AutoCheckCode>true</AutoCheckCode>
     <AlwaysOnTop>true</AlwaysOnTop>
     <CharmapConfPath>charmap-anisong.xml</CharmapConfPath>
+    <Language>cht</Language>
 </config>

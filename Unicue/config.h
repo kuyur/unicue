@@ -20,6 +20,13 @@
 #include <WinDef.h>
 #include <atlmisc.h>
 
+enum LANG {
+    EN  = (int)0x00,
+    CHN = (int)0x01,
+    CHT = (int)0x02,
+    JPN = (int)0x03
+};
+
 typedef struct CConfig_tag
 {
     WTL::CString TemplateStr;              // 命名模板
@@ -31,6 +38,7 @@ typedef struct CConfig_tag
     BOOL CloseCuePrompt;                   // 是否关闭cue文件有错误的提示
     BOOL RegNewUniFile;                    // 注册新建uni文件
     WTL::CString MapConfName;              // 字符映射表配置文件路径
+    LANG Lang;
 }CConfig;
 
 #endif // CONFIG_H_

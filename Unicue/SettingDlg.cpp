@@ -19,18 +19,45 @@
 CSettingDlg::CSettingDlg(CConfig config)
 {
     m_Config = config;
+    m_nLangIndex = (int)config.Lang;
 }
 
 LRESULT CSettingDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
     CenterWindow(GetParent());
+
+    // add lang items
+    CComboBox &theCombo = (CComboBox)GetDlgItem(IDC_SETTING_LANGCOMBO);
+    theCombo.InsertString(-1, _T("English"));
+    theCombo.InsertString(-1, _T("简体中文"));
+    theCombo.InsertString(-1, _T("繁體中文"));
+    theCombo.InsertString(-1, _T("日本語"));
+
     DoDataExchange(FALSE);
+
     return TRUE;
 }
 
 LRESULT CSettingDlg::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
     DoDataExchange(TRUE);
+    switch (m_nLangIndex)
+    {
+    case 0:
+        m_Config.Lang = EN;
+        break;
+    case 1:
+        m_Config.Lang = CHN;
+        break;
+    case 2:
+        m_Config.Lang = CHT;
+        break;
+    case 3:
+        m_Config.Lang = JPN;
+        break;
+    default:
+        m_Config.Lang = CHN;
+    }
     EndDialog(wID);
     return 0;
 }

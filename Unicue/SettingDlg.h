@@ -21,6 +21,8 @@
 
 class CSettingDlg : public CDialogImpl<CSettingDlg>, public CWinDataExchange<CSettingDlg>
 {
+protected:
+    int m_nLangIndex;
 public:
     CSettingDlg(CConfig config);
     ~CSettingDlg(void) {};
@@ -47,6 +49,7 @@ public:
         DDX_CHECK(IDC_SETTING_INCUECHECK, m_Config.AcceptDragAudioFile)
         DDX_CHECK(IDC_SETTING_CLOSEPROMPTCHECK, m_Config.CloseCuePrompt)
         DDX_TEXT(IDC_EDIT_MAPCONF, m_Config.MapConfName)
+        DDX_COMBO_INDEX(IDC_SETTING_LANGCOMBO, m_nLangIndex);
     END_DDX_MAP()
 
     LRESULT OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);

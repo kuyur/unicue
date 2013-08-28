@@ -58,6 +58,7 @@ CMainDlg::CMainDlg()
         m_Config.AlwaysOnTop = TRUE;
         m_Config.CloseCuePrompt = FALSE;
         m_Config.MapConfName = _T("charmap-anisong.xml");
+        m_Config.Lang = CHN;
     }
     else
     {
@@ -82,6 +83,7 @@ CMainDlg::CMainDlg()
             m_Config.AlwaysOnTop = TRUE;
             m_Config.CloseCuePrompt = FALSE;
             m_Config.MapConfName = _T("charmap-anisong.xml");
+            m_Config.Lang = CHN;
         }
 
         delete []fileBuffer;
@@ -92,9 +94,24 @@ CMainDlg::CMainDlg()
     if (!m_context->init())
         MessageBox(_T("Failed to load charmaps!"), _T("Unicue"), MB_OK);
     // set local here
-    //SetThreadLocale(MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US));
-    SetThreadLocale(MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED));
-    //SetThreadLocale(MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_TRADITIONAL));
+    switch (m_Config.Lang)
+    {
+    case EN:
+        SetThreadLocale(MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US));
+        break;
+    case CHN:
+        SetThreadLocale(MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED));
+        break;
+    case CHT:
+        SetThreadLocale(MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_TRADITIONAL));
+        break;
+    case JPN:
+        // TODO
+        SetThreadLocale(MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED));
+        break;
+    default:
+        SetThreadLocale(MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED));
+    }
 }
 
 CMainDlg::~CMainDlg()
@@ -817,6 +834,21 @@ BOOL CMainDlg::LoadConfigFile(TiXmlDocument *xmlfile)
     if (!pElem->GetText()) return FALSE;
     m_Config.MapConfName = CC4EncodeUTF8::convert2unicode(pElem->GetText(), strlen(pElem->GetText())).c_str();
 
+    // Lang node
+    pElem = hXmlHandle.FirstChild("Language").Element();
+    if (!pElem) return FALSE;
+    if (!pElem->GetText()) return FALSE;
+    if (_stricmp(pElem->GetText(),"en") == 0)
+        m_Config.Lang = EN;
+    else if (_stricmp(pElem->GetText(),"chn") == 0)
+        m_Config.Lang = CHN;
+    else if (_stricmp(pElem->GetText(),"cht") == 0)
+        m_Config.Lang = CHT;
+    else if (_stricmp(pElem->GetText(),"jpn") == 0)
+        m_Config.Lang = JPN;
+    else
+        m_Config.Lang = CHN;
+
     return TRUE;
 }
 
@@ -865,6 +897,11 @@ BOOL CMainDlg::CreateConfigFile()
     TiXmlText *CharmapConfPathValue = new TiXmlText("charmap-anisong.xml");
     CharmapConfPath->LinkEndChild(CharmapConfPathValue);
     configure->LinkEndChild(CharmapConfPath);
+
+    TiXmlElement *Lang = new TiXmlElement("Language");
+    TiXmlText *LangValue = new TiXmlText("chn");
+    Lang->LinkEndChild(LangValue);
+    configure->LinkEndChild(Lang);
 
     configdoc.LinkEndChild(dec);
     configdoc.LinkEndChild(configure);
@@ -954,6 +991,28 @@ BOOL CMainDlg::SaveConfigFile()
     CharmapConfPathValue = new TiXmlText(CC4EncodeUTF16::getInstance()->convertWideString(m_Config.MapConfName).c_str());
     CharmapConfPath->LinkEndChild(CharmapConfPathValue);
     configure->LinkEndChild(CharmapConfPath);
+
+    TiXmlElement *Lang = new TiXmlElement("Language");
+    TiXmlText *LangValue;
+    switch (m_Config.Lang)
+    {
+    case EN:
+        LangValue = new TiXmlText("en");
+        break;
+    case CHN:
+        LangValue = new TiXmlText("chn");
+        break;
+    case CHT:
+        LangValue = new TiXmlText("cht");
+        break;
+    case JPN:
+        LangValue = new TiXmlText("jpn");
+        break;
+    default:
+        LangValue = new TiXmlText("chn");
+    }
+    Lang->LinkEndChild(LangValue);
+    configure->LinkEndChild(Lang);
 
     configdoc.LinkEndChild(dec);
     configdoc.LinkEndChild(configure);
