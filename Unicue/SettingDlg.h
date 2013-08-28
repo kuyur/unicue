@@ -1,4 +1,21 @@
+/************************************************************************/
+/*                                                                      */
+/* Unicue 1.2                                                           */
+/* A tool to convert file from ansi code-page to Unicode                */
+/*                                                                      */
+/* Author:  kuyur (kuyur@kuyur.info)                                    */
+/* Published under GPLv3                                                */
+/* http://www.gnu.org/licenses/gpl-3.0.en.html                          */
+/*                                                                      */
+/* Project URL: http://github.com/kuyur/unicue                          */
+/*                                                                      */
+/************************************************************************/
+
 #pragma once
+
+// settingdlg.h
+#ifndef CSETTINGDLG_H_
+#define CSETTINGDLG_H_
 
 #include "config.h"
 
@@ -41,3 +58,4 @@ public:
     LRESULT OnBnClickedTxtoldstyleButton(WORD, WORD, HWND, BOOL&);
 };
 
+#endif // CSETTINGDLG_H_

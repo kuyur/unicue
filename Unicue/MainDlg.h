@@ -1,8 +1,20 @@
-﻿// MainDlg.h : interface of the CMainDlg class
-//
-/////////////////////////////////////////////////////////////////////////////
+﻿/************************************************************************/
+/*                                                                      */
+/* Unicue 1.2                                                           */
+/* A tool to convert file from ansi code-page to Unicode                */
+/*                                                                      */
+/* Author:  kuyur (kuyur@kuyur.info)                                    */
+/* Published under GPLv3                                                */
+/* http://www.gnu.org/licenses/gpl-3.0.en.html                          */
+/*                                                                      */
+/* Project URL: http://github.com/kuyur/unicue                          */
+/*                                                                      */
+/************************************************************************/
 
 #pragma once
+// maindlg.h
+#ifndef CMAINDLG_H_
+#define CMAINDLG_H_
 
 #include "config.h"
 
@@ -10,34 +22,32 @@ class CMainDlg : public CDialogImpl<CMainDlg>, public CUpdateUI<CMainDlg>,
         public CMessageFilter, public CIdleHandler, public CWinDataExchange<CMainDlg>
 {
 protected:
-    BOOL     m_bNeedConvert;        // 需要转换
-    char*    m_RawString;           // 原始字符串（从文本读取，含BOM）
-    UINT     m_RawStringLength;     // 原始字符串的长度（从文本获取，含BOM长度)
-    char*    m_String;              // 字符串（不含BOM）
-    UINT     m_StringLength;        // 字符串的长度（不含BOM）
-    std::wstring  m_StringCodeType; // 字符串编码类型
-    wchar_t* m_UnicodeString;       // Unicode字符串
-    UINT     m_UnicodeLength;       // Unicode字符串的长度
-    std::wstring  m_FilePathName;   // 文本文件路径
-    std::wstring  m_CodeStatus;     // 编码检测状态
-    CConfig  m_Config;              // 配置
-    std::wstring  m_ConfigPath;     // 配置文件路径
-    //BOOL     m_bConfigLoaded;     // 配置成功加载标记
-    //BOOL     m_bCommandLineOpen;  // 命令行参数标记
-    BOOL     m_bCueFile;            // 文本是cue文件
-    BOOL     m_bTransferString;     // 切换到转换字符串状态
-    CC4Context* m_context;          // converting context
+    BOOL          m_bNeedConvert;        // m_RawString need to be converted or not
+    char*         m_RawString;           // Raw string read from file, with BOM if it is existing
+    UINT          m_RawStringLength;     // Length of m_RawString
+    char*         m_String;              // String without BOM, contained in m_RawString
+    UINT          m_StringLength;        // Length of m_String, without length of BOM
+    WTL::CString  m_StringCodeType;      // Encoding type.
+    wchar_t*      m_UnicodeString;       // Unicode String to save converted result
+    UINT          m_UnicodeLength;       // Length of m_UnicodeString
+    WTL::CString  m_FilePathName;        // File path to be converted
+    WTL::CString  m_CodeStatus;          // Encoding check result
+    CConfig       m_Config;              // Config for app
+    WTL::CString  m_ConfigPath;          // File path of config
+    BOOL          m_bCueFile;            // Type of file to be converted is a cue
+    BOOL          m_bTransferString;     // Transfer string mode if TRUE, Transfer file mode if FALSE
+    CC4Context*   m_context;             // converting context
 
     BOOL LoadConfigFile(TiXmlDocument *xmlfile);
     BOOL CreateConfigFile();
     BOOL SaveConfigFile();
     void FixCue();
-    void FixInternalCue(std::wstring AudioFileName);
+    void FixInternalCue(WTL::CString AudioFileName);
     void FixTTACue();
     BOOL SetDialogPos();
     BOOL DealFile();
-    BOOL ExtractTakInternalCue(std::wstring AudioFileName);
-    BOOL ExtractFlacInternalCue(std::wstring AudioFileName);
+    BOOL ExtractTakInternalCue(WTL::CString AudioFileName);
+    BOOL ExtractFlacInternalCue(WTL::CString AudioFileName);
 
 public:
     enum { IDD = IDD_MAINDLG };
@@ -103,3 +113,5 @@ public:
 
     void CloseDialog(int nVal);
 };
+
+#endif // CMAINDLG_H_

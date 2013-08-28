@@ -5,11 +5,11 @@
 /* See http://code.google.com/p/win32-standard-expansion/ for detail.   */
 /*                                                                      */
 /* win32-standard-expansion                                             */
-/* Published under New BSD License.                                      */
+/* Published under New BSD License.                                     */
 /* Copyright memleak@darkc.at                                           */
 /*                                                                      */
 /* Author:  kuyur (kuyur@kuyur.info)                                    */
-/* Published under Apache License 2.0                                   */
+/* winfile.h and winfile.cpp are published under Apache License 2.0     */
 /* http://www.apache.org/licenses/LICENSE-2.0                           */
 /*                                                                      */
 /* Project URL: http://github.com/kuyur/unicue                          */

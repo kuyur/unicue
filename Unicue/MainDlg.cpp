@@ -1,6 +1,15 @@
-﻿// MainDlg.cpp : implementation of the CMainDlg class
-//
-/////////////////////////////////////////////////////////////////////////////
+﻿/************************************************************************/
+/*                                                                      */
+/* Unicue 1.2                                                           */
+/* A tool to convert file from ansi code-page to Unicode                */
+/*                                                                      */
+/* Author:  kuyur (kuyur@kuyur.info)                                    */
+/* Published under GPLv3                                                */
+/* http://www.gnu.org/licenses/gpl-3.0.en.html                          */
+/*                                                                      */
+/* Project URL: http://github.com/kuyur/unicue                          */
+/*                                                                      */
+/************************************************************************/
 
 #include "stdafx.h"
 #include "winfile.h"
@@ -17,14 +26,13 @@ BOOL CMainDlg::PreTranslateMessage(MSG* pMsg)
 }
 
 CMainDlg::CMainDlg()
-    :m_bNeedConvert(TRUE), m_RawStringLength(0),m_StringLength(0),m_UnicodeLength(0),
-    m_StringCodeType(L"Local Codepage"),m_bCueFile(FALSE),m_bTransferString(FALSE)
+    :m_bNeedConvert(TRUE), m_RawStringLength(0), m_StringLength(0), m_UnicodeLength(0),
+    m_ConfigPath(L""), m_FilePathName(L""), m_CodeStatus(L""), m_StringCodeType(L"Local Codepage"),
+    m_bCueFile(FALSE), m_bTransferString(FALSE)
 {
     m_RawString = NULL;
     m_String = NULL;
     m_UnicodeString = NULL;
-    m_FilePathName = L"";
-    m_CodeStatus = L"";
     m_Config.RegNewUniFile = FALSE;
 
     // Load config file...
@@ -33,8 +41,8 @@ CMainDlg::CMainDlg()
     wchar_t *pos = wcsrchr(processPath, L'\\');
     if (pos) *(pos+1) = L'\0';
 
-    m_ConfigPath.append(processPath);
-    m_ConfigPath.append(L"Config.xml");
+    m_ConfigPath += processPath;
+    m_ConfigPath += L"Config.xml";
 
     // Because TiXml does not support wchar_t file name,
     // use Win32 File Api to load xml file.
@@ -64,7 +72,7 @@ CMainDlg::CMainDlg()
         doc->Parse(fileBuffer, NULL, TIXML_ENCODING_UTF8);
         if (doc->Error() || !LoadConfigFile(doc))
         {
-            ::DeleteFile(m_ConfigPath.c_str());
+            ::DeleteFile(m_ConfigPath);
             CreateConfigFile();
             m_Config.TemplateStr = _T(".utf-8");
             m_Config.AutoFixCue = TRUE;
@@ -92,20 +100,13 @@ CMainDlg::CMainDlg()
 CMainDlg::~CMainDlg()
 {
     if (m_RawString)
-    {
         delete []m_RawString;
-        m_RawString=NULL;
-    }
     if (m_UnicodeString)
-    {
         delete []m_UnicodeString;
-        m_UnicodeString=NULL;
-    }
     if (m_context)
     {
         m_context->finalize();
         delete m_context;
-        m_context = NULL;
     }
 }
 
@@ -162,18 +163,18 @@ LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
         WTL::CString &ExtensionName = filePath.Right(filePath.GetLength() - filePath.ReverseFind('.') - 1);
         ExtensionName.MakeLower();
         WTL::CString &FileName = filePath.Right(filePath.GetLength() - filePath.ReverseFind('\\') - 1);
-        if ((ExtensionName==_T("tak"))||(ExtensionName==_T("flac"))||(ExtensionName==_T("ape")))
+        if ((ExtensionName == _T("tak")) || (ExtensionName == _T("flac")) || (ExtensionName == _T("ape")))
         {
             if (m_Config.AcceptDragAudioFile)
             {
                 if (ExtensionName==_T("flac"))
-                    ExtractFlacInternalCue(std::wstring(FileName));
+                    ExtractFlacInternalCue(FileName);
                 else if ((ExtensionName==_T("tak"))||(ExtensionName==_T("ape")))
-                    ExtractTakInternalCue(std::wstring(FileName));
+                    ExtractTakInternalCue(FileName);
             }
             else
             {
-                if (TRUE==DealFile())
+                if (DealFile())
                 {
                     if (m_Config.AutoFixTTA) FixTTACue();
                     if (m_Config.AutoFixCue) FixCue();
@@ -182,7 +183,7 @@ LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
         }
         else
         {
-            if (TRUE==DealFile())
+            if (DealFile())
             {
                 if (m_Config.AutoFixTTA) FixTTACue();
                 if (m_Config.AutoFixCue) FixCue();
@@ -208,16 +209,13 @@ BOOL CMainDlg::SetDialogPos()
 
 BOOL CMainDlg::DealFile()
 {
-    int length = m_FilePathName.length();
-    if (length <= 0) return FALSE;
+    if (m_FilePathName.IsEmpty()) return FALSE;
 
-    m_bCueFile = FALSE;
-    std::wstring filepath(m_FilePathName);
-    toLower(filepath);
-    if (filepath.length() >= 4 && filepath.substr(filepath.length() - 4, 4) == L".cue")
-    {
-        m_bCueFile = TRUE;
-    }
+    m_bCueFile=FALSE;
+    WTL::CString extendName = m_FilePathName.Right(m_FilePathName.GetLength() - m_FilePathName.ReverseFind('.') - 1);
+    extendName.MakeLower();
+    if (extendName == _T("cue"))
+        m_bCueFile=TRUE;
 
     CWinFile openFile(m_FilePathName, CWinFile::modeRead | CWinFile::shareDenyWrite);
     if (!openFile.open())
@@ -260,8 +258,8 @@ BOOL CMainDlg::DealFile()
     {
         m_CodeStatus = _T("Unicode (little endian)");
         m_bNeedConvert = FALSE;
-        m_StringCodeType = CC4EncodeUTF16::_getName();
-        int nIndex = theCombo.FindStringExact(0, m_StringCodeType.c_str());
+        m_StringCodeType = CC4EncodeUTF16::_getName().c_str();
+        int nIndex = theCombo.FindStringExact(0, m_StringCodeType);
         theCombo.SetCurSel(nIndex);
         m_String = m_RawString + 2; // 真正的起始地址
         m_StringLength = m_RawStringLength - 2; // 真正的长度
@@ -276,15 +274,15 @@ BOOL CMainDlg::DealFile()
         m_UnicodeString[m_UnicodeLength] = '\0';
     }
     // Unicode(big-endian)
-    if (((unsigned char)m_RawString[0]==0xFE)&&((unsigned char)m_RawString[1]==0xFF))
+    if (((unsigned char)m_RawString[0] == 0xFE) && ((unsigned char)m_RawString[1] == 0xFF))
     {
         m_CodeStatus = _T("Unicode (big endian)");
         m_bNeedConvert = FALSE;
-        m_StringCodeType = CC4EncodeUTF16::_getName();
-        int nIndex = theCombo.FindStringExact(0, m_StringCodeType.c_str());
+        m_StringCodeType = CC4EncodeUTF16::_getName().c_str();
+        int nIndex = theCombo.FindStringExact(0, m_StringCodeType);
         theCombo.SetCurSel(nIndex);
-        m_String = m_RawString+2; // 真正的起始地址
-        m_StringLength = m_RawStringLength - 2; //真正的长度
+        m_String = m_RawString + 2; // 真正的起始地址
+        m_StringLength = m_RawStringLength - 2; // 真正的长度
         if ((m_RawStringLength%2) != 0)
         {
             MessageBox(_T("文本错误！"));
@@ -299,17 +297,19 @@ BOOL CMainDlg::DealFile()
         {
             unsigned char chars[2];
             memcpy(chars,(void*)(m_UnicodeString+i),2);
-            wchar_t theChr=chars[0]*256+chars[1];
-            m_UnicodeString[i]=theChr;
+            wchar_t theChr = chars[0] * 256 + chars[1];
+            m_UnicodeString[i] = theChr;
         }
     }
     // UTF-8(with BOM)
-    if (((unsigned char)m_RawString[0]==0xEF)&&((unsigned char)m_RawString[1]==0xBB)&&((unsigned char)m_RawString[2]==0xBF))
+    if (((unsigned char)m_RawString[0] == 0xEF) &&
+        ((unsigned char)m_RawString[1] == 0xBB) &&
+        ((unsigned char)m_RawString[2] == 0xBF))
     {
         m_CodeStatus = _T("UTF-8 (with BOM)");
         m_bNeedConvert = FALSE;
-        m_StringCodeType = CC4EncodeUTF8::_getName();
-        int nIndex = theCombo.FindStringExact(0, m_StringCodeType.c_str());
+        m_StringCodeType = CC4EncodeUTF8::_getName().c_str();
+        int nIndex = theCombo.FindStringExact(0, m_StringCodeType);
         theCombo.SetCurSel(nIndex);
         m_String = m_RawString + 3; // 真正的起始地址
         m_StringLength = m_RawStringLength - 3; // 真正的长度
@@ -317,15 +317,13 @@ BOOL CMainDlg::DealFile()
 
     if (!m_bNeedConvert)
     {
-        std::wstring statusstring;
-        statusstring.append(_T("文档编码检测结果：")).append(m_CodeStatus).append(_T("\n\n文档路径：")).append(m_FilePathName);
-        theStatic.SetWindowText(statusstring.c_str());
-        if (m_StringCodeType == CC4EncodeUTF16::_getName())
+        theStatic.SetWindowText(_T("文档编码检测结果：") + m_CodeStatus + _T("\n\n文档路径：") + m_FilePathName);
+        if (m_StringCodeType == CC4EncodeUTF16::_getName().c_str())
         {
             RightEdit.SetWindowText(m_UnicodeString);
             LeftEdit.SetWindowText(_T(""));
         }
-        if (m_StringCodeType==CC4EncodeUTF8::_getName().c_str())
+        if (m_StringCodeType == CC4EncodeUTF8::_getName().c_str())
         {
             RightEdit.SetWindowText(CC4EncodeUTF8::convert2unicode(m_String,m_StringLength).c_str());
             LeftEdit.SetWindowText(_T(""));
@@ -339,31 +337,22 @@ BOOL CMainDlg::DealFile()
             const CC4Encode *encode = m_context->getMostPossibleEncode(m_String);
             if (encode)
             {
-                m_StringCodeType = encode->getName();
-                int nIndex = theCombo.FindStringExact(0, m_StringCodeType.c_str());
+                m_StringCodeType = encode->getName().c_str();
+                int nIndex = theCombo.FindStringExact(0, m_StringCodeType);
                 theCombo.SetCurSel(nIndex);
-                m_CodeStatus = encode->getName();
+                m_CodeStatus = encode->getName().c_str();
             }
             else
             {
-                int lbTextLength = theCombo.GetLBTextLen(0);
-                wchar_t *lbText = new wchar_t[lbTextLength + 1];
-                lbText[lbTextLength] = L'\0';
-                theCombo.GetLBText(0,lbText);
+                getLBText(theCombo, 0, m_StringCodeType);
                 theCombo.SetCurSel(0);
                 m_CodeStatus = _T("未知编码");
-                m_StringCodeType.clear();
-                m_StringCodeType.append(lbText);
-                delete []lbText;
-                lbText = NULL;
             }
         }
         else
             m_CodeStatus = _T("已经关闭编码自动检测");
 
-        std::wstring statusstring;
-        statusstring.append(_T("文档编码检测结果：")).append(m_CodeStatus).append(_T("\n\n文档路径：")).append(m_FilePathName);
-        theStatic.SetWindowText(statusstring.c_str());
+        theStatic.SetWindowText(_T("文档编码检测结果：") + m_CodeStatus + _T("\n\n文档路径：") + m_FilePathName);
 
         // 左
         /*
@@ -372,29 +361,15 @@ BOOL CMainDlg::DealFile()
         wchar_t *localString = new wchar_t[requiredSize + 1];
         size_t result = _mbstowcs_l(localString, m_String, requiredSize + 1, locale);
         */
-        int requiredSize = MultiByteToWideChar(CP_ACP, 0, m_String, strlen(m_String)+1, NULL, 0);
-        wchar_t *localString = new wchar_t[requiredSize + 1];
-        localString[requiredSize] = L'\0';
-        int result = MultiByteToWideChar(CP_ACP, 0, m_String, strlen(m_String)+1, localString, requiredSize + 1);
-        if (result == 0)
-            LeftEdit.SetWindowText(L"");
-        else
-            LeftEdit.SetWindowText(localString);
+        std::wstring &localString = msConvert(m_String);
+        LeftEdit.SetWindowText(localString.c_str());
 
         // 右
-        const CC4Encode *encode = m_context->getEncode(m_StringCodeType);
+        const CC4Encode *encode = m_context->getEncode(std::wstring(m_StringCodeType));
         if (encode)
             RightEdit.SetWindowText(encode->wconvertText(m_String, m_StringLength).c_str());
         else
-        {
-            if (result == 0)
-                RightEdit.SetWindowText(L"");
-            else
-                RightEdit.SetWindowText(localString);
-        }
-        WTL::CString str;
-        // release memory
-        delete []localString;
+            RightEdit.SetWindowText(localString.c_str());
     }
 
     return TRUE;
@@ -451,18 +426,19 @@ LRESULT CMainDlg::OnFileOpen(WORD, WORD, HWND, BOOL&)
     if (openFile.DoModal() == IDOK)
     {
         m_FilePathName = openFile.m_szFileName;
-        WTL::CString FilePath(m_FilePathName.c_str());
-        WTL::CString &ExtensionName = FilePath.Right(FilePath.GetLength() - FilePath.ReverseFind('.') - 1);
+        WTL::CString &ExtensionName = m_FilePathName.Right(m_FilePathName.GetLength() - m_FilePathName.ReverseFind('.') - 1);
         ExtensionName.MakeLower();
-        WTL::CString &FileName = FilePath.Right(FilePath.GetLength() - FilePath.ReverseFind('\\')-1);
-        if ((ExtensionName==_T("tak"))||(ExtensionName==_T("flac"))||(ExtensionName==_T("ape")))
+        WTL::CString &FileName = m_FilePathName.Right(m_FilePathName.GetLength() - m_FilePathName.ReverseFind('\\') - 1);
+        if ((ExtensionName == _T("tak"))  ||
+            (ExtensionName == _T("flac")) ||
+            (ExtensionName == _T("ape")))
         {
             if (m_Config.AcceptDragAudioFile)
             {
-                if (ExtensionName==_T("flac"))
-                    ExtractFlacInternalCue(std::wstring(FileName));
-                else if ((ExtensionName==_T("tak"))||(ExtensionName==_T("ape")))
-                    ExtractTakInternalCue(std::wstring(FileName));
+                if (ExtensionName == _T("flac"))
+                    ExtractFlacInternalCue(FileName);
+                else
+                    ExtractTakInternalCue(FileName);
             }
             else
             {
@@ -528,21 +504,13 @@ LRESULT CMainDlg::OnDropFiles(UINT, WPARAM wParam, LPARAM, BOOL&)
         {
             TCHAR szFileName[MAX_PATH + 1] = {0};
             DragQueryFile(hDrop, 0, szFileName, MAX_PATH);
-            m_FilePathName.clear();
-            m_FilePathName.append(szFileName);
-            std::wstring ExtensionName, FileName;
-            std::wstring::size_type pos = m_FilePathName.rfind(L'.');
-            if (pos != std::wstring::npos)
-            {
-                ExtensionName.append(m_FilePathName.substr(pos + 1, m_FilePathName.length() - pos -1));
-                toLower(ExtensionName);
-            }
-            pos = m_FilePathName.rfind(L'\\');
-            if (pos != std::wstring::npos)
-            {
-                FileName.append(m_FilePathName.substr(pos + 1, m_FilePathName.length() - pos -1));
-            }
-            if ((ExtensionName == L"tak") || (ExtensionName == L"flac") || (ExtensionName == L"ape"))
+            m_FilePathName = szFileName;
+            WTL::CString &ExtensionName = m_FilePathName.Right(m_FilePathName.GetLength() - m_FilePathName.ReverseFind('.') - 1);
+            ExtensionName.MakeLower();
+            WTL::CString &FileName = m_FilePathName.Right(m_FilePathName.GetLength() - m_FilePathName.ReverseFind('\\') - 1);
+            if ((ExtensionName == L"tak")  ||
+                (ExtensionName == L"flac") ||
+                (ExtensionName == L"ape"))
             {
                 if (m_Config.AcceptDragAudioFile)
                 {
@@ -609,7 +577,7 @@ LRESULT CMainDlg::OnCbnSelchangeComboSelectcode(WORD, WORD, HWND, BOOL&)
         getWindowText(GetDlgItem(IDC_EDIT_ANSI), LeftStr);
         std::string &LeftAnsiStr = msConvertBack(LeftStr);
         // 右
-        const CC4Encode *encode = m_context->getEncode(m_StringCodeType);
+        const CC4Encode *encode = m_context->getEncode(std::wstring(m_StringCodeType));
         if (encode)
             GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(encode->wconvertText(LeftAnsiStr.c_str(),LeftAnsiStr.length()).c_str());
         else
@@ -620,7 +588,7 @@ LRESULT CMainDlg::OnCbnSelchangeComboSelectcode(WORD, WORD, HWND, BOOL&)
     if (m_bNeedConvert)
     {
         getWindowText(theCombo, m_StringCodeType);
-        const CC4Encode *encode = m_context->getEncode(m_StringCodeType);
+        const CC4Encode *encode = m_context->getEncode(std::wstring(m_StringCodeType));
         if (encode)
             GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(encode->wconvertText(m_String, m_StringLength).c_str());
         else
@@ -653,10 +621,10 @@ LRESULT CMainDlg::OnBnClickedButtonDo(WORD, WORD, HWND, BOOL&)
             const CC4Encode *encode = m_context->getMostPossibleEncode(LeftAnsiStr);
             if (encode)
             {
-                m_StringCodeType = encode->getName();
-                int nIndex = theCombo.FindStringExact(0, m_StringCodeType.c_str());
+                m_StringCodeType = encode->getName().c_str();
+                int nIndex = theCombo.FindStringExact(0, m_StringCodeType);
                 theCombo.SetCurSel(nIndex);
-                m_CodeStatus = encode->getName();
+                m_CodeStatus = encode->getName().c_str();
             } else {
                 getLBText(theCombo, 0, m_StringCodeType);
                 theCombo.SetCurSel(0);
@@ -665,12 +633,11 @@ LRESULT CMainDlg::OnBnClickedButtonDo(WORD, WORD, HWND, BOOL&)
         }
         else
             m_CodeStatus = _T("已经关闭编码自动检测");
-        std::wstring status(_T("编码检测结果："));
-        status.append(m_CodeStatus);
-        theStatic.SetWindowText(status.c_str());
+
+        theStatic.SetWindowText(_T("编码检测结果：") + m_CodeStatus);
 
         //右
-        const CC4Encode *encode = m_context->getEncode(m_StringCodeType);
+        const CC4Encode *encode = m_context->getEncode(std::wstring(m_StringCodeType));
         if (encode)
             GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(encode->wconvertText(LeftAnsiStr.c_str(), LeftAnsiStr.length()).c_str());
         else
@@ -681,7 +648,7 @@ LRESULT CMainDlg::OnBnClickedButtonDo(WORD, WORD, HWND, BOOL&)
 
 LRESULT CMainDlg::OnBnClickedButtonSave(WORD, WORD, HWND, BOOL&)
 {
-    CWinFile file(m_FilePathName,CWinFile::modeCreate|CWinFile::modeWrite|CWinFile::shareExclusive);
+    CWinFile file(m_FilePathName, CWinFile::modeCreate|CWinFile::modeWrite|CWinFile::shareExclusive);
     if (!file.open())
     {
         MessageBox(_T("无法写入文件！"), _T("Unicue"), MB_OK);
@@ -699,10 +666,9 @@ LRESULT CMainDlg::OnBnClickedButtonSave(WORD, WORD, HWND, BOOL&)
 
 LRESULT CMainDlg::OnBnClickedButtonSaveas(WORD, WORD, HWND, BOOL&)
 {
-    WTL::CString FilePath(m_FilePathName.c_str());
-    int position = FilePath.ReverseFind('.');
-    WTL::CString &FileType = FilePath.Right(FilePath.GetLength() - position);
-    FilePath = FilePath.Left(position);
+    int position = m_FilePathName.ReverseFind('.');
+    WTL::CString &FileType = m_FilePathName.Right(m_FilePathName.GetLength() - position);
+    WTL::CString &FilePath = m_FilePathName.Left(position);
     FilePath += m_Config.TemplateStr;
     FilePath += FileType;
 
@@ -1005,17 +971,16 @@ BOOL CMainDlg::SaveConfigFile()
     return TRUE;
 }
 
-BOOL CMainDlg::ExtractTakInternalCue(std::wstring AudioFileName)
+BOOL CMainDlg::ExtractTakInternalCue(WTL::CString AudioFileName)
 {
     m_CodeStatus = _T("UTF-8 (Internal Cue File)");
     m_bNeedConvert = FALSE;
-    m_StringCodeType = CC4EncodeUTF8::_getName();
-    int nIndex = ((CComboBox)GetDlgItem(IDC_COMBO_SELECTCODE)).FindStringExact(0, m_StringCodeType.c_str());
+    m_StringCodeType = CC4EncodeUTF8::_getName().c_str();
+    int nIndex = ((CComboBox)GetDlgItem(IDC_COMBO_SELECTCODE)).FindStringExact(0, m_StringCodeType);
     ((CComboBox)GetDlgItem(IDC_COMBO_SELECTCODE)).SetCurSel(nIndex);
 
-    std::wstring statusText = _T("文档编码检测结果：");
-    statusText.append(m_CodeStatus).append(_T("\n\n文档路径：")).append(m_FilePathName);
-    GetDlgItem(IDC_STATIC_STAT).SetWindowText(statusText.c_str());
+    WTL::CString statusText = _T("文档编码检测结果：") + m_CodeStatus + _T("\n\n文档路径：") + m_FilePathName;
+    GetDlgItem(IDC_STATIC_STAT).SetWindowText(statusText);
     GetDlgItem(IDC_EDIT_ANSI).SetWindowText(_T(""));
     GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(_T(""));
 
@@ -1031,7 +996,7 @@ BOOL CMainDlg::ExtractTakInternalCue(std::wstring AudioFileName)
         m_UnicodeString = NULL;
     }
 
-    if (m_FilePathName.length() <= 0)
+    if (m_FilePathName.IsEmpty())
         return FALSE;
 
     CWinFile OpenFile(m_FilePathName, CWinFile::modeRead | CWinFile::shareDenyWrite);
@@ -1041,9 +1006,9 @@ BOOL CMainDlg::ExtractTakInternalCue(std::wstring AudioFileName)
         return FALSE;
     }
 
-    m_FilePathName.append(_T(".cue"));
-    statusText.append(_T(".cue"));
-    GetDlgItem(IDC_STATIC_STAT).SetWindowText(statusText.c_str());
+    m_FilePathName += _T(".cue");
+    statusText += _T(".cue");
+    GetDlgItem(IDC_STATIC_STAT).SetWindowText(statusText);
 
     if (OpenFile.length() < 20480) // 小于20K，文档太小了
     {
@@ -1056,75 +1021,75 @@ BOOL CMainDlg::ExtractTakInternalCue(std::wstring AudioFileName)
     OpenFile.close();
 
     //查找 Cuesheet 标记,自动机模型,大小写不敏感
-    int state=0,BeginPos=0,EndPos=0,Length=0;
-    for (int i=0;i<20480;++i)
+    int state = 0, BeginPos = 0, EndPos = 0, Length = 0;
+    for (int i = 0; i < 20480; ++i)
     {
-        if ((Buffer[i]>=0x41)&&(Buffer[i]<=0x5A))
-            Buffer[i]=Buffer[i]+0x20;
+        if ((Buffer[i] >= 0x41) && (Buffer[i] <= 0x5A))
+            Buffer[i] = Buffer[i] + 0x20;
 
         switch (Buffer[i])
         {
         case 'c':
-            state=1;      //C
+            state = 1;      // C
             break;
         case 'u':
-            if (state==1)
-                state=2;  //Cu
+            if (state == 1)
+                state = 2;  // Cu
             else
-                state=0;
+                state = 0;
             break;
         case 'e':
             switch (state)
             {
             case 2:
-                state=3;  //Cue
+                state = 3;  // Cue
                 break;
             case 5:
-                state=6;  //Cueshe
+                state = 6;  // Cueshe
                 break;
             case 6:
-                state=7;  //Cueshee
+                state = 7;  // Cueshee
                 break;
             default:
-                state=0;
+                state = 0;
             }
             break;
         case 's':
-            if (state==3)
-                state=4;  //Cues
+            if (state == 3)
+                state = 4;  // Cues
             else
-                state=0;
+                state = 0;
             break;
         case 'h':
-            if (state==4)
-                state=5;  //Cuesh
+            if (state == 4)
+                state = 5;  // Cuesh
             else
-                state=0;
+                state = 0;
             break;
         case 't':
-            if (state==7)
+            if (state == 7)
             {
-                state=8;  //Cuesheet
+                state = 8;  // Cuesheet
             }
             else
-                state=0;
+                state = 0;
             break;
         default:
-            state=0;
+            state = 0;
         }
-        if (state==8)
+        if (state == 8)
         {
-            BeginPos=i+2;
+            BeginPos = i + 2;
             break;
         }
     }
 
-    if (BeginPos==0)
+    if (BeginPos == 0)
         return FALSE;
 
     // 查找终止符 0D 0A ? 00 00 00 00 00 00 （连续六个终止符以上）
-    state=0;
-    for (int i=BeginPos;i<20480;++i)
+    state = 0;
+    for (int i = BeginPos; i < 20480; ++i)
     {
         switch (Buffer[i])
         {
@@ -1132,31 +1097,31 @@ BOOL CMainDlg::ExtractTakInternalCue(std::wstring AudioFileName)
             state++;
             break;
         default:
-            state=0;
+            state = 0;
         }
-        if (state==6)
+        if (state == 6)
         {
-            EndPos=i-6; //指向0D 0A后的第一个字符
+            EndPos = i - 6; //指向0D 0A后的第一个字符
             break;
         }
     }
 
-    if (EndPos<=1)
+    if (EndPos <= 1)
         return FALSE;
 
-    if ((Buffer[EndPos-2]=='\x0D')&&(Buffer[EndPos-1]=='\x0A'))
+    if ((Buffer[EndPos - 2] == '\x0D') && (Buffer[EndPos - 1] == '\x0A'))
         EndPos--;
 
-    Length=EndPos-BeginPos+1;
-    if (Length<=10) //too short
+    Length = EndPos - BeginPos + 1;
+    if (Length <= 10) //too short
         return FALSE;
 
-    m_RawStringLength=Length;
-    m_RawString=new char[m_RawStringLength+1];
-    memcpy(m_RawString,Buffer+BeginPos,m_RawStringLength);
+    m_RawStringLength = Length;
+    m_RawString = new char[m_RawStringLength + 1];
+    memcpy(m_RawString, Buffer + BeginPos, m_RawStringLength);
     m_RawString[m_RawStringLength]='\0';
-    m_String=m_RawString;
-    m_StringLength=m_RawStringLength;
+    m_String = m_RawString;
+    m_StringLength = m_RawStringLength;
 
     GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CC4EncodeUTF8::convert2unicode(m_String,m_StringLength).c_str());
 
@@ -1167,16 +1132,16 @@ BOOL CMainDlg::ExtractTakInternalCue(std::wstring AudioFileName)
 
 // flac文件结构
 // http://flac.sourceforge.net/format.html
-BOOL CMainDlg::ExtractFlacInternalCue(std::wstring AudioFileName)
+BOOL CMainDlg::ExtractFlacInternalCue(WTL::CString AudioFileName)
 {
     m_CodeStatus=_T("UTF-8 (Internal Cue File)");
     m_bNeedConvert=FALSE;
     m_StringCodeType=CC4EncodeUTF8::_getName().c_str();
-    int nIndex = ((CComboBox)GetDlgItem(IDC_COMBO_SELECTCODE)).FindStringExact(0, m_StringCodeType.c_str());
+    int nIndex = ((CComboBox)GetDlgItem(IDC_COMBO_SELECTCODE)).FindStringExact(0, m_StringCodeType);
     ((CComboBox)GetDlgItem(IDC_COMBO_SELECTCODE)).SetCurSel(nIndex);
-    std::wstring statusText = _T("文档编码检测结果：");
-    statusText.append(m_CodeStatus).append(_T("\n\n文档路径：")).append(m_FilePathName);
-    GetDlgItem(IDC_STATIC_STAT).SetWindowText(statusText.c_str());
+
+    WTL::CString statusText = _T("文档编码检测结果：") + m_CodeStatus + _T("\n\n文档路径：") + m_FilePathName;
+    GetDlgItem(IDC_STATIC_STAT).SetWindowText(statusText);
     GetDlgItem(IDC_EDIT_ANSI).SetWindowText(_T(""));
     GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(_T(""));
 
@@ -1192,7 +1157,7 @@ BOOL CMainDlg::ExtractFlacInternalCue(std::wstring AudioFileName)
         m_UnicodeString=NULL;
     }
 
-    if (m_FilePathName.length() <= 0)
+    if (m_FilePathName.IsEmpty())
         return FALSE;
 
     CWinFile OpenFile(m_FilePathName, CWinFile::modeRead | CWinFile::shareDenyWrite);
@@ -1202,9 +1167,9 @@ BOOL CMainDlg::ExtractFlacInternalCue(std::wstring AudioFileName)
         return FALSE;
     }
 
-    m_FilePathName.append(_T(".cue"));
-    statusText.append(_T(".cue"));
-    GetDlgItem(IDC_STATIC_STAT).SetWindowText(statusText.c_str());
+    m_FilePathName += _T(".cue");
+    statusText += _T(".cue");
+    GetDlgItem(IDC_STATIC_STAT).SetWindowText(statusText);
 
     if (OpenFile.length() < 1048576) // 小于1M，文档太小了
     {
@@ -1215,12 +1180,12 @@ BOOL CMainDlg::ExtractFlacInternalCue(std::wstring AudioFileName)
     unsigned char Header[5];
     memset(Header,0,5);
     UINT64 position=0;
-    //4个字节的头部
+    // 4个字节的头部
     OpenFile.seek(0, CWinFile::begin);
     OpenFile.read((char*)Header,4);
     if (strcmp((char*)Header,"fLaC")!=0)
     {
-        //AfxMessageBox(_T("Not real flac file!"));
+        //MessageBox(_T("Not real flac file!"));
         return FALSE;
     }
 
@@ -1397,22 +1362,21 @@ BOOL CMainDlg::ExtractFlacInternalCue(std::wstring AudioFileName)
 
 void CMainDlg::FixCue()
 {
-    if (!m_bCueFile)
-        return;
+    if (!m_bCueFile) return;
 
     FixTTACue();
 
-    std::wstring CueString;
+    WTL::CString CueString;
     getWindowText(GetDlgItem(IDC_EDIT_UNICODE), CueString);
 
-    std::wstring::size_type BeginPos = CueString.find(_T("FILE \""));
-    if (BeginPos == std::wstring::npos)
+    int BeginPos = CueString.Find(_T("FILE \""));
+    if (BeginPos == -1)
     {
         if (!m_Config.CloseCuePrompt) MessageBox(_T("cue文件异常"));
         return;
     }
-    std::wstring::size_type EndPos = CueString.find(_T("\" WAVE"));
-    if (EndPos == std::wstring::npos)
+    int EndPos = CueString.Find(_T("\" WAVE"));
+    if (EndPos == -1)
     {
         if (!m_Config.CloseCuePrompt) MessageBox(_T("cue文件异常"));
         return;
@@ -1424,152 +1388,139 @@ void CMainDlg::FixCue()
         return;
     }
 
-    std::wstring MusicFileName(CueString.substr(BeginPos,EndPos - BeginPos)), MusicFilePath; //音频文件名，路径
-
-    //依据文档路径：m_FilePathName查找音频文件
-    std::wstring::size_type pos=m_FilePathName.rfind('\\');
-    MusicFilePath.append(m_FilePathName.substr(0, pos));
-    MusicFilePath.append(_T("\\"));
-    MusicFilePath.append(MusicFileName);
+    // 依据文档路径：m_FilePathName查找音频文件
+    WTL::CString &MusicFileName = CueString.Mid(BeginPos, EndPos - BeginPos); // 音频文件名
+    int pos = m_FilePathName.ReverseFind('\\');
+    WTL::CString MusicFilePath = m_FilePathName.Left(pos); // 路径
+    MusicFilePath += _T("\\");
+    MusicFilePath += MusicFileName;
 
     WIN32_FIND_DATA FindFileData;
     HANDLE hFind;
-    hFind=FindFirstFile(MusicFilePath.c_str(), &FindFileData);
-
-    if (hFind==INVALID_HANDLE_VALUE) //没找到cue中音频文件
+    hFind=FindFirstFile(MusicFilePath, &FindFileData);
+    if (hFind == INVALID_HANDLE_VALUE) // 没找到cue中音频文件
     {
-        pos=MusicFilePath.rfind('.');
-        MusicFilePath=MusicFilePath.substr(pos);
-        //替换扩展名查找
-        std::wstring FindFilePath;
+        pos = MusicFilePath.ReverseFind('.');
+        MusicFilePath = MusicFilePath.Left(pos);
+        // 替换扩展名查找
+        WTL::CString FindFilePath;
 
-        FindFilePath.append(MusicFilePath).append(_T(".ape")); //ape
-        hFind=FindFirstFile(FindFilePath.c_str(), &FindFileData);
-        if (hFind!=INVALID_HANDLE_VALUE)
+        FindFilePath = MusicFilePath + _T(".ape"); // ape
+        hFind = FindFirstFile(FindFilePath, &FindFileData);
+        if (hFind != INVALID_HANDLE_VALUE)
         {
-            replace(CueString, MusicFileName, FindFileData.cFileName);
-            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString.c_str());
+            CueString.Replace(MusicFileName, FindFileData.cFileName);
+            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString);
             FindClose(hFind);
             return;
         }
 
-        FindFilePath.clear();
-        FindFilePath.append(MusicFilePath).append(_T(".mac")); //mac
-        hFind=FindFirstFile(FindFilePath.c_str(), &FindFileData);
-        if (hFind!=INVALID_HANDLE_VALUE)
+        FindFilePath = MusicFilePath + _T(".mac"); // ape
+        hFind = FindFirstFile(FindFilePath, &FindFileData);
+        if (hFind != INVALID_HANDLE_VALUE)
         {
-            replace(CueString, MusicFileName, FindFileData.cFileName);
-            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString.c_str());
+            CueString.Replace(MusicFileName, FindFileData.cFileName);
+            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString);
             FindClose(hFind);
             return;
         }
 
-        FindFilePath.clear();
-        FindFilePath.append(MusicFilePath).append(_T(".flac")); //flac
-        hFind=FindFirstFile(FindFilePath.c_str(), &FindFileData);
-        if (hFind!=INVALID_HANDLE_VALUE)
+        FindFilePath = MusicFilePath + _T(".flac"); //flac
+        hFind=FindFirstFile(FindFilePath, &FindFileData);
+        if (hFind != INVALID_HANDLE_VALUE)
         {
-            replace(CueString, MusicFileName, FindFileData.cFileName);
-            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString.c_str());
+            CueString.Replace(MusicFileName, FindFileData.cFileName);
+            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString);
             FindClose(hFind);
             return;
         }
 
-        FindFilePath.clear();
-        FindFilePath.append(MusicFilePath).append(_T(".fla")); //flac
-        hFind=FindFirstFile(FindFilePath.c_str(), &FindFileData);
-        if (hFind!=INVALID_HANDLE_VALUE)
+        FindFilePath = MusicFilePath + _T(".fla"); //flac
+        hFind = FindFirstFile(FindFilePath, &FindFileData);
+        if (hFind != INVALID_HANDLE_VALUE)
         {
-            replace(CueString, MusicFileName, FindFileData.cFileName);
-            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString.c_str());
+            CueString.Replace(MusicFileName, FindFileData.cFileName);
+            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString);
             FindClose(hFind);
             return;
         }
 
-        FindFilePath.clear();
-        FindFilePath.append(MusicFilePath).append(_T(".tta")); //tta
-        hFind=FindFirstFile(FindFilePath.c_str(), &FindFileData);
-        if (hFind!=INVALID_HANDLE_VALUE)
+        FindFilePath = MusicFilePath + _T(".tta"); //tta
+        hFind = FindFirstFile(FindFilePath, &FindFileData);
+        if (hFind != INVALID_HANDLE_VALUE)
         {
-            replace(CueString, MusicFileName, FindFileData.cFileName);
-            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString.c_str());
+            CueString.Replace(MusicFileName, FindFileData.cFileName);
+            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString);
             FindClose(hFind);
             return;
         }
 
-        FindFilePath.clear();
-        FindFilePath.append(MusicFilePath).append(_T(".tak")); //tak
-        hFind=FindFirstFile(FindFilePath.c_str(), &FindFileData);
-        if (hFind!=INVALID_HANDLE_VALUE)
+        FindFilePath = MusicFilePath+_T(".tak"); //tak
+        hFind=FindFirstFile(FindFilePath, &FindFileData);
+        if (hFind != INVALID_HANDLE_VALUE)
         {
-            replace(CueString, MusicFileName, FindFileData.cFileName);
-            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString.c_str());
+            CueString.Replace(MusicFileName, FindFileData.cFileName);
+            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString);
             FindClose(hFind);
             return;
         }
 
-        FindFilePath.clear();
-        FindFilePath.append(MusicFilePath).append(_T(".wv")); //wv
-        hFind=FindFirstFile(FindFilePath.c_str(), &FindFileData);
-        if (hFind!=INVALID_HANDLE_VALUE)
+        FindFilePath = MusicFilePath + _T(".wv"); //wv
+        hFind=FindFirstFile(FindFilePath, &FindFileData);
+        if (hFind != INVALID_HANDLE_VALUE)
         {
-            replace(CueString, MusicFileName, FindFileData.cFileName);
-            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString.c_str());
+            CueString.Replace(MusicFileName, FindFileData.cFileName);
+            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString);
             FindClose(hFind);
             return;
         }
 
-        FindFilePath.clear();
-        FindFilePath.append(MusicFilePath).append(_T(".m4a")); //apple lossless
-        hFind=FindFirstFile(FindFilePath.c_str(), &FindFileData);
-        if (hFind!=INVALID_HANDLE_VALUE)
+        FindFilePath = MusicFilePath + _T(".m4a"); //apple lossless
+        hFind = FindFirstFile(FindFilePath, &FindFileData);
+        if (hFind != INVALID_HANDLE_VALUE)
         {
-            replace(CueString, MusicFileName, FindFileData.cFileName);
-            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString.c_str());
+            CueString.Replace(MusicFileName, FindFileData.cFileName);
+            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString);
             FindClose(hFind);
             return;
         }
 
-        FindFilePath.clear();
-        FindFilePath.append(MusicFilePath).append(_T(".wma")); //wma
-        hFind=FindFirstFile(FindFilePath.c_str(), &FindFileData);
-        if (hFind!=INVALID_HANDLE_VALUE)
+        FindFilePath = MusicFilePath + _T(".wma"); //wma
+        hFind = FindFirstFile(FindFilePath, &FindFileData);
+        if (hFind != INVALID_HANDLE_VALUE)
         {
-            replace(CueString, MusicFileName, FindFileData.cFileName);
-            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString.c_str());
+            CueString.Replace(MusicFileName, FindFileData.cFileName);
+            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString);
             FindClose(hFind);
             return;
         }
 
-        FindFilePath.clear();
-        FindFilePath.append(MusicFilePath).append(_T(".wav")); //wav
-        hFind=FindFirstFile(FindFilePath.c_str(), &FindFileData);
-        if (hFind!=INVALID_HANDLE_VALUE)
+        FindFilePath = MusicFilePath + _T(".wav"); //wav
+        hFind = FindFirstFile(FindFilePath, &FindFileData);
+        if (hFind != INVALID_HANDLE_VALUE)
         {
-            replace(CueString, MusicFileName, FindFileData.cFileName);
-            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString.c_str());
+            CueString.Replace(MusicFileName, FindFileData.cFileName);
+            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString);
             FindClose(hFind);
             return;
         }
 
-        FindFilePath.clear();
-        FindFilePath.append(MusicFilePath).append(_T(".wave")); //wav
-        hFind=FindFirstFile(FindFilePath.c_str(), &FindFileData);
-        if (hFind!=INVALID_HANDLE_VALUE)
+        FindFilePath = MusicFilePath + _T(".wave"); //wav
+        hFind = FindFirstFile(FindFilePath, &FindFileData);
+        if (hFind != INVALID_HANDLE_VALUE)
         {
-            replace(CueString, MusicFileName, FindFileData.cFileName);
-            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString.c_str());
+            CueString.Replace(MusicFileName, FindFileData.cFileName);
+            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString);
             FindClose(hFind);
             return;
         }
 
-        FindFilePath.clear();
-        FindFilePath.append(MusicFilePath).append(_T(".mp3")); //mp3
-        hFind=FindFirstFile(FindFilePath.c_str(), &FindFileData);
-        if (hFind!=INVALID_HANDLE_VALUE)
+        FindFilePath = MusicFilePath + _T(".mp3"); //mp3
+        hFind = FindFirstFile(FindFilePath, &FindFileData);
+        if (hFind != INVALID_HANDLE_VALUE)
         {
-            replace(CueString, MusicFileName, FindFileData.cFileName);
-            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString.c_str());
+            CueString.Replace(MusicFileName, FindFileData.cFileName);
+            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString);
             FindClose(hFind);
             return;
         }
@@ -1585,33 +1536,32 @@ void CMainDlg::FixCue()
     }
 }
 
-void CMainDlg::FixInternalCue(std::wstring AudioFileName)
+void CMainDlg::FixInternalCue(WTL::CString AudioFileName)
 {
-    std::wstring CueString;
+    WTL::CString CueString;
     getWindowText(GetDlgItem(IDC_EDIT_UNICODE), CueString);
-
-    std::wstring::size_type BeginPos=CueString.find(_T("FILE \""));
-    if (BeginPos == std::wstring::npos)
+    int BeginPos = CueString.Find(_T("FILE \""));
+    if (BeginPos == -1)
     {
         if (!m_Config.CloseCuePrompt) MessageBox(_T("cue文件异常"));
         return;
     }
-    std::wstring::size_type EndPos = CueString.find(_T("\" WAVE"));
-    if (EndPos == std::wstring::npos)
+    int EndPos = CueString.Find(_T("\" WAVE"));
+    if (EndPos == -1)
     {
         if (!m_Config.CloseCuePrompt) MessageBox(_T("cue文件异常"));
         return;
     }
-    BeginPos+=6;
+    BeginPos += 6;
     if (BeginPos >= EndPos)
     {
         if (!m_Config.CloseCuePrompt) MessageBox(_T("cue文件异常"));
         return;
     }
 
-    std::wstring OldFileName(CueString.substr(BeginPos, EndPos - BeginPos)); //音频文件名
-    replace(CueString, OldFileName, AudioFileName);
-    GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString.c_str());
+    WTL::CString &OldFileName = CueString.Mid(BeginPos,EndPos-BeginPos); // 音频文件名
+    CueString.Replace(OldFileName, AudioFileName);
+    GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString);
 }
 
 void CMainDlg::FixTTACue()
@@ -1626,6 +1576,6 @@ void CMainDlg::FixTTACue()
     int pos=cueString.Find(_T("the true audio"));
     if (pos <= 0) return;
     getWindowText(GetDlgItem(IDC_EDIT_UNICODE), cueString);
-    WTL::CString &NewCueString = cueString.Left(pos)+_T("WAVE")+cueString.Right(cueString.GetLength()-pos-14);
+    WTL::CString &NewCueString = cueString.Left(pos) + _T("WAVE") + cueString.Right(cueString.GetLength() - pos - 14);
     GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(NewCueString);
 }
