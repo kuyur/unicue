@@ -19,8 +19,8 @@
 #pragma once
 
 // file.h
-#ifndef CWINFILE_H_
-#define CWINFILE_H_
+#ifndef WINFILE_H_
+#define WINFILE_H_
 
 #include <WinBase.h>
 #include <Windows.h>
@@ -64,4 +64,4 @@ private:
     void tryClose();
 };
 
-#endif // CWINFILE_H_
+#endif // WINFILE_H_

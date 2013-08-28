@@ -215,7 +215,7 @@ BOOL CMainDlg::DealFile()
     WTL::CString extendName = m_FilePathName.Right(m_FilePathName.GetLength() - m_FilePathName.ReverseFind('.') - 1);
     extendName.MakeLower();
     if (extendName == _T("cue"))
-        m_bCueFile=TRUE;
+        m_bCueFile = TRUE;
 
     CWinFile openFile(m_FilePathName, CWinFile::modeRead | CWinFile::shareDenyWrite);
     if (!openFile.open())
@@ -761,10 +761,10 @@ BOOL CMainDlg::LoadConfigFile(TiXmlDocument *xmlfile)
     pElem=hXmlHandle.FirstChild("AutoFixCue").Element();
     if (!pElem) return FALSE;
     if (!pElem->GetText()) return FALSE;
-    if (_stricmp(pElem->GetText(),"true")==0)
-        m_Config.AutoFixCue=TRUE;
+    if (_stricmp(pElem->GetText(),"true") == 0)
+        m_Config.AutoFixCue = TRUE;
     else
-        m_Config.AutoFixCue=FALSE;
+        m_Config.AutoFixCue = FALSE;
 
     //AutoFixTTA节点
     pElem=hXmlHandle.FirstChild("AutoFixTTA").Element();

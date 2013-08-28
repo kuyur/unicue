@@ -13,8 +13,8 @@
 
 #pragma once
 // maindlg.h
-#ifndef CMAINDLG_H_
-#define CMAINDLG_H_
+#ifndef MAINDLG_H_
+#define MAINDLG_H_
 
 #include "config.h"
 
@@ -114,4 +114,4 @@ public:
     void CloseDialog(int nVal);
 };
 
-#endif // CMAINDLG_H_
+#endif // MAINDLG_H_

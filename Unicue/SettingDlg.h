@@ -14,8 +14,8 @@
 #pragma once
 
 // settingdlg.h
-#ifndef CSETTINGDLG_H_
-#define CSETTINGDLG_H_
+#ifndef SETTINGDLG_H_
+#define SETTINGDLG_H_
 
 #include "config.h"
 
@@ -58,4 +58,4 @@ public:
     LRESULT OnBnClickedTxtoldstyleButton(WORD, WORD, HWND, BOOL&);
 };
 
-#endif // CSETTINGDLG_H_
+#endif // SETTINGDLG_H_

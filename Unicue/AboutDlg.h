@@ -1,8 +1,21 @@
-// aboutdlg.h : interface of the CAboutDlg class
-//
-/////////////////////////////////////////////////////////////////////////////
+/************************************************************************/
+/*                                                                      */
+/* Unicue 1.2                                                           */
+/* A tool to convert file from ansi code-page to Unicode                */
+/*                                                                      */
+/* Author:  kuyur (kuyur@kuyur.info)                                    */
+/* Published under GPLv3                                                */
+/* http://www.gnu.org/licenses/gpl-3.0.en.html                          */
+/*                                                                      */
+/* Project URL: http://github.com/kuyur/unicue                          */
+/*                                                                      */
+/************************************************************************/
 
 #pragma once
+
+// aboutdlg.h
+#ifndef ABOUTDLG_H_
+#define ABOUTDLG_H_
 
 #include "HyperLink.h"
 
@@ -31,3 +44,5 @@ private:
     CImage m_png;
     CHyperLink m_link;
 };
+
+#endif // ABOUTDLG_H_
