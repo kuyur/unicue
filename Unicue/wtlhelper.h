@@ -22,6 +22,14 @@
 #include <atlwin.h>
 #include <atldlgs.h>
 
+typedef BOOL (WINAPI* SET_PROCESS_PREFERRED_UI_LANGUAGES) (DWORD, PCWSTR, PULONG);
+#ifndef MUI_LANGUAGE_ID
+#define MUI_LANGUAGE_ID   0x04
+#endif
+#ifndef MUI_LANGUAGE_NAME
+#define MUI_LANGUAGE_NAME 0x08
+#endif
+
 inline void getWindowText(ATL::CWindow &window, std::wstring &str)
 {
     int len = window.GetWindowTextLengthW();
@@ -101,6 +109,32 @@ inline std::string msConvertBack(const wchar_t *src)
         result.append(dst);
     delete []dst;
     return result;
+}
+
+inline WTL::CString getString(int resourceId)
+{
+    wchar_t buffer[256] = {0};
+    if(LoadString(NULL, resourceId, buffer, 255) > 0)
+        return WTL::CString(buffer);
+    else
+        return WTL::CString();
+}
+
+void inline SetThreadLocalSettings(LANGID Language, LANGID SubLanguage)
+{
+    SET_PROCESS_PREFERRED_UI_LANGUAGES pProc = NULL;
+    pProc = (SET_PROCESS_PREFERRED_UI_LANGUAGES)GetProcAddress(GetModuleHandle(_T("kernel32.dll")),"SetProcessPreferredUILanguages");
+    if (pProc)
+    {
+        // function entry found
+        ULONG ulNumOfLangs = 1;
+        WCHAR wszLanguages[32];
+        wsprintfW(wszLanguages, L"%04X%c", MAKELANGID(Language, SubLanguage), 0);
+        pProc(0, NULL, &ulNumOfLangs);
+        pProc(MUI_LANGUAGE_ID, wszLanguages, &ulNumOfLangs);
+    }
+    else
+        ::SetThreadLocale(MAKELCID(MAKELANGID(Language, SubLanguage), SORT_DEFAULT)); // fallback
 }
 
 #endif // WTLHELPER_H_

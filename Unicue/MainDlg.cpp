@@ -90,28 +90,29 @@ CMainDlg::CMainDlg()
         fileBuffer = NULL;
         delete doc;
     }
-    m_context = new CC4Context(std::wstring(m_Config.MapConfName), processPath);
-    if (!m_context->init())
-        MessageBox(_T("Failed to load charmaps!"), _T("Unicue"), MB_OK);
     // set local here
     switch (m_Config.Lang)
     {
     case EN:
-        SetThreadLocale(MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US));
+        SetThreadLocalSettings(LANG_ENGLISH, SUBLANG_ENGLISH_US);
         break;
     case CHN:
-        SetThreadLocale(MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED));
+        SetThreadLocalSettings(LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED);
         break;
     case CHT:
-        SetThreadLocale(MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_TRADITIONAL));
+        SetThreadLocalSettings(LANG_CHINESE, SUBLANG_CHINESE_TRADITIONAL);
         break;
     case JPN:
-        // TODO
-        SetThreadLocale(MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED));
+        SetThreadLocalSettings(LANG_JAPANESE, SUBLANG_JAPANESE_JAPAN);
         break;
     default:
-        SetThreadLocale(MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED));
+        SetThreadLocalSettings(LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED);
     }
+    // init C4 Context and load charmaps
+    m_context = new CC4Context(std::wstring(m_Config.MapConfName), processPath);
+    if (!m_context->init())
+        MessageBox(getString(IDS_FAILEDTOLOAD), _T("Unicue"), MB_OK);
+
 }
 
 CMainDlg::~CMainDlg()
@@ -159,7 +160,7 @@ LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
     CComboBox &theCombo = (CComboBox)GetDlgItem(IDC_COMBO_SELECTCODE);
     std::list<std::wstring> &encodeList = m_context->getEncodesNameList();
     std::list<std::wstring>::iterator iter;
-    theCombo.InsertString(-1, _T("Local Codepage"));
+    theCombo.InsertString(-1, getString(IDS_LOCALPAGE));
     for (iter = encodeList.begin(); iter != encodeList.end(); iter++)
         theCombo.InsertString(-1, iter->c_str());
     theCombo.SetCurSel(0);
@@ -237,7 +238,7 @@ BOOL CMainDlg::DealFile()
     CWinFile openFile(m_FilePathName, CWinFile::modeRead | CWinFile::shareDenyWrite);
     if (!openFile.open())
     {
-        MessageBox(_T("打开失败！"), L"Unicue", MB_OK);
+        MessageBox(getString(IDS_OPENFAILED), L"Unicue", MB_OK);
         return FALSE;
     }
     m_bNeedConvert = TRUE;
@@ -257,7 +258,7 @@ BOOL CMainDlg::DealFile()
     openFile.seek(0, CWinFile::begin);
     if (openFile.read(m_RawString, m_RawStringLength) == (DWORD)-1)
     {
-        MessageBox(_T("读取文件失败！"), L"Unicue", MB_OK);
+        MessageBox(getString(IDS_READFAILED), L"Unicue", MB_OK);
     }
     openFile.close();
     m_RawString[m_RawStringLength] = '\0';
@@ -266,7 +267,7 @@ BOOL CMainDlg::DealFile()
 
     CComboBox &theCombo  = (CComboBox)GetDlgItem(IDC_COMBO_SELECTCODE);
     CStatic   &theStatic = (CStatic)GetDlgItem(IDC_STATIC_STAT);
-    m_CodeStatus = _T("未知编码");
+    m_CodeStatus = getString(IDS_UNKNOWNCODE);
     CEdit &LeftEdit  = (CEdit)GetDlgItem(IDC_EDIT_ANSI);
     CEdit &RightEdit = (CEdit)GetDlgItem(IDC_EDIT_UNICODE);
 
@@ -282,7 +283,7 @@ BOOL CMainDlg::DealFile()
         m_StringLength = m_RawStringLength - 2; // 真正的长度
         if ((m_RawStringLength%2) != 0)
         {
-            MessageBox(_T("文本错误！"));
+            MessageBox(getString(IDS_CORRUPTFILE));
             return FALSE;
         }
         m_UnicodeLength = m_StringLength>>1;
@@ -302,7 +303,7 @@ BOOL CMainDlg::DealFile()
         m_StringLength = m_RawStringLength - 2; // 真正的长度
         if ((m_RawStringLength%2) != 0)
         {
-            MessageBox(_T("文本错误！"));
+            MessageBox(getString(IDS_CORRUPTFILE));
             return FALSE;
         }
         m_UnicodeLength = m_StringLength>>1;
@@ -334,7 +335,7 @@ BOOL CMainDlg::DealFile()
 
     if (!m_bNeedConvert)
     {
-        theStatic.SetWindowText(_T("文档编码检测结果：") + m_CodeStatus + _T("\n\n文档路径：") + m_FilePathName);
+        theStatic.SetWindowText(getString(IDS_FILEDETECTRESULT) + m_CodeStatus + _T("\n\n") + getString(IDS_FILEPATH) + m_FilePathName);
         if (m_StringCodeType == CC4EncodeUTF16::_getName().c_str())
         {
             RightEdit.SetWindowText(m_UnicodeString);
@@ -363,13 +364,13 @@ BOOL CMainDlg::DealFile()
             {
                 getLBText(theCombo, 0, m_StringCodeType);
                 theCombo.SetCurSel(0);
-                m_CodeStatus = _T("未知编码");
+                m_CodeStatus = getString(IDS_UNKNOWNCODE);
             }
         }
         else
-            m_CodeStatus = _T("已经关闭编码自动检测");
+            m_CodeStatus = getString(IDS_DETECTDISABLED);
 
-        theStatic.SetWindowText(_T("文档编码检测结果：") + m_CodeStatus + _T("\n\n文档路径：") + m_FilePathName);
+        theStatic.SetWindowText(getString(IDS_FILEDETECTRESULT) + m_CodeStatus + _T("\n\n") + getString(IDS_FILEPATH) + m_FilePathName);
 
         // 左
         /*
@@ -439,7 +440,7 @@ LRESULT CMainDlg::OnFileExit(WORD, WORD wID, HWND, BOOL&)
 LRESULT CMainDlg::OnFileOpen(WORD, WORD, HWND, BOOL&)
 {
     CFileDialog openFile(TRUE, _T("*.txt"), NULL, OFN_EXTENSIONDIFFERENT|OFN_FILEMUSTEXIST|OFN_PATHMUSTEXIST,
-        _T("文本文件(*.txt;*.cue;*.log)\0*.txt;*.cue;*.log\0txt文本文件(*.txt)\0*.txt\0cue文件(*.cue)\0*.cue\0log文件(*.log)\0*.log\0All Files (*.*)\0*.*\0\0"));
+        _T("text file(*.txt;*.cue;*.log)\0*.txt;*.cue;*.log\0txt file(*.txt)\0*.txt\0cue file(*.cue)\0*.cue\0log file(*.log)\0*.log\0All Files (*.*)\0*.*\0\0"));
     if (openFile.DoModal() == IDOK)
     {
         m_FilePathName = openFile.m_szFileName;
@@ -481,13 +482,13 @@ LRESULT CMainDlg::OnFileOpen(WORD, WORD, HWND, BOOL&)
 LRESULT CMainDlg::OnFileSave(WORD, WORD, HWND, BOOL&)
 {
     CFileDialog saveFile(FALSE, _T("*.txt"), NULL, OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT|OFN_PATHMUSTEXIST,
-        _T("txt文本文件(*.txt)\0*.txt\0cue文件(*.cue)\0*.cue\0log文件(*.log)\0*.log\0All Files (*.*)\0*.*\0\0"));
+        _T("text file(*.txt;*.cue;*.log)\0*.txt;*.cue;*.log\0txt file(*.txt)\0*.txt\0cue file(*.cue)\0*.cue\0log file(*.log)\0*.log\0All Files (*.*)\0*.*\0\0"));
     if (saveFile.DoModal() == IDOK)
     {
         CWinFile file(saveFile.m_szFileName, CWinFile::modeCreate|CWinFile::modeWrite|CWinFile::shareExclusive);
         if (!file.open())
         {
-            MessageBox(_T("无法写入文件！"), _T("Unicue"), MB_OK);
+            MessageBox(getString(IDS_WRITEFAILED), _T("Unicue"), MB_OK);
             return 0;
         }
         WTL::CString UnicodeStr;
@@ -555,7 +556,7 @@ LRESULT CMainDlg::OnDropFiles(UINT, WPARAM wParam, LPARAM, BOOL&)
             }
         }
         else
-            MessageBox(_T(" 只能同时打开一个文件"), _T("Unicue"), MB_OK);
+            MessageBox(getString(IDS_ONLYONEFILEALLOW), _T("Unicue"), MB_OK);
     }
     else
     {
@@ -630,7 +631,7 @@ LRESULT CMainDlg::OnBnClickedButtonDo(WORD, WORD, HWND, BOOL&)
         CComboBox &theCombo  =(CComboBox)GetDlgItem(IDC_COMBO_SELECTCODE);
         CStatic   &theStatic =(CStatic)GetDlgItem(IDC_STATIC_STAT);
         getWindowText(theCombo, m_StringCodeType);
-        m_CodeStatus = _T("未知编码");
+        m_CodeStatus = getString(IDS_UNKNOWNCODE);
 
         // 检测编码
         if (m_Config.AutoCheckCode)
@@ -645,13 +646,13 @@ LRESULT CMainDlg::OnBnClickedButtonDo(WORD, WORD, HWND, BOOL&)
             } else {
                 getLBText(theCombo, 0, m_StringCodeType);
                 theCombo.SetCurSel(0);
-                m_CodeStatus = _T("未知编码");
+                m_CodeStatus = getString(IDS_UNKNOWNCODE);
             }
         }
         else
-            m_CodeStatus = _T("已经关闭编码自动检测");
+            m_CodeStatus = getString(IDS_DETECTDISABLED);
 
-        theStatic.SetWindowText(_T("编码检测结果：") + m_CodeStatus);
+        theStatic.SetWindowText(getString(IDS_STRDETECTRESULT) + m_CodeStatus);
 
         //右
         const CC4Encode *encode = m_context->getEncode(std::wstring(m_StringCodeType));
@@ -668,7 +669,7 @@ LRESULT CMainDlg::OnBnClickedButtonSave(WORD, WORD, HWND, BOOL&)
     CWinFile file(m_FilePathName, CWinFile::modeCreate|CWinFile::modeWrite|CWinFile::shareExclusive);
     if (!file.open())
     {
-        MessageBox(_T("无法写入文件！"), _T("Unicue"), MB_OK);
+        MessageBox(getString(IDS_WRITEFAILED), _T("Unicue"), MB_OK);
         return 0;
     }
     WTL::CString UnicodeStr;
@@ -692,7 +693,7 @@ LRESULT CMainDlg::OnBnClickedButtonSaveas(WORD, WORD, HWND, BOOL&)
     CWinFile file(FilePath, CWinFile::modeCreate|CWinFile::modeWrite|CWinFile::shareExclusive);
     if (!file.open())
     {
-        MessageBox(_T("无法写入文件！"), _T("Unicue"), MB_OK);
+        MessageBox(getString(IDS_WRITEFAILED), _T("Unicue"), MB_OK);
         return 0;
     }
     WTL::CString UnicodeStr;
@@ -723,20 +724,20 @@ LRESULT CMainDlg::OnBnClickedButtonTransferstring(WORD, WORD, HWND, BOOL&)
     m_bTransferString = !m_bTransferString;
     if (m_bTransferString)
     {
-        GetDlgItem(IDC_BUTTON_TRANSFERSTRING).SetWindowText(_T("切换到转换文档"));
+        GetDlgItem(IDC_BUTTON_TRANSFERSTRING).SetWindowText(getString(IDS_FILEMODE));
         GetDlgItem(IDC_BUTTON_SAVE).EnableWindow(FALSE);
         GetDlgItem(IDC_BUTTON_SAVEAS).EnableWindow(FALSE);
         GetDlgItem(IDC_BUTTON_DO).EnableWindow(TRUE);
-        GetDlgItem(IDC_STATIC_STAT).SetWindowText(_T("编码检测结果："));
+        GetDlgItem(IDC_STATIC_STAT).SetWindowText(getString(IDS_STRDETECTRESULT));
         UIEnable(IDM_FILE_OPEN, FALSE);
     }
     else
     {
-        GetDlgItem(IDC_BUTTON_TRANSFERSTRING).SetWindowText(_T("切换到转换字符串"));
+        GetDlgItem(IDC_BUTTON_TRANSFERSTRING).SetWindowText(getString(IDS_STRINGMODE));
         GetDlgItem(IDC_BUTTON_SAVE).EnableWindow(TRUE);
         GetDlgItem(IDC_BUTTON_SAVEAS).EnableWindow(TRUE);
         GetDlgItem(IDC_BUTTON_DO).EnableWindow(FALSE);
-        GetDlgItem(IDC_STATIC_STAT).SetWindowText(_T("文档编码检测结果：\n\n文档路径："));
+        GetDlgItem(IDC_STATIC_STAT).SetWindowText(getString(IDS_FILEDETECTRESULT) + _T("\n\n") + getString(IDS_FILEPATH));
         // 恢复
         UIEnable(IDM_FILE_OPEN, TRUE);
         GetDlgItem(IDC_EDIT_ANSI).SetWindowText(_T(""));
@@ -1038,7 +1039,7 @@ BOOL CMainDlg::ExtractTakInternalCue(WTL::CString AudioFileName)
     int nIndex = ((CComboBox)GetDlgItem(IDC_COMBO_SELECTCODE)).FindStringExact(0, m_StringCodeType);
     ((CComboBox)GetDlgItem(IDC_COMBO_SELECTCODE)).SetCurSel(nIndex);
 
-    WTL::CString statusText = _T("文档编码检测结果：") + m_CodeStatus + _T("\n\n文档路径：") + m_FilePathName;
+    WTL::CString statusText = getString(IDS_FILEDETECTRESULT) + m_CodeStatus + _T("\n\n") + getString(IDS_FILEPATH) + m_FilePathName;
     GetDlgItem(IDC_STATIC_STAT).SetWindowText(statusText);
     GetDlgItem(IDC_EDIT_ANSI).SetWindowText(_T(""));
     GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(_T(""));
@@ -1061,7 +1062,7 @@ BOOL CMainDlg::ExtractTakInternalCue(WTL::CString AudioFileName)
     CWinFile OpenFile(m_FilePathName, CWinFile::modeRead | CWinFile::shareDenyWrite);
     if (!OpenFile.open())
     {
-        MessageBox(_T("打开失败！"), _T("Unicue"), MB_OK);
+        MessageBox(getString(IDS_OPENFAILED), _T("Unicue"), MB_OK);
         return FALSE;
     }
 
@@ -1199,7 +1200,7 @@ BOOL CMainDlg::ExtractFlacInternalCue(WTL::CString AudioFileName)
     int nIndex = ((CComboBox)GetDlgItem(IDC_COMBO_SELECTCODE)).FindStringExact(0, m_StringCodeType);
     ((CComboBox)GetDlgItem(IDC_COMBO_SELECTCODE)).SetCurSel(nIndex);
 
-    WTL::CString statusText = _T("文档编码检测结果：") + m_CodeStatus + _T("\n\n文档路径：") + m_FilePathName;
+    WTL::CString statusText = getString(IDS_FILEDETECTRESULT) + m_CodeStatus + _T("\n\n") + getString(IDS_FILEPATH) + m_FilePathName;
     GetDlgItem(IDC_STATIC_STAT).SetWindowText(statusText);
     GetDlgItem(IDC_EDIT_ANSI).SetWindowText(_T(""));
     GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(_T(""));
@@ -1222,7 +1223,7 @@ BOOL CMainDlg::ExtractFlacInternalCue(WTL::CString AudioFileName)
     CWinFile OpenFile(m_FilePathName, CWinFile::modeRead | CWinFile::shareDenyWrite);
     if (!OpenFile.open())
     {
-        MessageBox(_T("打开失败！"), _T("Unicue"), MB_OK);
+        MessageBox(getString(IDS_OPENFAILED), _T("Unicue"), MB_OK);
         return FALSE;
     }
 
@@ -1431,19 +1432,19 @@ void CMainDlg::FixCue()
     int BeginPos = CueString.Find(_T("FILE \""));
     if (BeginPos == -1)
     {
-        if (!m_Config.CloseCuePrompt) MessageBox(_T("cue文件异常"));
+        if (!m_Config.CloseCuePrompt) MessageBox(getString(IDS_CORRUPTCUE));
         return;
     }
     int EndPos = CueString.Find(_T("\" WAVE"));
     if (EndPos == -1)
     {
-        if (!m_Config.CloseCuePrompt) MessageBox(_T("cue文件异常"));
+        if (!m_Config.CloseCuePrompt) MessageBox(getString(IDS_CORRUPTCUE));
         return;
     }
     BeginPos += 6;
     if (BeginPos >= EndPos)
     {
-        if (!m_Config.CloseCuePrompt) MessageBox(_T("cue文件异常"));
+        if (!m_Config.CloseCuePrompt) MessageBox(getString(IDS_CORRUPTCUE));
         return;
     }
 
@@ -1602,19 +1603,19 @@ void CMainDlg::FixInternalCue(WTL::CString AudioFileName)
     int BeginPos = CueString.Find(_T("FILE \""));
     if (BeginPos == -1)
     {
-        if (!m_Config.CloseCuePrompt) MessageBox(_T("cue文件异常"));
+        if (!m_Config.CloseCuePrompt) MessageBox(getString(IDS_CORRUPTCUE));
         return;
     }
     int EndPos = CueString.Find(_T("\" WAVE"));
     if (EndPos == -1)
     {
-        if (!m_Config.CloseCuePrompt) MessageBox(_T("cue文件异常"));
+        if (!m_Config.CloseCuePrompt) MessageBox(getString(IDS_CORRUPTCUE));
         return;
     }
     BeginPos += 6;
     if (BeginPos >= EndPos)
     {
-        if (!m_Config.CloseCuePrompt) MessageBox(_T("cue文件异常"));
+        if (!m_Config.CloseCuePrompt) MessageBox(getString(IDS_CORRUPTCUE));
         return;
     }
 

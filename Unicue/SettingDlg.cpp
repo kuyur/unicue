@@ -15,6 +15,7 @@
 #include "resource.h"
 
 #include "SettingDlg.h"
+#include "wtlhelper.h"
 
 CSettingDlg::CSettingDlg(CConfig config)
 {
@@ -105,7 +106,7 @@ LRESULT CSettingDlg::OnBnClickedSettingRegisterbutton(WORD, WORD, HWND, BOOL&)
     [HKEY_CLASSES_ROOT\UniCue.UNI]
     @="UniCue 文件"
     */
-    if (!AddRegKey(HKEY_CLASSES_ROOT,_T("UniCue.UNI"),_T(""),_T("UniCue 文件")))
+    if (!AddRegKey(HKEY_CLASSES_ROOT,_T("UniCue.UNI"),_T(""),getString(IDS_UNICUEFILETYPE)))
         MessageBox(_T("创建子项\"[HKEY_CLASSES_ROOT\\UniCue.UNI]\"失败"));
 
     /*
@@ -119,7 +120,7 @@ LRESULT CSettingDlg::OnBnClickedSettingRegisterbutton(WORD, WORD, HWND, BOOL&)
     [HKEY_CLASSES_ROOT\UniCue.UNI\shell\Open]
     @="使用 UniCue 打开"
     */
-    if (!AddRegKey(HKEY_CLASSES_ROOT,_T("UniCue.UNI\\shell\\Open"),_T(""),_T("使用 UniCue 打开")))
+    if (!AddRegKey(HKEY_CLASSES_ROOT,_T("UniCue.UNI\\shell\\Open"),_T(""),getString(IDS_OPENBYUNICUE)))
         MessageBox(_T("创建子项\"[HKEY_CLASSES_ROOT\\UniCue.UNI\\shell\\Open]\"失败"));
 
     /*
@@ -136,7 +137,7 @@ LRESULT CSettingDlg::OnBnClickedSettingRegisterbutton(WORD, WORD, HWND, BOOL&)
     [HKEY_CLASSES_ROOT\UniCue.UNI\shell\unicue]
     @="使用 UniCue 转换编码"
     */
-    if (!AddRegKey(HKEY_CLASSES_ROOT,_T("UniCue.UNI\\shell\\unicue"),_T(""),_T("使用 UniCue 转换编码")))
+    if (!AddRegKey(HKEY_CLASSES_ROOT,_T("UniCue.UNI\\shell\\unicue"),_T(""),getString(IDS_CONVERTBYUNICUE)))
         MessageBox(_T("创建子项\"[HKEY_CLASSES_ROOT\\UniCue.UNI\\shell\\unicue]\"失败"));
 
     /*
@@ -150,7 +151,7 @@ LRESULT CSettingDlg::OnBnClickedSettingRegisterbutton(WORD, WORD, HWND, BOOL&)
     [HKEY_CLASSES_ROOT\txtfile\shell\unicue]
     @="使用 UniCue 转换编码"
     */
-    if (!AddRegKey(HKEY_CLASSES_ROOT,_T("txtfile\\shell\\unicue"),_T(""),_T("使用 UniCue 转换编码")))
+    if (!AddRegKey(HKEY_CLASSES_ROOT,_T("txtfile\\shell\\unicue"),_T(""),getString(IDS_CONVERTBYUNICUE)))
         MessageBox(_T("创建子项\"[HKEY_CLASSES_ROOT\\txtfile\\shell\\unicue]\"失败"));
 
     /*
@@ -199,7 +200,7 @@ LRESULT CSettingDlg::OnBnClickedSettingRegisterbutton(WORD, WORD, HWND, BOOL&)
                 WTL::CString CueKeyPath(CueFileType);
                 //AfxMessageBox(CueKeyPath);
                 CueKeyPath+=_T("\\Shell\\unicue");
-                if (!AddRegKey(HKEY_CLASSES_ROOT,(LPCTSTR)CueKeyPath,_T(""),_T("使用 UniCue 转换编码")))
+                if (!AddRegKey(HKEY_CLASSES_ROOT,(LPCTSTR)CueKeyPath,_T(""),getString(IDS_CONVERTBYUNICUE)))
                     MessageBox(_T("创建子项\"[HKEY_CLASSES_ROOT\\foobar2000.CUE\\shell\\unicue\\command]\"失败"));
                 CueKeyPath+=_T("\\command");
                 if (!AddRegKey(HKEY_CLASSES_ROOT,(LPCTSTR)CueKeyPath,_T(""),(LPCTSTR)PathValue))
@@ -214,7 +215,7 @@ LRESULT CSettingDlg::OnBnClickedSettingRegisterbutton(WORD, WORD, HWND, BOOL&)
     [HKEY_CLASSES_ROOT\Applications\notepad.exe\shell\unicue]
     @="使用 UniCue 转换编码"
     */
-    if (!AddRegKey(HKEY_CLASSES_ROOT,_T("Applications\\notepad.exe\\shell\\unicue"),_T(""),_T("使用 UniCue 转换编码")))
+    if (!AddRegKey(HKEY_CLASSES_ROOT,_T("Applications\\notepad.exe\\shell\\unicue"),_T(""),getString(IDS_CONVERTBYUNICUE)))
         MessageBox(_T("创建子项\"[HKEY_CLASSES_ROOT\\Applications\\notepad.exe\\shell\\unicue]\"失败"));
 
     /*
