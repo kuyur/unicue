@@ -56,4 +56,18 @@
         <segment begin="0x0080" end="0x813F" reference="0xFFFD" type="undefine" />
         <segment begin="0x8140" end="0xFFFF" reference="buffer" offset="0" type="CP949-multiple-char" />
     </charmap>
+    <charmap>
+        <name>Cyrillic(CP1251)</name>
+        <version>Microsoft CP1251</version>
+        <description>Cyrillic to Unicode.</description>
+        <useinautocheck>true</useinautocheck>
+        <path>charmaps/cyrillic2u-little-endian.map</path>
+        <feature>BaseOnMultibyte</feature>
+        <feature>ResultIsUnicode</feature>
+        <readingpolicy begin="0x00" end="0x7F" readnext="false" />
+        <readingpolicy begin="0x80" end="0xFF" readnext="false" />
+        <segment begin="0x0000" end="0x007F" reference="ascii" type="ascii" />
+        <segment begin="0x0080" end="0x00FF" reference="buffer" offset="0" type="CP1251" />
+        <segment begin="0x0100" end="0xFFFF" reference="0xFFFD" type="undefine" />
+    </charmap>
 </charmaps>
