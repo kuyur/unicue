@@ -10,7 +10,7 @@ CAppModule _Module;
 
 bool preRun(LPTSTR lpstrCmdLine)
 {
-    WTL::CString folder(L"");
+    WTL::CString folder;
     if (NULL != lpstrCmdLine)
     {
         if (lpstrCmdLine[0] == L'"')

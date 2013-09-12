@@ -29,7 +29,7 @@ public:
     enum { IDD = IDD_SETTING };
     CConfig m_Config;
     BOOL AddRegKey(HKEY hKey,LPCTSTR lpSubItem,LPCTSTR lpKey,LPCTSTR lpValue,DWORD dwType=REG_SZ);
-    BOOL DeleteRegKey();
+    WTL::CString FindRegKey(LPCTSTR extension);
 
     BEGIN_MSG_MAP(CSettingDlg)
         MESSAGE_HANDLER(WM_INITDIALOG, OnInitDialog)

@@ -41,7 +41,7 @@ void CFileTraverser::getFiles_(std::vector<WTL::CString> &vec, const WTL::CStrin
     {
         while (FindNextFile(hFind, &FindFileData))
         {
-            WTL::CString find = folder + L"\\" + FindFileData.cFileName;
+            WTL::CString &find = folder + L"\\" + FindFileData.cFileName;
             if ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0)
             {
                 if (wcscmp(FindFileData.cFileName, L".") == 0 || wcscmp(FindFileData.cFileName, L"..") == 0)
