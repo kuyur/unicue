@@ -121,7 +121,7 @@
       </DllDataFileName>
     </Midl>
     <PostBuildEvent>
-      <Command>copy /Y Release\Unicue.exe build</Command>
+      <Command>copy /Y Release\Unicue.exe ..\build</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
