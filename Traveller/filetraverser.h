@@ -7,8 +7,6 @@
 
 #include <vector>
 #include <Windows.h>
-#include <atlbase.h>
-#include <atlapp.h>
 #include <atlmisc.h>
 
 class CFileTraverser
