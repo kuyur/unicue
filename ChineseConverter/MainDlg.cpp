@@ -72,6 +72,13 @@ LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
     }
     theCombo.SetCurSel(0);
 
+    // add encoding items for saving
+    CComboBox &savingCombo = (CComboBox)GetDlgItem(IDC_COMBO_SAVECODE);
+    savingCombo.InsertString(-1, _T("UTF-8"));
+    savingCombo.InsertString(-1, _T("Unicode (LE)"));
+    savingCombo.InsertString(-1, _T("Unicode (BE)"));
+    savingCombo.SetCurSel(0);
+
     return TRUE;
 }
 
@@ -233,8 +240,37 @@ LRESULT CMainDlg::OnBnClickedButtonSaveas(WORD, WORD, HWND, BOOL&)
         return 0;
     }
 
-    SaveFile.write(CC4Encode::LITTLEENDIAN_BOM, 2);
-    SaveFile.write((char*)m_UnicodeString, m_UnicodeLength*sizeof(wchar_t));
+    // get saving encoding
+    CComboBox &savingCombo = (CComboBox)GetDlgItem(IDC_COMBO_SAVECODE);
+    WTL::CString encoding;
+    getLBText(savingCombo, savingCombo.GetCurSel(), encoding);
+    if (encoding == _T("UTF-8"))
+    {
+        SaveFile.write(CC4Encode::UTF_8_BOM, 3);
+        std::string &utfstr = CC4EncodeUTF16::convert2utf8(m_UnicodeString, m_UnicodeLength);
+        SaveFile.write(utfstr.c_str(), utfstr.length());
+    }
+    else if (encoding == _T("Unicode (LE)"))
+    {
+        SaveFile.write(CC4Encode::LITTLEENDIAN_BOM, 2);
+        SaveFile.write((char*)m_UnicodeString, m_UnicodeLength*sizeof(wchar_t));
+    }
+    else if (encoding == _T("Unicode (BE)"))
+    {
+        SaveFile.write(CC4Encode::BIGENDIAN_BOM, 2);
+        for (UINT i = 0; i < m_UnicodeLength; i++)
+        {
+            /*
+            unsigned char chars[2];
+            memcpy(chars,(void*)(m_UnicodeString+i),2);
+            wchar_t theChr = chars[0] * 256 + chars[1];
+            SaveFile.write((char*)&theChr, 2);
+            */
+            wchar_t *offset = m_UnicodeString+i;
+            SaveFile.write(((char*)offset)+1, 1);
+            SaveFile.write((char*)offset, 1);
+        }
+    }
     SaveFile.close();
 
     return 0;

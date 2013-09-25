@@ -161,7 +161,8 @@ BOOL CWinFile::seek(INT64 offset, int position)
 
 DWORD CWinFile::read(char *dst, UINT length)
 {
-    if (!dst || length == 0) return -1;
+    if (!dst) return -1;
+    if (0 == length) return 0;
     if (isEOF()) return -1;
     DWORD dwBytesRead = 0;
     if(::ReadFile(m_hFile, dst, length, &dwBytesRead, NULL))
@@ -172,7 +173,8 @@ DWORD CWinFile::read(char *dst, UINT length)
 
 DWORD CWinFile::write(const char *src, UINT length)
 {
-    if (!src || length == 0) return -1;
+    if (!src) return -1;
+    if (0 == length) return 0;
     if (m_hFile == INVALID_HANDLE_VALUE) return -1;
     DWORD dwBytesWritten = 0;
     if(::WriteFile(m_hFile, src, length, &dwBytesWritten, NULL))

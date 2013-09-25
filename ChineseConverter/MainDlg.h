@@ -40,6 +40,7 @@ public:
         COMMAND_ID_HANDLER(IDCANCEL, OnCancel)
         COMMAND_HANDLER(IDC_COMBO_SELECTCODE, CBN_SELCHANGE, OnCbnSelchangeComboSelectcode)
         COMMAND_HANDLER(IDC_BUTTON_SAVEAS, BN_CLICKED, OnBnClickedButtonSaveas)
+        COMMAND_HANDLER(IDC_BUTTON_ABOUT, BN_CLICKED, OnAppAbout)
     END_MSG_MAP()
 
 // Handler prototypes (uncomment arguments if needed):

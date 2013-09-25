@@ -10,6 +10,8 @@
 #define IDC_EDIT_LEFT                   1002
 #define IDC_COMBO_SELECTCODE            1003
 #define IDC_BUTTON_SAVEAS               1004
+#define IDC_BUTTON_ABOUT                1005
+#define IDC_COMBO_SAVECODE              1006
 #define IDS_ABOUTBOX                    40001
 
 // Next default values for new objects
