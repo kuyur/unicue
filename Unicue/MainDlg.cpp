@@ -112,7 +112,6 @@ CMainDlg::CMainDlg()
     m_context = new CC4Context(std::wstring(m_Config.MapConfName), processPath);
     if (!m_context->init())
         MessageBox(getString(IDS_FAILEDTOLOAD), _T("Unicue"), MB_OK);
-
 }
 
 CMainDlg::~CMainDlg()

@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<charmaps>
+    <charmap>
+        <name>Tra-CHN(Unicode) to Simp-CHN(Unicode)</name>
+        <version>Unicode 4.0 Unihan(Wikipedia version)</version>
+        <description>Traditional Chinese character to Simplified Chinese character basing on Unicode Plane 0(BMP). Not support character bigger than 0xFFFF.</description>
+        <useinautocheck>false</useinautocheck>
+        <path>charmaps/tra2simp-little-endian.map</path>
+        <feature>BaseOnUnicode</feature>
+        <feature>ResultIsUnicode</feature>
+        <readingpolicy begin="0x00" end="0xFF" readnext="true" />
+        <segment begin="0x0000" end="0x42B6" reference="self" type="Unicode BMP" />
+        <segment begin="0x42B7" end="0x9F9C" reference="buffer" offset="0" type="Unicode BMP" />
+        <segment begin="0x9F9D" end="0xFFFF" reference="self" type="Unicode BMP" />
+    </charmap>
+    <charmap>
+        <name>Simp-CHN(Unicode) to Tra-CHN(Unicode)</name>
+        <version>Unicode 4.0 Unihan(Wikipedia version)</version>
+        <description>Simplified Chinese character to Traditional Chinese character basing on Unicode Plane 0(BMP). Not support character bigger than 0xFFFF.</description>
+        <useinautocheck>false</useinautocheck>
+        <path>charmaps/simp2tra-little-endian.map</path>
+        <feature>BaseOnUnicode</feature>
+        <feature>ResultIsUnicode</feature>
+        <readingpolicy begin="0x00" end="0xFF" readnext="true" />
+        <segment begin="0x0000" end="0x359D" reference="self" type="Unicode BMP" />
+        <segment begin="0x359E" end="0x9F9F" reference="buffer" offset="0" type="Unicode BMP" />
+        <segment begin="0x9FA0" end="0xFFFF" reference="self" type="Unicode BMP" />
+    </charmap>
+</charmaps>

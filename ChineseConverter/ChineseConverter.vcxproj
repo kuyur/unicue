@@ -117,7 +117,9 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\Unicue\winfile.cpp" />
     <ClCompile Include="ChineseConverter.cpp" />
+    <ClCompile Include="MainDlg.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -128,9 +130,10 @@
     <ClInclude Include="..\c4-lib\c4encode.h" />
     <ClInclude Include="..\c4-lib\c4policy.h" />
     <ClInclude Include="..\c4-lib\c4segment.h" />
-    <ClInclude Include="..\c4-lib\c4utils.h" />
     <ClInclude Include="..\c4-lib\tinystr.h" />
     <ClInclude Include="..\c4-lib\tinyxml.h" />
+    <ClInclude Include="..\Unicue\winfile.h" />
+    <ClInclude Include="..\Unicue\wtlhelper.h" />
     <ClInclude Include="AboutDlg.h" />
     <ClInclude Include="MainDlg.h" />
     <ClInclude Include="resource.h" />

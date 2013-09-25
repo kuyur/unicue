@@ -21,6 +21,12 @@
     <ClCompile Include="ChineseConverter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MainDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Unicue\winfile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -50,10 +56,13 @@
     <ClInclude Include="..\c4-lib\c4segment.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\c4-lib\c4utils.h">
+    <ClInclude Include="..\c4-lib\tinystr.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\c4-lib\tinystr.h">
+    <ClInclude Include="..\Unicue\winfile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Unicue\wtlhelper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
