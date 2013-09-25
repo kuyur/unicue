@@ -196,77 +196,77 @@ LRESULT CMainDlg::OnDropFiles(UINT, WPARAM wParam, LPARAM, BOOL&)
 {
     HDROP hDrop = (HDROP)wParam;
     int nFileCount = DragQueryFile(hDrop, 0xFFFFFFFF, NULL, MAX_PATH);
-	if(nFileCount == 1)
-	{
-		TCHAR szFileName[MAX_PATH+1];
-		::DragQueryFile(hDrop, 0, szFileName, MAX_PATH);
-		m_FilePathName=CString(szFileName);
-		DealFile();
-	}
-	else
-	{
+    if(nFileCount == 1)
+    {
+        TCHAR szFileName[MAX_PATH+1];
+        ::DragQueryFile(hDrop, 0, szFileName, MAX_PATH);
+        m_FilePathName=CString(szFileName);
+        DealFile();
+    }
+    else
+    {
         MessageBox(_T(" 只能同时打开一个文件"), _T("简繁转换"), MB_OK);
-	}
+    }
 
-	::DragFinish(hDrop);
+    ::DragFinish(hDrop);
     return 0;
 }
 
 LRESULT CMainDlg::OnBnClickedButtonSaveas(WORD, WORD, HWND, BOOL&)
 {
-	if (!m_UnicodeString)
-	{
+    if (!m_UnicodeString)
+    {
         MessageBox(_T("转换内容为空！"), _T("简繁转换"), MB_OK);
-		return 0;
-	}
-	WTL::CString FilePath,FileType;
-	int position=m_FilePathName.ReverseFind('.');
-	FilePath=m_FilePathName.Left(position);
-	FileType=m_FilePathName.Right(m_FilePathName.GetLength()-position);
-	FilePath+=_T(".convert");
-	FilePath+=FileType;
+        return 0;
+    }
+    WTL::CString FilePath,FileType;
+    int position=m_FilePathName.ReverseFind('.');
+    FilePath=m_FilePathName.Left(position);
+    FileType=m_FilePathName.Right(m_FilePathName.GetLength()-position);
+    FilePath+=_T(".convert");
+    FilePath+=FileType;
 
-	CWinFile SaveFile(FilePath,CWinFile::modeCreate|CWinFile::modeWrite|CWinFile::shareExclusive);
-	if (!SaveFile.open())
-	{
+    CWinFile SaveFile(FilePath,CWinFile::modeCreate|CWinFile::modeWrite|CWinFile::shareExclusive);
+    if (!SaveFile.open())
+    {
         MessageBox(_T("无法写入文件！"), _T("简繁转换"), MB_OK);
-		return 0;
-	}
+        return 0;
+    }
 
-	SaveFile.write(CC4Encode::LITTLEENDIAN_BOM, 2);
-	SaveFile.write((char*)m_UnicodeString, m_UnicodeLength*sizeof(wchar_t));
-	SaveFile.close();
+    SaveFile.write(CC4Encode::LITTLEENDIAN_BOM, 2);
+    SaveFile.write((char*)m_UnicodeString, m_UnicodeLength*sizeof(wchar_t));
+    SaveFile.close();
 
     return 0;
 }
 
 LRESULT CMainDlg::OnCbnSelchangeComboSelectcode(WORD, WORD, HWND, BOOL&)
 {
-	CEdit &RightEdit=(CEdit)GetDlgItem(IDC_EDIT_RIGHT);
-	CComboBox &theCombo  =(CComboBox)GetDlgItem(IDC_COMBO_SELECTCODE);
-	WTL::CString encodeName;
+    CEdit &RightEdit=(CEdit)GetDlgItem(IDC_EDIT_RIGHT);
+    CComboBox &theCombo  =(CComboBox)GetDlgItem(IDC_COMBO_SELECTCODE);
+    WTL::CString encodeName;
     getWindowText(theCombo, encodeName);
-	const CC4Encode *encode = m_context->getEncode((LPCTSTR)encodeName);
-	if (encode)
-	{
-		if (!m_String)
-			return 0;
+    const CC4Encode *encode = m_context->getEncode((LPCTSTR)encodeName);
+    if (encode)
+    {
+        if (!m_String)
+            return 0;
 
-		if (m_UnicodeString)
-		{
-			delete []m_UnicodeString;
-			m_UnicodeString = NULL;
-		}
-		m_UnicodeLength = m_StringLength;
-		m_UnicodeString = new wchar_t[m_UnicodeLength+1];
-		m_UnicodeString[m_UnicodeLength] = 0;
-		std::wstring &convertResult = encode->wconvertWideText(m_String, m_StringLength);
-		wmemcpy(m_UnicodeString, convertResult.c_str(), m_StringLength);
-		RightEdit.SetWindowText(m_UnicodeString);
-	}
-	else
-	{
-		RightEdit.SetWindowText(_T(""));
-	}
+        if (m_UnicodeString)
+        {
+            delete []m_UnicodeString;
+            m_UnicodeString = NULL;
+        }
+        m_UnicodeLength = m_StringLength;
+        m_UnicodeString = new wchar_t[m_UnicodeLength+1];
+        m_UnicodeString[m_UnicodeLength] = 0;
+        std::wstring &convertResult = encode->wconvertWideText(m_String, m_StringLength);
+        wmemcpy(m_UnicodeString, convertResult.c_str(), m_StringLength);
+        RightEdit.SetWindowText(m_UnicodeString);
+    }
+    else
+    {
+        RightEdit.SetWindowText(_T(""));
+    }
     return 0;
 }
