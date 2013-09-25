@@ -5,6 +5,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Unicue", "Unicue\Unicue.vcx
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Traveller", "Traveller\Traveller.vcxproj", "{059F2C96-BC49-4AD6-9939-B87D9AB6D81C}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ChineseConverter", "ChineseConverter\ChineseConverter.vcxproj", "{E7E97FAA-9E78-49F7-B0B4-B495C8190217}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ExtractAkaiito", "ExtractAkaiito\ExtractAkaiito.vcxproj", "{E9979454-17AC-4A41-9D24-AEEB92BBC31F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -19,6 +23,14 @@ Global
 		{059F2C96-BC49-4AD6-9939-B87D9AB6D81C}.Debug|Win32.Build.0 = Debug|Win32
 		{059F2C96-BC49-4AD6-9939-B87D9AB6D81C}.Release|Win32.ActiveCfg = Release|Win32
 		{059F2C96-BC49-4AD6-9939-B87D9AB6D81C}.Release|Win32.Build.0 = Release|Win32
+		{E7E97FAA-9E78-49F7-B0B4-B495C8190217}.Debug|Win32.ActiveCfg = Debug|Win32
+		{E7E97FAA-9E78-49F7-B0B4-B495C8190217}.Debug|Win32.Build.0 = Debug|Win32
+		{E7E97FAA-9E78-49F7-B0B4-B495C8190217}.Release|Win32.ActiveCfg = Release|Win32
+		{E7E97FAA-9E78-49F7-B0B4-B495C8190217}.Release|Win32.Build.0 = Release|Win32
+		{E9979454-17AC-4A41-9D24-AEEB92BBC31F}.Debug|Win32.ActiveCfg = Debug|Win32
+		{E9979454-17AC-4A41-9D24-AEEB92BBC31F}.Debug|Win32.Build.0 = Debug|Win32
+		{E9979454-17AC-4A41-9D24-AEEB92BBC31F}.Release|Win32.ActiveCfg = Release|Win32
+		{E9979454-17AC-4A41-9D24-AEEB92BBC31F}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
