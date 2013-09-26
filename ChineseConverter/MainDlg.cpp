@@ -6,8 +6,8 @@
 #include "../Unicue/wtlhelper.h"
 
 CMainDlg::CMainDlg()
-    :m_RawString(0), m_String(0), m_UnicodeString(0), m_FilePathName(L""),
-    m_RawStringLength(0), m_StringLength(0), m_UnicodeLength(0)
+    :m_String(0), m_UnicodeString(0), m_FilePathName(L""),
+    m_StringLength(0), m_UnicodeLength(0)
 {
     TCHAR szFull[_MAX_PATH];
     GetModuleFileName(NULL,szFull,_MAX_PATH);
@@ -20,8 +20,8 @@ CMainDlg::CMainDlg()
 
 CMainDlg::~CMainDlg()
 {
-    if (m_RawString)
-        delete []m_RawString;
+    if (m_String)
+        delete []m_String;
     if (m_UnicodeString)
         delete []m_UnicodeString;
     if (m_context)
@@ -119,6 +119,24 @@ void CMainDlg::CloseDialog(int nVal)
     ::PostQuitMessage(nVal);
 }
 
+void CMainDlg::clean()
+{
+    if (m_String)
+    {
+        delete []m_String;
+        m_String=NULL;
+    }
+    if (m_UnicodeString)
+    {
+        delete []m_UnicodeString;
+        m_UnicodeString=NULL;
+    }
+    CEdit &LeftEdit =(CEdit)GetDlgItem(IDC_EDIT_LEFT);
+    CEdit &RightEdit=(CEdit)GetDlgItem(IDC_EDIT_RIGHT);
+    LeftEdit.SetWindowText(_T(""));
+    RightEdit.SetWindowText(_T(""));
+}
+
 BOOL CMainDlg::DealFile()
 {
     if (m_FilePathName.IsEmpty())
@@ -128,56 +146,114 @@ BOOL CMainDlg::DealFile()
     if (!OpenFile.open())
     {
         OpenFile.close();
+        clean();
         MessageBox(_T("打开失败！"), _T("简繁转换"), MB_OK);
         return FALSE;
     }
 
     UINT fileLength = OpenFile.length();
-    if ((fileLength&1) != 0)
+    unsigned char bom[3] = {0};
+    if (fileLength >= 3)
+        OpenFile.read((char *)bom, 3);
+    else if (fileLength >= 2)
+        OpenFile.read((char *)bom, 2);
+
+    if ((bom[0] == 0xFF) && (bom[1] == 0xFE)) // Unicode LE
+    {
+        if ((fileLength&1) != 0)
+        {
+            OpenFile.close();
+            clean();
+            MessageBox(_T("文件已损坏，编码检测结果为Unicode(LE)"), _T("简繁转换"), MB_OK);
+            return FALSE;
+        }
+        // 读取
+        if (m_String)
+        {
+            delete []m_String;
+            m_String=NULL;
+        }
+        m_StringLength = (fileLength>>1) - 1;
+        m_String = new wchar_t[m_StringLength+1];
+        OpenFile.seek(2, CWinFile::begin);
+        OpenFile.read((char*)m_String,m_StringLength*sizeof(wchar_t));
+        OpenFile.close();
+        m_String[m_StringLength]=0x0000;
+    }
+    else if ((bom[0] == 0xFE) && (bom[1] == 0xFF)) // Unicode BE
+    {
+        if ((fileLength&1) != 0)
+        {
+            OpenFile.close();
+            clean();
+            MessageBox(_T("文件已损坏，编码检测结果为Unicode(BE)"), _T("简繁转换"), MB_OK);
+            return FALSE;
+        }
+        // 读取
+        if (m_String)
+        {
+            delete []m_String;
+            m_String=NULL;
+        }
+        m_StringLength = (fileLength>>1) - 1;
+        m_String = new wchar_t[m_StringLength+1];
+        OpenFile.seek(2, CWinFile::begin);
+        OpenFile.read((char*)m_String,m_StringLength*sizeof(wchar_t));
+        OpenFile.close();
+        m_String[m_StringLength]=0x0000;
+        // 调整高低位顺序
+        for (UINT i=0; i<m_StringLength; i++)
+        {
+            unsigned char *chr = (unsigned char *)(m_String + i);
+            unsigned char temp = *chr;
+            *chr = *(chr + 1);
+            *(chr + 1) = temp;
+        }
+    }
+    else if ((bom[0] == 0xEF) && (bom[1] == 0xBB) && (bom[2] == 0xBF)) // UTF-8
+    {
+        OpenFile.seek(3, CWinFile::begin);
+        UINT bufferLength = fileLength - 3;
+        char *buffer = new char[bufferLength+1];
+        OpenFile.read(buffer, bufferLength);
+        OpenFile.close();
+        buffer[bufferLength] = '\0';
+
+        m_StringLength = CC4EncodeUTF8::calcUnicodeStringLength(buffer, bufferLength);
+        if ((UINT)-1 == m_StringLength)
+        {
+            m_StringLength = 0;
+            delete []buffer;
+            clean();
+            MessageBox(_T("文件已损坏，编码检测结果为UTF-8"), _T("简繁转换"), MB_OK);
+            return FALSE;
+        }
+        if (m_String)
+        {
+            delete []m_String;
+            m_String=NULL;
+        }
+        m_String = new wchar_t[m_StringLength+1];
+        CC4EncodeUTF8::convert2unicode(buffer, bufferLength, m_String, m_StringLength);
+        m_String[m_StringLength]=0x0000;
+        delete []buffer;
+    }
+    else
     {
         OpenFile.close();
-        MessageBox(_T("错误的文件格式。仅支持Unicode(LE)"), _T("简繁转换"), MB_OK);
+        clean();
+        MessageBox(_T("错误的文件格式。仅支持UTF-8(With BOM)/Unicode(LE)/Unicode(BE)"), _T("简繁转换"), MB_OK);
         return FALSE;
     }
-    m_RawStringLength=fileLength>>1;
-    if (m_RawString)
-    {
-        delete []m_RawString;
-        m_RawString=NULL;
-        m_String=NULL;
-    }
+
     if (m_UnicodeString)
     {
         delete []m_UnicodeString;
         m_UnicodeString=NULL;
     }
-    m_RawString=new wchar_t[m_RawStringLength+1];
-    OpenFile.read((char*)m_RawString,m_RawStringLength*sizeof(wchar_t));
-    OpenFile.close();
-    m_RawString[m_RawStringLength]=0x0000;
-
     CEdit &LeftEdit =(CEdit)GetDlgItem(IDC_EDIT_LEFT);
     CEdit &RightEdit=(CEdit)GetDlgItem(IDC_EDIT_RIGHT);
-
-    if (m_RawString[0] != CC4Encode::LITTLEENDIAN_MARK)
-    {
-        if (m_RawString)
-        {
-            delete []m_RawString;
-            m_RawString=NULL;
-            m_String=NULL;
-        }
-        LeftEdit.SetWindowText(_T(""));
-        RightEdit.SetWindowText(_T(""));
-
-        MessageBox(_T("错误的文件格式。仅支持Unicode(LE)"), _T("简繁转换"), MB_OK);
-        return FALSE;
-    }
-    m_String=m_RawString+1;
-    m_StringLength=m_RawStringLength-1;
-
     LeftEdit.SetWindowText(m_String);
-
     CComboBox &theCombo = (CComboBox)GetDlgItem(IDC_COMBO_SELECTCODE);
     WTL::CString encodeName;
     getWindowText(theCombo, encodeName);
@@ -278,6 +354,8 @@ LRESULT CMainDlg::OnBnClickedButtonSaveas(WORD, WORD, HWND, BOOL&)
 
 LRESULT CMainDlg::OnCbnSelchangeComboSelectcode(WORD, WORD, HWND, BOOL&)
 {
+    if (!m_String)
+        return 0;
     CEdit &RightEdit=(CEdit)GetDlgItem(IDC_EDIT_RIGHT);
     CComboBox &theCombo  =(CComboBox)GetDlgItem(IDC_COMBO_SELECTCODE);
     WTL::CString encodeName;
@@ -285,9 +363,6 @@ LRESULT CMainDlg::OnCbnSelchangeComboSelectcode(WORD, WORD, HWND, BOOL&)
     const CC4Encode *encode = m_context->getEncode((LPCTSTR)encodeName);
     if (encode)
     {
-        if (!m_String)
-            return 0;
-
         if (m_UnicodeString)
         {
             delete []m_UnicodeString;

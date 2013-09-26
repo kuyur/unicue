@@ -93,7 +93,7 @@ BOOL CWinFile::open()
         dwShareMode = FILE_SHARE_READ | FILE_SHARE_WRITE;
         break;
     default:
-        return FALSE;
+        dwShareMode = 0; // default will be shareExclusive if share flag not set.
     }
 
     DWORD dwCreateFlag;

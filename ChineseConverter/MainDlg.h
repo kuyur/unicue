@@ -11,8 +11,6 @@ class CMainDlg : public CDialogImpl<CMainDlg>, public CUpdateUI<CMainDlg>,
         public CMessageFilter, public CIdleHandler
 {
 protected:
-    wchar_t*       m_RawString;           // 原始字符串（从文本读取，含BOM）
-    UINT           m_RawStringLength;     // 原始字符串的长度（从文本获取，含BOM长度)
     wchar_t*       m_String;              // 字符串（不含BOM）
     UINT           m_StringLength;        // 字符串的长度（不含BOM）
     wchar_t*       m_UnicodeString;       // Unicode字符串
@@ -20,6 +18,7 @@ protected:
     WTL::CString   m_FilePathName;        // 文本文件路径
     CC4Context*    m_context;             // converting context
     BOOL DealFile();
+    void clean();
 
 public:
     enum { IDD = IDD_CHINESECONVERTER_DIALOG };
