@@ -24,11 +24,12 @@
         <path>charmaps/gb2u-little-endian.map</path>
         <feature>BaseOnMultibyte</feature>
         <feature>ResultIsUnicode</feature>
-        <readingpolicy begin="0x00" end="0x7F" readnext="false" />
-        <readingpolicy begin="0x80" end="0xFF" readnext="true" />
+        <readingpolicy begin="0x00" end="0x80" readnext="false" />
+        <readingpolicy begin="0x81" end="0xFF" readnext="true" />
         <segment begin="0x0000" end="0x007F" reference="ascii" type="ascii" />
-        <segment begin="0x0080" end="0x813F" reference="0xFFFD" type="undefine" />
-        <segment begin="0x8140" end="0xFFFF" reference="buffer" offset="0" type="gbk-multiple-char" />
+        <segment begin="0x0080" end="0x0080" reference="buffer" offset="0" type="euro-sign" />
+        <segment begin="0x0081" end="0x813F" reference="0xFFFD" type="undefine" />
+        <segment begin="0x8140" end="0xFFFF" reference="buffer" offset="1" type="gbk-multiple-char" />
     </charmap>
     <charmap>
         <name>BIG5</name>
