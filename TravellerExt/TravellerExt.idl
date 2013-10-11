@@ -1,0 +1,36 @@
+﻿// TravellerExt.idl : TravellerExt 的 IDL 源
+//
+
+// 此文件将由 MIDL 工具处理以
+// 产生类型库(TravellerExt.tlb)和封送处理代码。
+
+import "oaidl.idl";
+import "ocidl.idl";
+
+[
+	object,
+	uuid(264604AF-E8FC-46DB-BCF2-74687D277377),
+	dual,
+	nonextensible,
+	helpstring("ITravellerMenuExt 接口"),
+	pointer_default(unique)
+]
+interface ITravellerMenuExt : IDispatch{
+};
+[
+	uuid(668E3772-68B1-4A2B-962F-EE58F4C7CBC2),
+	version(1.0),
+	helpstring("TravellerExt 1.0 类型库")
+]
+library TravellerExtLib
+{
+	importlib("stdole2.tlb");
+	[
+		uuid(C2397F2E-4BA3-4B9D-858A-F775761C023B),
+		helpstring("TravellerMenuExt Class")
+	]
+	coclass TravellerMenuExt
+	{
+		[default] interface ITravellerMenuExt;
+	};
+};

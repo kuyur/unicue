@@ -90,11 +90,13 @@
     <ClInclude Include="..\c4-lib\c4segment.h" />
     <ClInclude Include="..\c4-lib\tinyxml.h" />
     <ClInclude Include="filetraverser.h" />
+    <ClInclude Include="MainDlg.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="filetraverser.cpp" />
+    <ClCompile Include="MainDlg.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="Traveller.cpp" />
   </ItemGroup>

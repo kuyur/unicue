@@ -9,6 +9,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ChineseConverter", "Chinese
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ExtractAkaiito", "ExtractAkaiito\ExtractAkaiito.vcxproj", "{E9979454-17AC-4A41-9D24-AEEB92BBC31F}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TravellerExt", "TravellerExt\TravellerExt.vcxproj", "{767DD1EC-686D-4E4C-94E4-8BC16C1FD905}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TravellerExtPS", "TravellerExt\TravellerExtPS.vcxproj", "{B24C4239-7952-4EC0-A6C2-8823DAA22AD5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -31,6 +35,14 @@ Global
 		{E9979454-17AC-4A41-9D24-AEEB92BBC31F}.Debug|Win32.Build.0 = Debug|Win32
 		{E9979454-17AC-4A41-9D24-AEEB92BBC31F}.Release|Win32.ActiveCfg = Release|Win32
 		{E9979454-17AC-4A41-9D24-AEEB92BBC31F}.Release|Win32.Build.0 = Release|Win32
+		{767DD1EC-686D-4E4C-94E4-8BC16C1FD905}.Debug|Win32.ActiveCfg = Debug|Win32
+		{767DD1EC-686D-4E4C-94E4-8BC16C1FD905}.Debug|Win32.Build.0 = Debug|Win32
+		{767DD1EC-686D-4E4C-94E4-8BC16C1FD905}.Release|Win32.ActiveCfg = Release|Win32
+		{767DD1EC-686D-4E4C-94E4-8BC16C1FD905}.Release|Win32.Build.0 = Release|Win32
+		{B24C4239-7952-4EC0-A6C2-8823DAA22AD5}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B24C4239-7952-4EC0-A6C2-8823DAA22AD5}.Debug|Win32.Build.0 = Debug|Win32
+		{B24C4239-7952-4EC0-A6C2-8823DAA22AD5}.Release|Win32.ActiveCfg = Release|Win32
+		{B24C4239-7952-4EC0-A6C2-8823DAA22AD5}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

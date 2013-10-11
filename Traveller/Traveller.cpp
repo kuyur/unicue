@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "resource.h"
 #include <iostream>
+#include "MainDlg.h"
 #include "filetraverser.h"
 
 CAppModule _Module;
@@ -56,7 +57,7 @@ bool preRun(LPTSTR lpstrCmdLine)
             result += (LPCWSTR)*iter;
             result += L"\n";
         }
-        ::MessageBox(NULL, result, L"Batcher", MB_OK);
+        ::MessageBox(NULL, result, L"Unicue Traveller", MB_OK);
     }
     return true;
 }
@@ -66,8 +67,17 @@ int Run(LPTSTR /*lpstrCmdLine*/ = NULL, int nCmdShow = SW_SHOWDEFAULT)
     CMessageLoop theLoop;
     _Module.AddMessageLoop(&theLoop);
 
-    ::PostQuitMessage(0);
+    //::PostQuitMessage(0);
+    CMainDlg dlgMain;
+    if (dlgMain.Create(NULL) == NULL)
+    {
+        ATLTRACE(_T("Main dialog creation failed!\n"));
+        return 0;
+    }
+    dlgMain.ShowWindow(nCmdShow);
+
     int nRet = theLoop.Run();
+
     _Module.RemoveMessageLoop();
     return nRet;
 }
@@ -86,7 +96,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR lp
     hRes = _Module.Init(NULL, hInstance);
     ATLASSERT(SUCCEEDED(hRes));
 
-    preRun(lpstrCmdLine);
+    //preRun(lpstrCmdLine);
     int nRet = Run(lpstrCmdLine, nCmdShow);
     _Module.Term();
     ::CoUninitialize();
