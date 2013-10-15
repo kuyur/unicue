@@ -89,19 +89,25 @@
     <ClInclude Include="..\c4-lib\c4policy.h" />
     <ClInclude Include="..\c4-lib\c4segment.h" />
     <ClInclude Include="..\c4-lib\tinyxml.h" />
+    <ClInclude Include="cmdline.h" />
     <ClInclude Include="filetraverser.h" />
     <ClInclude Include="MainDlg.h" />
+    <ClInclude Include="ProcessDlg.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="cmdline.cpp" />
     <ClCompile Include="filetraverser.cpp" />
     <ClCompile Include="MainDlg.cpp" />
+    <ClCompile Include="ProcessDlg.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="Traveller.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Manifest Include="res\Traveller.exe.manifest" />
+    <Manifest Include="res\Traveller.exe.manifest">
+      <SubType>Designer</SubType>
+    </Manifest>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Traveller.rc" />

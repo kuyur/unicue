@@ -83,7 +83,11 @@ LRESULT CMainDlg::OnBnClickedRegister(WORD, WORD, HWND, BOOL&)
     GetModuleFileName(NULL, szFull, MAX_PATH);
     wchar_t *pos = wcsrchr(szFull, L'\\');
     if (pos) *(pos) = L'\0';
+#ifdef DEBUG
+    WTL::CString dll(L"\"");
+#else
     WTL::CString dll(L"/s \"");
+#endif
     dll += szFull;
     dll += _T("\\TravellerExt.dll\"");
 
@@ -112,7 +116,11 @@ LRESULT CMainDlg::OnBnClickedUnregister(WORD, WORD, HWND, BOOL&)
     GetModuleFileName(NULL, szFull, MAX_PATH);
     wchar_t *pos = wcsrchr(szFull, L'\\');
     if (pos) *(pos) = L'\0';
+#ifdef DEBUG
+    WTL::CString dll(L"/u \"");
+#else
     WTL::CString dll(L"/s /u \"");
+#endif
     dll += szFull;
     dll += _T("\\TravellerExt.dll\"");
 

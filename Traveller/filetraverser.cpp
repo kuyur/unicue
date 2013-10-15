@@ -19,7 +19,8 @@ CFileTraverser::~CFileTraverser()
 std::vector<WTL::CString> CFileTraverser::getFiles(const wchar_t* extension)
 {
     std::vector<WTL::CString> vec;
-    getFiles_(vec, m_folder, extension);
+    if (m_folder.GetLength() > 0)
+        getFiles_(vec, m_folder, extension);
     return vec;
 }
 
