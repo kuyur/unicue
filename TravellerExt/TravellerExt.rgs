@@ -1,11 +1,11 @@
 HKCR
 {
-	NoRemove AppID
-	{
-		'%APPID%' = s 'TravellerExt'
-		'TravellerExt.DLL'
-		{
-			val AppID = s '%APPID%'
-		}
-	}
+    NoRemove AppID
+    {
+        '%APPID%' = s 'TravellerExt'
+        'TravellerExt.DLL'
+        {
+            val AppID = s '%APPID%'
+        }
+    }
 }

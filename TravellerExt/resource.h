@@ -5,6 +5,7 @@
 #define IDS_PROJNAME                    100
 #define IDR_TRAVELLEREXT                101
 #define IDR_TRAVELLERMENUEXT            102
+#define IDR_TRAVELLERBGMENUEXT          103
 #define IDB_MENU                        202
 
 // Next default values for new objects

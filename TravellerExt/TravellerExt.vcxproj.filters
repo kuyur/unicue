@@ -31,6 +31,9 @@
     <ClCompile Include="TravellerMenuExt.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="TravellerBgMenuExt.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="TravellerExt.def">
@@ -54,6 +57,9 @@
       <Filter>生成的文件</Filter>
     </ClInclude>
     <ClInclude Include="TravellerMenuExt.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TravellerBgMenuExt.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

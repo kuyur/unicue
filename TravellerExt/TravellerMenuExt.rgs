@@ -1,27 +1,27 @@
 HKCR
 {
-	TravellerExt.TravellerMenuExt.1 = s 'TravellerMenuExt Class'
-	{
-		CLSID = s '{C2397F2E-4BA3-4B9D-858A-F775761C023B}'
-	}
-	TravellerExt.TravellerMenuExt = s 'TravellerMenuExt Class'
-	{
-		CLSID = s '{C2397F2E-4BA3-4B9D-858A-F775761C023B}'
-		CurVer = s 'TravellerExt.TravellerMenuExt.1'
-	}
-	NoRemove CLSID
-	{
-		ForceRemove {C2397F2E-4BA3-4B9D-858A-F775761C023B} = s 'TravellerMenuExt Class'
-		{
-			ProgID = s 'TravellerExt.TravellerMenuExt.1'
-			VersionIndependentProgID = s 'TravellerExt.TravellerMenuExt'
-			ForceRemove 'Programmable'
-			InprocServer32 = s '%MODULE%'
-			{
-				val ThreadingModel = s 'Apartment'
-			}
-			val AppID = s '%APPID%'
-			'TypeLib' = s '{668E3772-68B1-4A2B-962F-EE58F4C7CBC2}'
-		}
-	}
+    TravellerExt.TravellerMenuExt.1 = s 'TravellerMenuExt Class'
+    {
+        CLSID = s '{C2397F2E-4BA3-4B9D-858A-F775761C023B}'
+    }
+    TravellerExt.TravellerMenuExt = s 'TravellerMenuExt Class'
+    {
+        CLSID = s '{C2397F2E-4BA3-4B9D-858A-F775761C023B}'
+        CurVer = s 'TravellerExt.TravellerMenuExt.1'
+    }
+    NoRemove CLSID
+    {
+        ForceRemove {C2397F2E-4BA3-4B9D-858A-F775761C023B} = s 'TravellerMenuExt Class'
+        {
+            ProgID = s 'TravellerExt.TravellerMenuExt.1'
+            VersionIndependentProgID = s 'TravellerExt.TravellerMenuExt'
+            ForceRemove 'Programmable'
+            InprocServer32 = s '%MODULE%'
+            {
+                val ThreadingModel = s 'Apartment'
+            }
+            val AppID = s '%APPID%'
+            'TypeLib' = s '{668E3772-68B1-4A2B-962F-EE58F4C7CBC2}'
+        }
+    }
 }

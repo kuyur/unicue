@@ -128,6 +128,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="TravellerBgMenuExt.cpp" />
     <ClCompile Include="TravellerMenuExt.cpp" />
     <ClCompile Include="TravellerExt.cpp" />
     <ClCompile Include="stdafx.cpp">
@@ -139,12 +140,15 @@
   <ItemGroup>
     <None Include="TravellerExt.def" />
     <None Include="TravellerMenuExt.rgs" />
-    <None Include="TravellerExt.rgs" />
+    <None Include="TravellerExt.rgs">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Midl Include="TravellerExt.idl" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="TravellerBgMenuExt.h" />
     <ClInclude Include="TravellerMenuExt.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />

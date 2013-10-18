@@ -9,12 +9,31 @@
 #include "resource.h"
 #include "TravellerExt.h"
 
+inline BOOL AddRegKey (HKEY hKey,LPCTSTR lpSubItem,LPCTSTR lpKey,LPCTSTR lpValue,DWORD dwType = REG_SZ)
+{
+    HKEY hAddKey;
+    DWORD dwDisp; // 存放新建子项时的返回类型
+    if (RegOpenKeyEx(hKey, lpSubItem, 0L, KEY_ALL_ACCESS, &hAddKey))
+    {
+        // 不存在子项，新建之
+        if (RegCreateKeyEx(hKey, lpSubItem, 0L, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hAddKey, &dwDisp))
+            return FALSE;
+        RegSetValueEx(hAddKey, lpKey, 0L, dwType, (const BYTE *)lpValue, wcslen(lpValue)*2+2); // unicode
+    }
+    else
+    {
+        RegSetValueEx(hAddKey, lpKey, 0L, dwType, (const BYTE *)lpValue, wcslen(lpValue)*2+2); // unicode
+    }
+
+    RegCloseKey(hAddKey);
+    return TRUE;
+};
 
 class CTravellerExtModule : public CAtlDllModuleT< CTravellerExtModule >
 {
 public :
-	DECLARE_LIBID(LIBID_TravellerExtLib)
-	DECLARE_REGISTRY_APPID_RESOURCEID(IDR_TRAVELLEREXT, "{168F5E2F-BDCF-452B-AB6D-42497AF16E39}")
+    DECLARE_LIBID(LIBID_TravellerExtLib)
+    DECLARE_REGISTRY_APPID_RESOURCEID(IDR_TRAVELLEREXT, "{168F5E2F-BDCF-452B-AB6D-42497AF16E39}")
 };
 
 CTravellerExtModule _AtlModule;
@@ -25,10 +44,9 @@ HINSTANCE           _hInstance;
 #pragma managed(push, off)
 #endif
 
-// DLL 入口点
 extern "C" BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved)
 {
-	_hInstance = hInstance;
+    _hInstance = hInstance;
     return _AtlModule.DllMain(dwReason, lpReserved); 
 }
 
@@ -36,61 +54,38 @@ extern "C" BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpRes
 #pragma managed(pop)
 #endif
 
-
-
-
-// 用于确定 DLL 是否可由 OLE 卸载
 STDAPI DllCanUnloadNow(void)
 {
     return _AtlModule.DllCanUnloadNow();
 }
 
-
-// 返回一个类工厂以创建所请求类型的对象
 STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, LPVOID* ppv)
 {
     return _AtlModule.DllGetClassObject(rclsid, riid, ppv);
 }
 
-
-// DllRegisterServer - 将项添加到系统注册表
 STDAPI DllRegisterServer(void)
 {
-    // 注册对象、类型库和类型库中的所有接口
-    HRESULT hr;
-    HKEY hKey;
-
-    static char pszGUID[] = "{C2397F2E-4BA3-4B9D-858A-F775761C023B}";
-
-    hr = _AtlModule.DllRegisterServer();
+    HRESULT hr = _AtlModule.DllRegisterServer();
     if (FAILED(hr))
-    {
         return hr;
-    }
 
-    if (RegCreateKeyA(HKEY_CLASSES_ROOT, 
-        "*\\shellex\\ContextMenuHandlers\\0TravellerMenu", &hKey) != ERROR_SUCCESS)
-    {
-        return E_FAIL;
-    }
+    static TCHAR pszGUID[] = _T("{C2397F2E-4BA3-4B9D-858A-F775761C023B}");
+    AddRegKey(HKEY_CLASSES_ROOT, _T("*\\shellex\\ContextMenuHandlers\\0TravellerMenu"), _T(""), pszGUID);
+    AddRegKey(HKEY_CLASSES_ROOT, _T("Directory\\shellex\\ContextMenuHandlers\\0TravellerMenu"), _T(""), pszGUID);
+    //AddRegKey(HKEY_CLASSES_ROOT, _T("Directory\\Background\\shellex\\ContextMenuHandlers\\0TravellerMenu"), _T(""), pszGUID);
+    AddRegKey(HKEY_CLASSES_ROOT, _T("Folder\\shellex\\ContextMenuHandlers\\0TravellerMenu"), _T(""), pszGUID);
 
-    if (RegSetValueA(hKey, NULL, REG_SZ, pszGUID,
-            (DWORD)strlen(pszGUID)) != ERROR_SUCCESS)
-    {
-        RegCloseKey(hKey);
-        return E_FAIL;
-    }
-
-  
-	return hr;
+    return hr;
 }
 
-
-// DllUnregisterServer - 将项从系统注册表中移除
 STDAPI DllUnregisterServer(void)
 {
-    RegDeleteKeyA(HKEY_CLASSES_ROOT, "*\\shellex\\ContextMenuHandlers\\0TravellerMenu");
+    RegDeleteKey(HKEY_CLASSES_ROOT, _T("*\\shellex\\ContextMenuHandlers\\0TravellerMenu"));
+    RegDeleteKey(HKEY_CLASSES_ROOT, _T("Directory\\shellex\\ContextMenuHandlers\\0TravellerMenu"));
+    //RegDeleteKey(HKEY_CLASSES_ROOT, _T("Directory\\Background\\shellex\\ContextMenuHandlers\\0TravellerMenu"));
+    RegDeleteKey(HKEY_CLASSES_ROOT, _T("Folder\\shellex\\ContextMenuHandlers\\0TravellerMenu"));
 
-	return _AtlModule.DllUnregisterServer();
+    return _AtlModule.DllUnregisterServer();
 }
 
