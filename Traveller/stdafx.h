@@ -48,6 +48,7 @@
   };
 #endif // _WTL_SUPPORT_SDK_ATL3
 
+#include <atlcoll.h>
 #include <atlapp.h>
 
 extern CAppModule _Module;

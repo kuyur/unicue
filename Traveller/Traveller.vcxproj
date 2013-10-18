@@ -89,6 +89,7 @@
     <ClInclude Include="..\c4-lib\c4policy.h" />
     <ClInclude Include="..\c4-lib\c4segment.h" />
     <ClInclude Include="..\c4-lib\tinyxml.h" />
+    <ClInclude Include="..\Unicue\winfile.h" />
     <ClInclude Include="cmdline.h" />
     <ClInclude Include="filetraverser.h" />
     <ClInclude Include="MainDlg.h" />
@@ -97,6 +98,7 @@
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\Unicue\winfile.cpp" />
     <ClCompile Include="cmdline.cpp" />
     <ClCompile Include="filetraverser.cpp" />
     <ClCompile Include="MainDlg.cpp" />

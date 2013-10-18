@@ -1,5 +1,6 @@
 
 #include "stdafx.h"
+#include <fstream>
 #include "filetraverser.h"
 
 CFileTraverser::CFileTraverser(const WTL::CString &folderPath, UINT mode)
@@ -28,6 +29,19 @@ void CFileTraverser::getFiles_(std::vector<WTL::CString> &vec, const WTL::CStrin
 {
     WIN32_FIND_DATA FindFileData;
     HANDLE hFind = INVALID_HANDLE_VALUE;
+
+    if ((NULL != extension) && (folder.Right(wcslen(extension)) == extension))
+    {
+        // consider as a file path
+        std::fstream _file;
+        _file.open(folder, std::ios::in);
+        if (_file)
+        {
+            _file.close();
+            vec.push_back(folder);
+            return;
+        }
+    }
 
     WTL::CString spec(folder);
     spec += L"\\*";

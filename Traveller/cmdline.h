@@ -16,6 +16,6 @@ typedef struct CParameters_tag
 }CParameters;
 
 void freeCParameters(CParameters &param);
-CParameters parseCmdLine(wchar_t *lpstrCmdLine);
+CParameters parseCmdLine(const wchar_t *lpstrCmdLine);
 
 #endif  // CMDLINE_H_

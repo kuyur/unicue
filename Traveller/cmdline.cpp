@@ -13,7 +13,7 @@ void freeCParameters(CParameters &param)
     param.folders.clear();
 }
 
-CParameters parseCmdLine(wchar_t *lpstrCmdLine)
+CParameters parseCmdLine(const wchar_t *lpstrCmdLine)
 {
     CParameters param;
     param.appMode = MODE_SETTING;
@@ -21,9 +21,9 @@ CParameters parseCmdLine(wchar_t *lpstrCmdLine)
     {
         param.appMode = MODE_PROCESS;
         // find input folder paths
-        wchar_t *next = wcschr(lpstrCmdLine, L'"');
-        wchar_t *end = lpstrCmdLine + wcslen(lpstrCmdLine);
-        wchar_t *first = NULL, *second = NULL;
+        const wchar_t *next = wcschr(lpstrCmdLine, L'"');
+        const wchar_t *end = lpstrCmdLine + wcslen(lpstrCmdLine);
+        const wchar_t *first = NULL, *second = NULL;
         for (; next && (next != end); next = wcschr(next+1, L'"'))
         {
             if (first)

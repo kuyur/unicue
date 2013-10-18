@@ -74,6 +74,11 @@ inline void getLBText(WTL::CComboBox &combo, int index, WTL::CString &str)
     delete []lbText;
 }
 
+inline void getListItemText(WTL::CListViewCtrl &ctrl, int row, int subItem, WTL::CString &str)
+{
+    // TODO
+}
+
 inline void getFilePath(WTL::CFileDialog &dialog, WTL::CString &str)
 {
     str.Empty();

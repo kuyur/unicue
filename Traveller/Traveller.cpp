@@ -33,7 +33,8 @@ int Run(CParameters &param, int nCmdShow = SW_SHOWDEFAULT)
             return 0;
         }
         dlgProcess.ShowWindow(nCmdShow);
-        dlgProcess.loadCueFiles(param);
+        dlgProcess.setCueFolders(param.folders);
+        dlgProcess.loadCueFiles();
     }
 
     int nRet = theLoop.Run();
@@ -47,7 +48,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR lp
 #if defined( WIN32 ) && defined( _DEBUG )
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
-    CParameters &param = parseCmdLine(lpstrCmdLine/*L"\"\""*/);
+    CParameters &param = parseCmdLine(lpstrCmdLine/*L"\"D:\\workspace-visual_studio_2010\\Unicue_1.2\\test-files\""*/);
 
     HRESULT hRes = ::CoInitialize(NULL);
     ATLASSERT(SUCCEEDED(hRes));

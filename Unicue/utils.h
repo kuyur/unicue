@@ -58,7 +58,7 @@ inline size_t strlen_t(const T* str)
 inline wchar_t _wchartolower(wchar_t chr)
 {
     if (chr <= L'Z' && chr >= L'A')
-        return chr - (L'Z' - L'z');
+        return chr + (L'z' - L'Z');
     return chr;
 }
 
