@@ -155,6 +155,9 @@ LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
 
     UIAddChildWindowContainer(m_hWnd);
 
+    // always on top
+    SetDialogPos();
+
     // add encode items
     CComboBox &theCombo = (CComboBox)GetDlgItem(IDC_COMBO_SELECTCODE);
     std::list<std::wstring> &encodeList = m_context->getEncodesNameList();
