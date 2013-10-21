@@ -2,16 +2,16 @@ HKCR
 {
     TravellerExt.TravellerBgMenuExt.1 = s 'TravellerBgMenuExt Class'
     {
-        CLSID = s '{9107AF95-C39D-47EB-AD9E-66FDE5381A83}'
+        CLSID = s '{086E6038-7710-4399-B85C-B89981E01D41}'
     }
     TravellerExt.TravellerBgMenuExt = s 'TravellerBgMenuExt Class'
     {
-        CLSID = s '{9107AF95-C39D-47EB-AD9E-66FDE5381A83}'
+        CLSID = s '{086E6038-7710-4399-B85C-B89981E01D41}'
         CurVer = s 'TravellerExt.TravellerBgMenuExt.1'
     }
     NoRemove CLSID
     {
-        ForceRemove {9107AF95-C39D-47EB-AD9E-66FDE5381A83} = s 'TravellerBgMenuExt Class'
+        ForceRemove {086E6038-7710-4399-B85C-B89981E01D41} = s 'TravellerBgMenuExt Class'
         {
             ProgID = s 'TravellerExt.TravellerBgMenuExt.1'
             VersionIndependentProgID = s 'TravellerExt.TravellerBgMenuExt'
@@ -21,7 +21,7 @@ HKCR
                 val ThreadingModel = s 'Apartment'
             }
             val AppID = s '%APPID%'
-            'TypeLib' = s '{668E3772-68B1-4A2B-962F-EE58F4C7CBC2}'
+            'TypeLib' = s '{86369FD7-46EA-45D3-A972-981B0B52A8AC}'
         }
     }
     NoRemove Directory
@@ -32,7 +32,7 @@ HKCR
             {
                 NoRemove ContextMenuHandlers
                 {
-                    ForceRemove 0TravellerMenu = s '{9107AF95-C39D-47EB-AD9E-66FDE5381A83}'
+                    ForceRemove 0TravellerMenu = s '{086E6038-7710-4399-B85C-B89981E01D41}'
                 }
             }
         }
