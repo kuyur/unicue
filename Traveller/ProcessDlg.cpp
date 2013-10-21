@@ -125,7 +125,52 @@ void CProcessDlg::CloseDialog(int nVal)
 
 LRESULT CProcessDlg::OnBnClickedDo(WORD, WORD, HWND, BOOL&)
 {
-    // TODO
+    std::vector<WTL::CString>::iterator iter = m_files.begin();
+    for (; iter != m_files.end(); ++iter)
+    {
+        CFileInfo &fileInfo = m_fileInfoMap[*iter];
+        if (fileInfo.isChecked && !fileInfo.isInvalid)
+        {
+            CWinFile inFile(*iter, CWinFile::modeRead|CWinFile::shareExclusive);
+            if (!inFile.open())
+                continue;
+            UINT length = inFile.length();
+            char *buffer = new char[length];
+            inFile.read(buffer, length);
+            inFile.close();
+            const CC4Encode *encode = m_context->getEncode(std::wstring(fileInfo.encodeName));
+            if (encode)
+            {
+                CWinFile outFile(*iter, CWinFile::modeWrite|CWinFile::shareExclusive);
+                if (!outFile.open())
+                    continue;
+                outFile.write(CC4Encode::UTF_8_BOM, 3);
+                if (encode == (const CC4Encode*)CC4EncodeUTF8::getInstance())
+                {
+                    outFile.write(buffer, length);
+                }
+                else if(encode == (const CC4Encode*)CC4EncodeUTF16::getInstance())
+                {
+                    bool isLitterEndian = (fileInfo.status == UTF16_LE);
+                    std::string &utf8str = CC4EncodeUTF16::convert2utf8(buffer, length, isLitterEndian);
+                    outFile.write(utf8str.c_str(), utf8str.length());
+                }
+                else
+                {
+                    std::wstring &unicodeStr = encode->wconvertText(buffer, length);
+                    std::string &utf8str = CC4EncodeUTF16::convert2utf8(unicodeStr.c_str(), unicodeStr.length());
+                    outFile.write(utf8str.c_str(), utf8str.length());
+                }
+                outFile.close();
+                fileInfo.isChecked = false;
+                fileInfo.status = UTF8_BOM;
+                fileInfo.encodeName = CC4EncodeUTF8::_getName().c_str();
+            }
+            delete []buffer;
+            buffer = NULL;
+        }
+    }
+    reloadFileInfo();
 
     return 0;
 }
@@ -215,6 +260,23 @@ void CProcessDlg::preProcess()
     {
         CFileInfo &fileInfo = m_fileInfoMap[*iter];
         getFileInfo(*iter, fileInfo);
+        int row = list.InsertItem(i, L"");
+        list.SetCheckState(row, fileInfo.isChecked);
+        list.SetItemText(row, 1, *iter);
+        list.SetItemText(row, 2, fileInfo.encodeName);
+        list.SetItemText(row, 3, CueStatusToString(fileInfo.status));
+        list.SetItemData(row, (DWORD_PTR)i);
+    }
+}
+
+void CProcessDlg::reloadFileInfo()
+{
+    CListViewCtrl &list = (CListViewCtrl)GetDlgItem(IDC_FILELIST);
+    list.DeleteAllItems();
+    std::vector<WTL::CString>::iterator iter = m_files.begin();
+    for (int i = 0; iter != m_files.end(); ++iter, ++i)
+    {
+        CFileInfo &fileInfo = m_fileInfoMap[*iter];
         int row = list.InsertItem(i, L"");
         list.SetCheckState(row, fileInfo.isChecked);
         list.SetItemText(row, 1, *iter);

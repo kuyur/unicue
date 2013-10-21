@@ -67,6 +67,7 @@ private:
     std::vector<WTL::CString> m_files;
     CC4Context *m_context;
     void preProcess();
+    void reloadFileInfo();
     void getFileInfo(const WTL::CString &filePath, CFileInfo &fileInfo);
 public:
     enum { IDD = IDD_PROCESSDLG };
