@@ -1,6 +1,7 @@
 ﻿#include "stdafx.h"
 #include "resource.h"
 #include "MainDlg.h"
+#include "..\Unicue\wtlhelper.h"
 
 CMainDlg::CMainDlg()
 {
@@ -73,8 +74,6 @@ void CMainDlg::CloseDialog(int nVal)
 
 LRESULT CMainDlg::OnBnClickedRegister(WORD, WORD, HWND, BOOL&)
 {
-    HINSTANCE hi;
-
     TCHAR path[MAX_PATH] = {0};
     GetSystemDirectory(path, sizeof(path));
     _tcscat_s(path, _T("\\RegSvr32.exe"));
@@ -83,31 +82,21 @@ LRESULT CMainDlg::OnBnClickedRegister(WORD, WORD, HWND, BOOL&)
     GetModuleFileName(NULL, szFull, MAX_PATH);
     wchar_t *pos = wcsrchr(szFull, L'\\');
     if (pos) *(pos) = L'\0';
-#ifdef DEBUG
-    WTL::CString dll(L"\"");
-#else
-    WTL::CString dll(L"/s \"");
-#endif
-    dll += szFull;
-    dll += _T("\\TravellerExt.dll\"");
 
-    hi = ShellExecute(NULL, _T("open"), path, dll, NULL, SW_HIDE);
-    if ((int)hi <= 32)
-    {
-        MessageBox(_T("TravellerExt.dll注册失败！请检查文件是否存在并以管理员权限执行程序。"));
-    }
+    WTL::CString dll(L"\"");
+    dll += szFull;
+    if (IsX64())
+        dll += _T("\\TravellerExt64.dll\"");
     else
-    {
-        MessageBox(_T("TravellerExt.dll注册成功！"));
-    }
+        dll += _T("\\TravellerExt.dll\"");
+
+    ShellExecute(NULL, _T("open"), path, dll, NULL, SW_HIDE);
 
     return 0;
 }
 
 LRESULT CMainDlg::OnBnClickedUnregister(WORD, WORD, HWND, BOOL&)
 {
-    HINSTANCE hi;
-
     TCHAR path[MAX_PATH] = {0};
     GetSystemDirectory(path, sizeof(path));
     _tcscat_s(path, _T("\\RegSvr32.exe"));
@@ -116,23 +105,14 @@ LRESULT CMainDlg::OnBnClickedUnregister(WORD, WORD, HWND, BOOL&)
     GetModuleFileName(NULL, szFull, MAX_PATH);
     wchar_t *pos = wcsrchr(szFull, L'\\');
     if (pos) *(pos) = L'\0';
-#ifdef DEBUG
     WTL::CString dll(L"/u \"");
-#else
-    WTL::CString dll(L"/s /u \"");
-#endif
     dll += szFull;
-    dll += _T("\\TravellerExt.dll\"");
-
-    hi = ShellExecute(NULL, _T("open"), path, dll, NULL, SW_HIDE);
-    if ((int)hi <= 32)
-    {
-        MessageBox(_T("解除TravellerExt.dll注册失败！请以管理员权限执行程序。"));
-    }
+    if (IsX64())
+        dll += _T("\\TravellerExt64.dll\"");
     else
-    {
-        MessageBox(_T("已解除TravellerExt.dll注册！"));
-    }
+        dll += _T("\\TravellerExt.dll\"");
+
+    ShellExecute(NULL, _T("open"), path, dll, NULL, SW_HIDE);
 
     return 0;
 }

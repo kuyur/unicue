@@ -1,0 +1,40 @@
+HKCR
+{
+    TravellerExt.TravellerBgMenuExt.1 = s 'TravellerBgMenuExt Class'
+    {
+        CLSID = s '{9107AF95-C39D-47EB-AD9E-66FDE5381A83}'
+    }
+    TravellerExt.TravellerBgMenuExt = s 'TravellerBgMenuExt Class'
+    {
+        CLSID = s '{9107AF95-C39D-47EB-AD9E-66FDE5381A83}'
+        CurVer = s 'TravellerExt.TravellerBgMenuExt.1'
+    }
+    NoRemove CLSID
+    {
+        ForceRemove {9107AF95-C39D-47EB-AD9E-66FDE5381A83} = s 'TravellerBgMenuExt Class'
+        {
+            ProgID = s 'TravellerExt.TravellerBgMenuExt.1'
+            VersionIndependentProgID = s 'TravellerExt.TravellerBgMenuExt'
+            ForceRemove 'Programmable'
+            InprocServer32 = s '%MODULE%'
+            {
+                val ThreadingModel = s 'Apartment'
+            }
+            val AppID = s '%APPID%'
+            'TypeLib' = s '{668E3772-68B1-4A2B-962F-EE58F4C7CBC2}'
+        }
+    }
+    NoRemove Directory
+    {
+        NoRemove Background
+        {
+            NoRemove ShellEx
+            {
+                NoRemove ContextMenuHandlers
+                {
+                    ForceRemove 0TravellerMenu = s '{9107AF95-C39D-47EB-AD9E-66FDE5381A83}'
+                }
+            }
+        }
+    }
+}

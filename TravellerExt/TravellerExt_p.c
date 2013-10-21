@@ -4,7 +4,7 @@
 
 
  /* File created by MIDL compiler version 7.00.0555 */
-/* at Fri Oct 18 19:36:58 2013
+/* at Mon Oct 21 18:31:50 2013
  */
 /* Compiler settings for TravellerExt.idl:
     Oicf, W1, Zp8, env=Win32 (32b run), target_arch=X86 7.00.0555 
@@ -90,6 +90,13 @@ extern const MIDL_SERVER_INFO ITravellerMenuExt_ServerInfo;
 extern const MIDL_STUBLESS_PROXY_INFO ITravellerMenuExt_ProxyInfo;
 
 
+extern const MIDL_STUB_DESC Object_StubDesc;
+
+
+extern const MIDL_SERVER_INFO ITravellerBgMenuExt_ServerInfo;
+extern const MIDL_STUBLESS_PROXY_INFO ITravellerBgMenuExt_ProxyInfo;
+
+
 
 #if !defined(__RPC_WIN32__)
 #error  Invalid build platform for this stub.
@@ -132,7 +139,7 @@ static const TravellerExt_MIDL_TYPE_FORMAT_STRING TravellerExt__MIDL_TypeFormatS
 
 
 /* Object interface: ITravellerMenuExt, ver. 0.0,
-   GUID={0x264604AF,0xE8FC,0x46DB,{0xBC,0xF2,0x74,0x68,0x7D,0x27,0x73,0x77}} */
+   GUID={0x1D16BFEE,0xC651,0x47C0,{0xA5,0xAA,0xB6,0x10,0xB6,0x3D,0x2B,0x23}} */
 
 #pragma code_seg(".orpc")
 static const unsigned short ITravellerMenuExt_FormatStringOffsetTable[] =
@@ -196,6 +203,72 @@ CInterfaceStubVtbl _ITravellerMenuExtStubVtbl =
     CStdStubBuffer_DELEGATING_METHODS
 };
 
+
+/* Object interface: ITravellerBgMenuExt, ver. 0.0,
+   GUID={0xEBBC8177,0xC739,0x4E36,{0xA2,0xDC,0xDA,0xC4,0x40,0x6A,0xE2,0x36}} */
+
+#pragma code_seg(".orpc")
+static const unsigned short ITravellerBgMenuExt_FormatStringOffsetTable[] =
+    {
+    (unsigned short) -1,
+    (unsigned short) -1,
+    (unsigned short) -1,
+    (unsigned short) -1,
+    0
+    };
+
+static const MIDL_STUBLESS_PROXY_INFO ITravellerBgMenuExt_ProxyInfo =
+    {
+    &Object_StubDesc,
+    TravellerExt__MIDL_ProcFormatString.Format,
+    &ITravellerBgMenuExt_FormatStringOffsetTable[-3],
+    0,
+    0,
+    0
+    };
+
+
+static const MIDL_SERVER_INFO ITravellerBgMenuExt_ServerInfo = 
+    {
+    &Object_StubDesc,
+    0,
+    TravellerExt__MIDL_ProcFormatString.Format,
+    &ITravellerBgMenuExt_FormatStringOffsetTable[-3],
+    0,
+    0,
+    0,
+    0};
+CINTERFACE_PROXY_VTABLE(7) _ITravellerBgMenuExtProxyVtbl = 
+{
+    0,
+    &IID_ITravellerBgMenuExt,
+    IUnknown_QueryInterface_Proxy,
+    IUnknown_AddRef_Proxy,
+    IUnknown_Release_Proxy ,
+    0 /* IDispatch::GetTypeInfoCount */ ,
+    0 /* IDispatch::GetTypeInfo */ ,
+    0 /* IDispatch::GetIDsOfNames */ ,
+    0 /* IDispatch_Invoke_Proxy */
+};
+
+
+static const PRPC_STUB_FUNCTION ITravellerBgMenuExt_table[] =
+{
+    STUB_FORWARDING_FUNCTION,
+    STUB_FORWARDING_FUNCTION,
+    STUB_FORWARDING_FUNCTION,
+    STUB_FORWARDING_FUNCTION
+};
+
+CInterfaceStubVtbl _ITravellerBgMenuExtStubVtbl =
+{
+    &IID_ITravellerBgMenuExt,
+    &ITravellerBgMenuExt_ServerInfo,
+    7,
+    &ITravellerBgMenuExt_table[-3],
+    CStdStubBuffer_DELEGATING_METHODS
+};
+
 static const MIDL_STUB_DESC Object_StubDesc = 
     {
     0,
@@ -222,24 +295,28 @@ static const MIDL_STUB_DESC Object_StubDesc =
 
 const CInterfaceProxyVtbl * const _TravellerExt_ProxyVtblList[] = 
 {
+    ( CInterfaceProxyVtbl *) &_ITravellerBgMenuExtProxyVtbl,
     ( CInterfaceProxyVtbl *) &_ITravellerMenuExtProxyVtbl,
     0
 };
 
 const CInterfaceStubVtbl * const _TravellerExt_StubVtblList[] = 
 {
+    ( CInterfaceStubVtbl *) &_ITravellerBgMenuExtStubVtbl,
     ( CInterfaceStubVtbl *) &_ITravellerMenuExtStubVtbl,
     0
 };
 
 PCInterfaceName const _TravellerExt_InterfaceNamesList[] = 
 {
+    "ITravellerBgMenuExt",
     "ITravellerMenuExt",
     0
 };
 
 const IID *  const _TravellerExt_BaseIIDList[] = 
 {
+    &IID_IDispatch,
     &IID_IDispatch,
     0
 };
@@ -249,14 +326,11 @@ const IID *  const _TravellerExt_BaseIIDList[] =
 
 int __stdcall _TravellerExt_IID_Lookup( const IID * pIID, int * pIndex )
 {
-    
-    if(!_TravellerExt_CHECK_IID(0))
-        {
-        *pIndex = 0;
-        return 1;
-        }
+    IID_BS_LOOKUP_SETUP
 
-    return 0;
+    IID_BS_LOOKUP_INITIAL_TEST( _TravellerExt, 2, 1 )
+    IID_BS_LOOKUP_RETURN_RESULT( _TravellerExt, 2, *pIndex )
+    
 }
 
 const ExtendedProxyFileInfo TravellerExt_ProxyFileInfo = 
@@ -266,7 +340,7 @@ const ExtendedProxyFileInfo TravellerExt_ProxyFileInfo =
     (const PCInterfaceName * ) & _TravellerExt_InterfaceNamesList,
     (const IID ** ) & _TravellerExt_BaseIIDList,
     & _TravellerExt_IID_Lookup, 
-    1,
+    2,
     2,
     0, /* table of [async_uuid] interfaces */
     0, /* Filler1 */

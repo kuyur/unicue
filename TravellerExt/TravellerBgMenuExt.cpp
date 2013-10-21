@@ -32,7 +32,7 @@ STDMETHODIMP CTravellerBgMenuExt::InvokeCommand(LPCMINVOKECOMMANDINFO pInfo)
     return S_OK;
 }
 
-STDMETHODIMP CTravellerBgMenuExt::GetCommandString (UINT uCmd, UINT uFlags, UINT* puReserved, LPSTR pszName, UINT cchMax )
+STDMETHODIMP CTravellerBgMenuExt::GetCommandString(UINT_PTR uCmd, UINT uType, UINT *pwReserved, LPSTR pszName, UINT cchMax)
 {
     static CHAR szHelpTextA[] = "Unicue Traveller Extension";
     static WCHAR szHelpTextW[] = L"Unicue Traveller Extension";
@@ -40,9 +40,9 @@ STDMETHODIMP CTravellerBgMenuExt::GetCommandString (UINT uCmd, UINT uFlags, UINT
     if (uCmd != 0)
         return E_INVALIDARG;
 
-    if ( uFlags & GCS_HELPTEXT )
+    if ( uType & GCS_HELPTEXT )
     {        
-        if ( uFlags & GCS_UNICODE )
+        if ( uType & GCS_UNICODE )
             lstrcpynW((LPWSTR)pszName, szHelpTextW, cchMax);
         else
             lstrcpynA(pszName, szHelpTextA, cchMax);

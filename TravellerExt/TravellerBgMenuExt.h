@@ -1,9 +1,11 @@
+
 #pragma once
 
 #ifndef CTRAVELLERBGMENUEXT_H_
 #define CTRAVELLERBGMENUEXT_H_
 
 #include "resource.h"
+#include "TravellerExt.h"
 #include "shlobj.h"
 
 class ATL_NO_VTABLE CTravellerBgMenuExt :
@@ -49,7 +51,9 @@ public:
     // IContextMenu
     STDMETHOD(QueryContextMenu)(HMENU hMenu, UINT indexMenu, UINT idCmdFirst, UINT idCmdLast, UINT uFlags);
     STDMETHOD(InvokeCommand)(LPCMINVOKECOMMANDINFO lpici);
-    STDMETHOD(GetCommandString)(UINT_PTR idCmd, UINT uType, UINT *pwReserved, LPSTR pszName, UINT cchMax);
+    STDMETHOD(GetCommandString)(UINT_PTR uCmd, UINT uType, UINT *pwReserved, LPSTR pszName, UINT cchMax);
 };
 
 #endif // CTRAVELLERBGMENUEXT_H_
+
+OBJECT_ENTRY_AUTO(__uuidof(TravellerBgMenuExt), CTravellerBgMenuExt)

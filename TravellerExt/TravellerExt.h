@@ -4,7 +4,7 @@
 
 
  /* File created by MIDL compiler version 7.00.0555 */
-/* at Fri Oct 18 19:36:58 2013
+/* at Mon Oct 21 18:31:50 2013
  */
 /* Compiler settings for TravellerExt.idl:
     Oicf, W1, Zp8, env=Win32 (32b run), target_arch=X86 7.00.0555 
@@ -51,6 +51,12 @@ typedef interface ITravellerMenuExt ITravellerMenuExt;
 #endif 	/* __ITravellerMenuExt_FWD_DEFINED__ */
 
 
+#ifndef __ITravellerBgMenuExt_FWD_DEFINED__
+#define __ITravellerBgMenuExt_FWD_DEFINED__
+typedef interface ITravellerBgMenuExt ITravellerBgMenuExt;
+#endif 	/* __ITravellerBgMenuExt_FWD_DEFINED__ */
+
+
 #ifndef __TravellerMenuExt_FWD_DEFINED__
 #define __TravellerMenuExt_FWD_DEFINED__
 
@@ -61,6 +67,18 @@ typedef struct TravellerMenuExt TravellerMenuExt;
 #endif /* __cplusplus */
 
 #endif 	/* __TravellerMenuExt_FWD_DEFINED__ */
+
+
+#ifndef __TravellerBgMenuExt_FWD_DEFINED__
+#define __TravellerBgMenuExt_FWD_DEFINED__
+
+#ifdef __cplusplus
+typedef class TravellerBgMenuExt TravellerBgMenuExt;
+#else
+typedef struct TravellerBgMenuExt TravellerBgMenuExt;
+#endif /* __cplusplus */
+
+#endif 	/* __TravellerBgMenuExt_FWD_DEFINED__ */
 
 
 /* header files for imported files */
@@ -83,7 +101,7 @@ EXTERN_C const IID IID_ITravellerMenuExt;
 
 #if defined(__cplusplus) && !defined(CINTERFACE)
     
-    MIDL_INTERFACE("264604AF-E8FC-46DB-BCF2-74687D277377")
+    MIDL_INTERFACE("1D16BFEE-C651-47C0-A5AA-B610B63D2B23")
     ITravellerMenuExt : public IDispatch
     {
     public:
@@ -183,6 +201,117 @@ EXTERN_C const IID IID_ITravellerMenuExt;
 #endif 	/* __ITravellerMenuExt_INTERFACE_DEFINED__ */
 
 
+#ifndef __ITravellerBgMenuExt_INTERFACE_DEFINED__
+#define __ITravellerBgMenuExt_INTERFACE_DEFINED__
+
+/* interface ITravellerBgMenuExt */
+/* [unique][helpstring][nonextensible][dual][uuid][object] */ 
+
+
+EXTERN_C const IID IID_ITravellerBgMenuExt;
+
+#if defined(__cplusplus) && !defined(CINTERFACE)
+    
+    MIDL_INTERFACE("EBBC8177-C739-4E36-A2DC-DAC4406AE236")
+    ITravellerBgMenuExt : public IDispatch
+    {
+    public:
+    };
+    
+#else 	/* C style interface */
+
+    typedef struct ITravellerBgMenuExtVtbl
+    {
+        BEGIN_INTERFACE
+        
+        HRESULT ( STDMETHODCALLTYPE *QueryInterface )( 
+            ITravellerBgMenuExt * This,
+            /* [in] */ REFIID riid,
+            /* [annotation][iid_is][out] */ 
+            __RPC__deref_out  void **ppvObject);
+        
+        ULONG ( STDMETHODCALLTYPE *AddRef )( 
+            ITravellerBgMenuExt * This);
+        
+        ULONG ( STDMETHODCALLTYPE *Release )( 
+            ITravellerBgMenuExt * This);
+        
+        HRESULT ( STDMETHODCALLTYPE *GetTypeInfoCount )( 
+            ITravellerBgMenuExt * This,
+            /* [out] */ UINT *pctinfo);
+        
+        HRESULT ( STDMETHODCALLTYPE *GetTypeInfo )( 
+            ITravellerBgMenuExt * This,
+            /* [in] */ UINT iTInfo,
+            /* [in] */ LCID lcid,
+            /* [out] */ ITypeInfo **ppTInfo);
+        
+        HRESULT ( STDMETHODCALLTYPE *GetIDsOfNames )( 
+            ITravellerBgMenuExt * This,
+            /* [in] */ REFIID riid,
+            /* [size_is][in] */ LPOLESTR *rgszNames,
+            /* [range][in] */ UINT cNames,
+            /* [in] */ LCID lcid,
+            /* [size_is][out] */ DISPID *rgDispId);
+        
+        /* [local] */ HRESULT ( STDMETHODCALLTYPE *Invoke )( 
+            ITravellerBgMenuExt * This,
+            /* [in] */ DISPID dispIdMember,
+            /* [in] */ REFIID riid,
+            /* [in] */ LCID lcid,
+            /* [in] */ WORD wFlags,
+            /* [out][in] */ DISPPARAMS *pDispParams,
+            /* [out] */ VARIANT *pVarResult,
+            /* [out] */ EXCEPINFO *pExcepInfo,
+            /* [out] */ UINT *puArgErr);
+        
+        END_INTERFACE
+    } ITravellerBgMenuExtVtbl;
+
+    interface ITravellerBgMenuExt
+    {
+        CONST_VTBL struct ITravellerBgMenuExtVtbl *lpVtbl;
+    };
+
+    
+
+#ifdef COBJMACROS
+
+
+#define ITravellerBgMenuExt_QueryInterface(This,riid,ppvObject)	\
+    ( (This)->lpVtbl -> QueryInterface(This,riid,ppvObject) ) 
+
+#define ITravellerBgMenuExt_AddRef(This)	\
+    ( (This)->lpVtbl -> AddRef(This) ) 
+
+#define ITravellerBgMenuExt_Release(This)	\
+    ( (This)->lpVtbl -> Release(This) ) 
+
+
+#define ITravellerBgMenuExt_GetTypeInfoCount(This,pctinfo)	\
+    ( (This)->lpVtbl -> GetTypeInfoCount(This,pctinfo) ) 
+
+#define ITravellerBgMenuExt_GetTypeInfo(This,iTInfo,lcid,ppTInfo)	\
+    ( (This)->lpVtbl -> GetTypeInfo(This,iTInfo,lcid,ppTInfo) ) 
+
+#define ITravellerBgMenuExt_GetIDsOfNames(This,riid,rgszNames,cNames,lcid,rgDispId)	\
+    ( (This)->lpVtbl -> GetIDsOfNames(This,riid,rgszNames,cNames,lcid,rgDispId) ) 
+
+#define ITravellerBgMenuExt_Invoke(This,dispIdMember,riid,lcid,wFlags,pDispParams,pVarResult,pExcepInfo,puArgErr)	\
+    ( (This)->lpVtbl -> Invoke(This,dispIdMember,riid,lcid,wFlags,pDispParams,pVarResult,pExcepInfo,puArgErr) ) 
+
+
+#endif /* COBJMACROS */
+
+
+#endif 	/* C style interface */
+
+
+
+
+#endif 	/* __ITravellerBgMenuExt_INTERFACE_DEFINED__ */
+
+
 
 #ifndef __TravellerExtLib_LIBRARY_DEFINED__
 #define __TravellerExtLib_LIBRARY_DEFINED__
@@ -197,8 +326,16 @@ EXTERN_C const CLSID CLSID_TravellerMenuExt;
 
 #ifdef __cplusplus
 
-class DECLSPEC_UUID("C2397F2E-4BA3-4B9D-858A-F775761C023B")
+class DECLSPEC_UUID("66276779-39DB-40A5-8F32-BB36A2B8F698")
 TravellerMenuExt;
+#endif
+
+EXTERN_C const CLSID CLSID_TravellerBgMenuExt;
+
+#ifdef __cplusplus
+
+class DECLSPEC_UUID("086E6038-7710-4399-B85C-B89981E01D41")
+TravellerBgMenuExt;
 #endif
 #endif /* __TravellerExtLib_LIBRARY_DEFINED__ */
 

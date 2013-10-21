@@ -7,30 +7,55 @@
 import "oaidl.idl";
 import "ocidl.idl";
 
+    // ITravellerMenuExt Interface
+    [
+        object,
+        uuid(1D16BFEE-C651-47C0-A5AA-B610B63D2B23),
+        dual,
+        nonextensible,
+        helpstring("ITravellerMenuExt Interface"),
+        pointer_default(unique)
+    ]
+    interface ITravellerMenuExt : IDispatch {};
+
+    // ITravellerBgMenuExt Interface
+    [
+        object,
+        uuid(EBBC8177-C739-4E36-A2DC-DAC4406AE236),
+        dual,
+        nonextensible,
+        helpstring("ITravellerBgMenuExt Interface"),
+        pointer_default(unique)
+    ]
+    interface ITravellerBgMenuExt : IDispatch {};
+
 [
-    object,
-    uuid(264604AF-E8FC-46DB-BCF2-74687D277377),
-    dual,
-    nonextensible,
-    helpstring("ITravellerMenuExt 接口"),
-    pointer_default(unique)
-]
-interface ITravellerMenuExt : IDispatch{
-};
-[
-    uuid(668E3772-68B1-4A2B-962F-EE58F4C7CBC2),
+    uuid(86369FD7-46EA-45D3-A972-981B0B52A8AC),
     version(1.0),
-    helpstring("TravellerExt 1.0 类型库")
+    helpstring("TravellerExt 1.0 Type Library")
 ]
 library TravellerExtLib
 {
+    importlib("stdole32.tlb");
     importlib("stdole2.tlb");
+
+    // TravellerMenuExt Class
     [
-        uuid(C2397F2E-4BA3-4B9D-858A-F775761C023B),
+        uuid(66276779-39DB-40A5-8F32-BB36A2B8F698),
         helpstring("TravellerMenuExt Class")
     ]
     coclass TravellerMenuExt
     {
         [default] interface ITravellerMenuExt;
+    };
+
+    // TravellerBgMenuExt Class
+    [
+        uuid(086E6038-7710-4399-B85C-B89981E01D41),
+        helpstring("TravellerBgMenuExt Class")
+    ]
+    coclass TravellerBgMenuExt
+    {
+        [default] interface ITravellerBgMenuExt;
     };
 };

@@ -39,10 +39,10 @@
     <None Include="TravellerExt.def">
       <Filter>源文件</Filter>
     </None>
-    <None Include="TravellerExt.rgs">
+    <None Include="TravellerMenuExt.rgs">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="TravellerMenuExt.rgs">
+    <None Include="TravellerExt.rgs">
       <Filter>资源文件</Filter>
     </None>
   </ItemGroup>
