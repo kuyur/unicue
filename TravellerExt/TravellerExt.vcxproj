@@ -190,7 +190,7 @@
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <PostBuildEvent>
-      <Command>copy /Y Release\TravellerExt.dll ..\build</Command>
+      <Command>copy /Y Release\TravellerExt.dll ..\build\TravellerExt32.dll</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

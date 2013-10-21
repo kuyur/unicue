@@ -3,6 +3,7 @@
 #include "MainDlg.h"
 #include "..\common\win32helper.h"
 #include "..\common\wtlhelper.h"
+#include "..\common\winfile.h"
 
 CMainDlg::CMainDlg()
 {
@@ -75,16 +76,54 @@ void CMainDlg::CloseDialog(int nVal)
 
 LRESULT CMainDlg::OnBnClickedRegister(WORD, WORD, HWND, BOOL&)
 {
+    // copy dll file
+    if (GetFileAttributes(_T("TravellerExt.dll")) == INVALID_FILE_ATTRIBUTES)
+    {
+        WTL::CString dllPath(GetProcessFolder());
+        if (IsWow64())
+            dllPath += _T("TravellerExt64.dll");
+        else
+            dllPath += _T("TravellerExt32.dll");
+        CWinFile inFile(dllPath, CWinFile::modeRead|CWinFile::shareDenyWrite);
+        if (!inFile.open())
+        {
+            MessageBox(dllPath + " not found!");
+            return 0;
+        }
+        UINT length = inFile.length();
+        char *buffer = new char[length];
+        inFile.read(buffer, length);
+        inFile.close();
+
+        WTL::CString target(GetProcessFolder());
+        target += _T("TravellerExt.dll");
+        CWinFile outFile(target, CWinFile::modeCreate|CWinFile::modeWrite|CWinFile::shareExclusive);
+        if (!outFile.open())
+        {
+            delete []buffer;
+            MessageBox(_T("Can not write to TravellerExt.dll!"));
+            return 0;
+        }
+        outFile.write(buffer, length);
+        outFile.close();
+        delete []buffer;
+        buffer = NULL;
+        
+        /*
+        if (IsWow64())
+            ShellExecute(NULL, _T("open"), _T("cmd"), _T("/c copy /Y TravellerExt64.dll TravellerExt.dll"), GetProcessFolder(), SW_HIDE);
+        else
+            ShellExecute(NULL, _T("open"), _T("cmd"), _T("/c copy /Y TravellerExt32.dll TravellerExt.dll"), GetProcessFolder(), SW_HIDE);
+        */
+    }
+
     TCHAR path[MAX_PATH] = {0};
     GetSystemDirectory(path, sizeof(path));
     _tcscat_s(path, _T("\\RegSvr32.exe"));
 
     WTL::CString dll(L"\"");
     dll += GetProcessFolder();
-    if (IsWow64())
-        dll += _T("TravellerExt64.dll\"");
-    else
-        dll += _T("TravellerExt.dll\"");
+    dll += _T("TravellerExt.dll\"");
 
     ShellExecute(NULL, _T("open"), path, dll, NULL, SW_HIDE);
 
@@ -99,10 +138,7 @@ LRESULT CMainDlg::OnBnClickedUnregister(WORD, WORD, HWND, BOOL&)
 
     WTL::CString dll(L"/u \"");
     dll += GetProcessFolder();
-    if (IsWow64())
-        dll += _T("TravellerExt64.dll\"");
-    else
-        dll += _T("TravellerExt.dll\"");
+    dll += _T("TravellerExt.dll\"");
 
     ShellExecute(NULL, _T("open"), path, dll, NULL, SW_HIDE);
 

@@ -66,7 +66,7 @@ public:
 
     HRESULT FinalConstruct()
     {
-        HMODULE hm = GetModuleHandle(IsWow64() ? _T("TravellerExt64.dll") : _T("TravellerExt.dll"));
+        HMODULE hm = GetModuleHandle(_T("TravellerExt.dll"));
         if (!hm)
             return E_FAIL;
         m_travellerPath += _T("\"");
