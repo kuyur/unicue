@@ -18,11 +18,12 @@
 #define WTLHELPER_H_
 
 #include <string>
+#include <Windows.h>
 #include <atlbase.h>
+#include <atlmisc.h>
 #include <atlwin.h>
 #include <atldlgs.h>
 
-typedef BOOL (WINAPI *LPFN_ISWOW64PROCESS) (HANDLE, PBOOL);
 typedef BOOL (WINAPI* SET_PROCESS_PREFERRED_UI_LANGUAGES) (DWORD, PCWSTR, PULONG);
 #ifndef MUI_LANGUAGE_ID
 #define MUI_LANGUAGE_ID   0x04
@@ -86,37 +87,6 @@ inline void getFilePath(WTL::CFileDialog &dialog, WTL::CString &str)
     str += dialog.m_szFileName;
 }
 
-inline std::wstring msConvert(const char *src)
-{
-    if (!src) return std::wstring();
-
-    int requiredSize = MultiByteToWideChar(CP_ACP, 0, src, strlen(src), NULL, 0);
-    wchar_t *localString = new wchar_t[requiredSize + 1];
-    localString[requiredSize] = L'\0';
-    int r = MultiByteToWideChar(CP_ACP, 0, src, strlen(src), localString, requiredSize);
-    std::wstring result;
-    if (r != 0)
-        result.append(localString);
-    delete []localString;
-
-    return result;
-}
-
-inline std::string msConvertBack(const wchar_t *src)
-{
-    if (!src) return std::string();
-
-    int requiredSize = WideCharToMultiByte(CP_ACP, 0, src, -1, NULL, 0, NULL, FALSE);
-    char *dst = new char[requiredSize + 1];
-    dst[requiredSize] = '\0';
-    int r = WideCharToMultiByte(CP_ACP, 0, src, -1, dst, requiredSize, NULL, FALSE);
-    std::string result;
-    if (r != 0)
-        result.append(dst);
-    delete []dst;
-    return result;
-}
-
 inline WTL::CString getString(int resourceId)
 {
     wchar_t buffer[256] = {0};
@@ -141,27 +111,6 @@ void inline SetThreadLocalSettings(LANGID Language, LANGID SubLanguage)
     }
     else
         ::SetThreadLocale(MAKELCID(MAKELANGID(Language, SubLanguage), SORT_DEFAULT)); // fallback
-}
-
-BOOL inline IsX64()
-{
-    BOOL bIsWow64 = FALSE;
-
-    //IsWow64Process is not available on all supported versions of Windows.
-    //Use GetModuleHandle to get a handle to the DLL that contains the function
-    //and GetProcAddress to get a pointer to the function if available.
-    LPFN_ISWOW64PROCESS fnIsWow64Process;
-    fnIsWow64Process = (LPFN_ISWOW64PROCESS) GetProcAddress(
-        GetModuleHandle(TEXT("kernel32")), "IsWow64Process");
-
-    if(NULL != fnIsWow64Process)
-    {
-        if (!fnIsWow64Process(GetCurrentProcess(), &bIsWow64))
-        {
-            //handle error
-        }
-    }
-    return bIsWow64;
 }
 
 #endif // WTLHELPER_H_

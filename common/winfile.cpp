@@ -16,7 +16,6 @@
 /*                                                                      */
 /************************************************************************/
 
-#include "stdafx.h"
 #include "winfile.h"
 
 CWinFile::CWinFile(const std::wstring &filename, UINT openFlags)

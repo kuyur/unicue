@@ -7,6 +7,7 @@
 #include "resource.h"
 #include "TravellerExt.h"
 #include "shlobj.h"
+#include "..\common\win32helper.h"
 
 class ATL_NO_VTABLE CTravellerBgMenuExt :
     public CComObjectRootEx<CComSingleThreadModel>,
@@ -33,16 +34,12 @@ public:
 
     HRESULT FinalConstruct()
     {
-        HMODULE hm = GetModuleHandle(_T("TravellerExt.dll"));
+        HMODULE hm = GetModuleHandle(IsWow64() ? _T("TravellerExt64.dll") : _T("TravellerExt.dll"));
         if (!hm)
             return E_FAIL;
-        TCHAR processPath[MAX_PATH] = {0};
-        GetModuleFileName(hm, processPath, MAX_PATH);
-        TCHAR *pos = wcsrchr(processPath, _T('\\'));
-        if (pos) *(pos) = _T('\0');
         m_travellerPath += _T("\"");
-        m_travellerPath += processPath;
-        m_travellerPath += _T("\\Traveller.exe\"");
+        m_travellerPath += GetProcessFolder(hm);
+        m_travellerPath += _T("Traveller.exe\"");
 
         return S_OK;
     };

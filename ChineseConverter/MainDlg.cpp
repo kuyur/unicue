@@ -2,18 +2,15 @@
 #include "resource.h"
 #include "aboutdlg.h"
 #include "MainDlg.h"
-#include "../Unicue/winfile.h"
-#include "../Unicue/wtlhelper.h"
+#include "..\common\winfile.h"
+#include "..\common\win32helper.h"
+#include "..\common\wtlhelper.h"
 
 CMainDlg::CMainDlg()
     :m_String(0), m_UnicodeString(0), m_FilePathName(L""),
     m_StringLength(0), m_UnicodeLength(0)
 {
-    TCHAR szFull[_MAX_PATH];
-    GetModuleFileName(NULL,szFull,_MAX_PATH);
-    wchar_t *pos = wcsrchr(szFull, L'\\');
-    if (pos) *(pos+1) = L'\0';
-    m_context = new CC4Context(L"charmap-chinese.xml", szFull);
+    m_context = new CC4Context(L"charmap-chinese.xml", GetProcessFolder());
     if (!m_context->init())
         MessageBox(_T("Failed to load charmaps!"), _T("简繁转换"), MB_OK);
 }

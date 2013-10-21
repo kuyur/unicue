@@ -8,26 +8,7 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "TravellerExt.h"
-
-inline BOOL AddRegKey (HKEY hKey,LPCTSTR lpSubItem,LPCTSTR lpKey,LPCTSTR lpValue,DWORD dwType = REG_SZ)
-{
-    HKEY hAddKey;
-    DWORD dwDisp; // 存放新建子项时的返回类型
-    if (RegOpenKeyEx(hKey, lpSubItem, 0L, KEY_ALL_ACCESS, &hAddKey))
-    {
-        // 不存在子项，新建之
-        if (RegCreateKeyEx(hKey, lpSubItem, 0L, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hAddKey, &dwDisp))
-            return FALSE;
-        RegSetValueEx(hAddKey, lpKey, 0L, dwType, (const BYTE *)lpValue, wcslen(lpValue)*2+2); // unicode
-    }
-    else
-    {
-        RegSetValueEx(hAddKey, lpKey, 0L, dwType, (const BYTE *)lpValue, wcslen(lpValue)*2+2); // unicode
-    }
-
-    RegCloseKey(hAddKey);
-    return TRUE;
-};
+#include "..\common\win32helper.h"
 
 class CTravellerExtModule : public CAtlDllModuleT< CTravellerExtModule >
 {
@@ -73,7 +54,6 @@ STDAPI DllRegisterServer(void)
     static TCHAR pszGUID[] = _T("{66276779-39DB-40A5-8F32-BB36A2B8F698}");
     AddRegKey(HKEY_CLASSES_ROOT, _T("*\\shellex\\ContextMenuHandlers\\0TravellerMenu"), _T(""), pszGUID);
     AddRegKey(HKEY_CLASSES_ROOT, _T("Directory\\shellex\\ContextMenuHandlers\\0TravellerMenu"), _T(""), pszGUID);
-    //AddRegKey(HKEY_CLASSES_ROOT, _T("Directory\\Background\\shellex\\ContextMenuHandlers\\0TravellerMenu"), _T(""), pszGUID);
     AddRegKey(HKEY_CLASSES_ROOT, _T("Folder\\shellex\\ContextMenuHandlers\\0TravellerMenu"), _T(""), pszGUID);
 
     return hr;
@@ -83,7 +63,6 @@ STDAPI DllUnregisterServer(void)
 {
     RegDeleteKey(HKEY_CLASSES_ROOT, _T("*\\shellex\\ContextMenuHandlers\\0TravellerMenu"));
     RegDeleteKey(HKEY_CLASSES_ROOT, _T("Directory\\shellex\\ContextMenuHandlers\\0TravellerMenu"));
-    //RegDeleteKey(HKEY_CLASSES_ROOT, _T("Directory\\Background\\shellex\\ContextMenuHandlers\\0TravellerMenu"));
     RegDeleteKey(HKEY_CLASSES_ROOT, _T("Folder\\shellex\\ContextMenuHandlers\\0TravellerMenu"));
 
     return _AtlModule.DllUnregisterServer();

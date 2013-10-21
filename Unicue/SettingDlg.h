@@ -28,7 +28,6 @@ public:
     ~CSettingDlg(void) {};
     enum { IDD = IDD_SETTING };
     CConfig m_Config;
-    BOOL AddRegKey(HKEY hKey,LPCTSTR lpSubItem,LPCTSTR lpKey,LPCTSTR lpValue,DWORD dwType=REG_SZ);
     WTL::CString FindRegKey(LPCTSTR extension);
 
     BEGIN_MSG_MAP(CSettingDlg)

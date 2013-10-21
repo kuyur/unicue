@@ -63,7 +63,6 @@ class CProcessDlg : public CDialogImpl<CProcessDlg>, public CUpdateUI<CProcessDl
 private:
     wchar_t** m_cueFolders;
     int m_cueFoldersCount;
-    wchar_t m_processPath[MAX_PATH];
     CAtlMap<WTL::CString, CFileInfo, CStringElementTraitX> m_fileInfoMap;
     std::vector<WTL::CString> m_files;
     CC4Context *m_context;

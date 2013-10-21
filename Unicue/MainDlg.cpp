@@ -12,9 +12,10 @@
 /************************************************************************/
 
 #include "stdafx.h"
-#include "winfile.h"
-#include "utils.h"
-#include "wtlhelper.h"
+#include "..\common\winfile.h"
+#include "..\common\utils.h"
+#include "..\common\win32helper.h"
+#include "..\common\wtlhelper.h"
 #include "resource.h"
 #include "aboutdlg.h"
 #include "SettingDlg.h"
@@ -36,12 +37,7 @@ CMainDlg::CMainDlg()
     m_Config.RegNewUniFile = FALSE;
 
     // Load config file...
-    TCHAR processPath[_MAX_PATH];
-    GetModuleFileName(NULL, processPath, _MAX_PATH);
-    wchar_t *pos = wcsrchr(processPath, L'\\');
-    if (pos) *(pos+1) = L'\0';
-
-    m_ConfigPath += processPath;
+    m_ConfigPath += GetProcessFolder();
     m_ConfigPath += L"Config.xml";
 
     // Because TiXml does not support wchar_t file name,
@@ -109,7 +105,7 @@ CMainDlg::CMainDlg()
         SetThreadLocalSettings(LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED);
     }
     // init C4 Context and load charmaps
-    m_context = new CC4Context(std::wstring(m_Config.MapConfName), processPath);
+    m_context = new CC4Context(std::wstring(m_Config.MapConfName), GetProcessFolder());
     if (!m_context->init())
         MessageBox(getString(IDS_FAILEDTOLOAD), _T("Unicue"), MB_OK);
 }

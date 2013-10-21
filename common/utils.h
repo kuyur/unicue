@@ -18,8 +18,8 @@
 #define UTILS_H_
 
 #include <string.h>
-#include <algorithm>
 #include <string>
+#include <algorithm>
 
 template <typename T>
 inline void replace(std::basic_string<T> &str, const std::basic_string<T> &oldstr, const std::basic_string<T> &newstr)

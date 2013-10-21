@@ -34,6 +34,9 @@
     <ClCompile Include="TravellerBgMenuExt.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="..\common\win32helper.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="TravellerExt.def">
@@ -43,6 +46,9 @@
       <Filter>资源文件</Filter>
     </None>
     <None Include="TravellerExt.rgs">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="TravellerBgMenuExt.rgs">
       <Filter>资源文件</Filter>
     </None>
   </ItemGroup>
@@ -60,6 +66,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="TravellerBgMenuExt.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\win32helper.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

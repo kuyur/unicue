@@ -22,8 +22,8 @@
 #ifndef WINFILE_H_
 #define WINFILE_H_
 
-#include <WinBase.h>
-#include <Windows.h>
+#include <string>
+#include <windows.h>
 
 class CWinFile
 {

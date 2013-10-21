@@ -2,8 +2,9 @@
 #include "resource.h"
 #include "ProcessDlg.h"
 #include "filetraverser.h"
-#include "..\Unicue\winfile.h"
-#include "..\Unicue\wtlhelper.h"
+#include "..\common\winfile.h"
+#include "..\common\win32helper.h"
+#include "..\common\wtlhelper.h"
 
 WTL::CString CueStatusToString(CUESTATUS status)
 {
@@ -33,7 +34,6 @@ WTL::CString CueStatusToString(CUESTATUS status)
 CProcessDlg::CProcessDlg(void)
     :m_files(), m_fileInfoMap(), m_context(NULL), m_cueFolders(NULL), m_cueFoldersCount(0)
 {
-    wmemset(m_processPath, 0, MAX_PATH);
 }
 
 CProcessDlg::~CProcessDlg(void)
@@ -85,11 +85,8 @@ LRESULT CProcessDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPa
     list.InsertColumn(2, _T("编码检测结果"), LVCFMT_LEFT, 90);
     list.InsertColumn(3, _T("文件状态"), LVCFMT_LEFT, 80);
 
-    GetModuleFileName(NULL, m_processPath, MAX_PATH);
-    wchar_t *pos = wcsrchr(m_processPath, L'\\');
-    if (pos) *(pos+1) = L'\0';
     // load charmaps
-    m_context = new CC4Context(std::wstring(L"charmap-anisong.xml"), m_processPath);
+    m_context = new CC4Context(std::wstring(L"charmap-anisong.xml"), GetProcessFolder());
     if (!m_context->init())
         MessageBox(L"载入字符映射表失败！", _T("Unicue Traveller"), MB_OK);
 
@@ -156,7 +153,7 @@ LRESULT CProcessDlg::OnListDBClicked(int idCtrl, LPNMHDR pnmh, BOOL& /*bHandled*
         if (index > m_files.size() - 1)
             return 0;
         WTL::CString unicuePath(L"\"");
-        unicuePath += m_processPath;
+        unicuePath += GetProcessFolder();
         unicuePath += L"Unicue.exe\"";
         WTL::CString cuePath(L"\"");
         cuePath += m_files[index];

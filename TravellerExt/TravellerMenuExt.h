@@ -1,10 +1,14 @@
 ﻿// TravellerMenuExt.h : CTravellerMenuExt 的声明
 
 #pragma once
-#include "resource.h"       // 主符号
 
+#ifndef CTRAVELLERMENUEXT_H_
+#define CTRAVELLERMENUEXT_H_
+
+#include "resource.h"       // 主符号
 #include "TravellerExt.h"
 #include "shlobj.h"
+#include "..\common\win32helper.h"
 
 #if defined(_WIN32_WCE) && !defined(_CE_DCOM) && !defined(_CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA)
 #error "Windows CE 平台(如不提供完全 DCOM 支持的 Windows Mobile 平台)上无法正确支持单线程 COM 对象。定义 _CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA 可强制 ATL 支持创建单线程 COM 对象实现并允许使用其单线程 COM 对象实现。rgs 文件中的线程模型已被设置为“Free”，原因是该模型是非 DCOM Windows CE 平台支持的唯一线程模型。"
@@ -62,16 +66,12 @@ public:
 
     HRESULT FinalConstruct()
     {
-        HMODULE hm = GetModuleHandle(_T("TravellerExt.dll"));
+        HMODULE hm = GetModuleHandle(IsWow64() ? _T("TravellerExt64.dll") : _T("TravellerExt.dll"));
         if (!hm)
             return E_FAIL;
-        TCHAR processPath[MAX_PATH] = {0};
-        GetModuleFileName(hm, processPath, MAX_PATH);
-        TCHAR *pos = wcsrchr(processPath, _T('\\'));
-        if (pos) *(pos) = _T('\0');
         m_travellerPath += _T("\"");
-        m_travellerPath += processPath;
-        m_travellerPath += _T("\\Traveller.exe\"");
+        m_travellerPath += GetProcessFolder(hm);
+        m_travellerPath += _T("Traveller.exe\"");
 
         m_hBitmap = NULL;/*LoadBitmap(_hInstance, MAKEINTRESOURCE(IDB_MENU));*/
         return S_OK;
@@ -93,3 +93,5 @@ public:
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(TravellerMenuExt), CTravellerMenuExt)
+
+#endif // CTRAVELLERMENUEXT_H_

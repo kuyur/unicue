@@ -1,7 +1,8 @@
 ﻿#include "stdafx.h"
 #include "resource.h"
 #include "MainDlg.h"
-#include "..\Unicue\wtlhelper.h"
+#include "..\common\win32helper.h"
+#include "..\common\wtlhelper.h"
 
 CMainDlg::CMainDlg()
 {
@@ -78,17 +79,12 @@ LRESULT CMainDlg::OnBnClickedRegister(WORD, WORD, HWND, BOOL&)
     GetSystemDirectory(path, sizeof(path));
     _tcscat_s(path, _T("\\RegSvr32.exe"));
 
-    TCHAR szFull[MAX_PATH] = {0};;
-    GetModuleFileName(NULL, szFull, MAX_PATH);
-    wchar_t *pos = wcsrchr(szFull, L'\\');
-    if (pos) *(pos) = L'\0';
-
     WTL::CString dll(L"\"");
-    dll += szFull;
-    if (IsX64())
-        dll += _T("\\TravellerExt64.dll\"");
+    dll += GetProcessFolder();
+    if (IsWow64())
+        dll += _T("TravellerExt64.dll\"");
     else
-        dll += _T("\\TravellerExt.dll\"");
+        dll += _T("TravellerExt.dll\"");
 
     ShellExecute(NULL, _T("open"), path, dll, NULL, SW_HIDE);
 
@@ -101,16 +97,12 @@ LRESULT CMainDlg::OnBnClickedUnregister(WORD, WORD, HWND, BOOL&)
     GetSystemDirectory(path, sizeof(path));
     _tcscat_s(path, _T("\\RegSvr32.exe"));
 
-    TCHAR szFull[MAX_PATH] = {0};;
-    GetModuleFileName(NULL, szFull, MAX_PATH);
-    wchar_t *pos = wcsrchr(szFull, L'\\');
-    if (pos) *(pos) = L'\0';
     WTL::CString dll(L"/u \"");
-    dll += szFull;
-    if (IsX64())
-        dll += _T("\\TravellerExt64.dll\"");
+    dll += GetProcessFolder();
+    if (IsWow64())
+        dll += _T("TravellerExt64.dll\"");
     else
-        dll += _T("\\TravellerExt.dll\"");
+        dll += _T("TravellerExt.dll\"");
 
     ShellExecute(NULL, _T("open"), path, dll, NULL, SW_HIDE);
 

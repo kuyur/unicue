@@ -2,7 +2,8 @@
 //
 
 #include "stdafx.h"
-#include "../Unicue/winfile.h"
+#include "..\common\win32helper.h"
+#include "..\common\winfile.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -27,12 +28,8 @@ UINT ReplaceDumpChar(const char* src, char* dst, UINT length)
     if (length==0)
         return 0;
 
-    TCHAR path[MAX_PATH]; //最长260
-    GetModuleFileName(NULL, path, MAX_PATH);
-    WTL::CString mapPath(path);
-    int position=mapPath.ReverseFind('\\');
-    mapPath=mapPath.Left(position);
-    mapPath+=_T("\\jis2u-little-endian.map");
+    WTL::CString mapPath(GetProcessFolder());
+    mapPath += _T("jis2u-little-endian.map");
 
     //加载映射表
     CWinFile loadMap(mapPath, CWinFile::modeRead|CWinFile::shareDenyWrite);

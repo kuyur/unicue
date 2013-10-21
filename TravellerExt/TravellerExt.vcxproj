@@ -232,6 +232,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\common\win32helper.cpp" />
     <ClCompile Include="TravellerBgMenuExt.cpp" />
     <ClCompile Include="TravellerMenuExt.cpp" />
     <ClCompile Include="TravellerExt.cpp" />
@@ -244,6 +245,7 @@
     <ClCompile Include="TravellerExt_i.c" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="TravellerBgMenuExt.rgs" />
     <None Include="TravellerExt.def" />
     <None Include="TravellerExt.rgs" />
     <None Include="TravellerMenuExt.rgs" />
@@ -252,6 +254,7 @@
     <Midl Include="TravellerExt.idl" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\common\win32helper.h" />
     <ClInclude Include="TravellerBgMenuExt.h" />
     <ClInclude Include="TravellerMenuExt.h" />
     <ClInclude Include="Resource.h" />

@@ -24,7 +24,10 @@
     <ClCompile Include="MainDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Unicue\winfile.cpp">
+    <ClCompile Include="..\common\winfile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\win32helper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -59,10 +62,13 @@
     <ClInclude Include="..\c4-lib\tinystr.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Unicue\winfile.h">
+    <ClInclude Include="..\common\win32helper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Unicue\wtlhelper.h">
+    <ClInclude Include="..\common\winfile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\wtlhelper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

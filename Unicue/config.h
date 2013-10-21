@@ -17,7 +17,7 @@
 #ifndef CONFIG_H_
 #define CONFIG_H_
 
-#include <WinDef.h>
+#include <windows.h>
 #include <atlmisc.h>
 
 enum LANG {

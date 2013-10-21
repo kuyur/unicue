@@ -13,9 +13,9 @@
 
 #include "stdafx.h"
 #include "resource.h"
-
 #include "SettingDlg.h"
-#include "wtlhelper.h"
+#include "..\common\win32helper.h"
+#include "..\common\wtlhelper.h"
 
 CSettingDlg::CSettingDlg(CConfig config)
 {
@@ -63,27 +63,6 @@ LRESULT CSettingDlg::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/
     return 0;
 }
 
-// 写注册表值默认类型是REG_SZ
-BOOL CSettingDlg::AddRegKey(HKEY hKey,LPCTSTR lpSubItem,LPCTSTR lpKey,LPCTSTR lpValue,DWORD dwType)
-{
-    HKEY hAddKey;
-    DWORD dwDisp; // 存放新建子项时的返回类型
-    if (RegOpenKeyEx(hKey, lpSubItem, 0L, KEY_ALL_ACCESS, &hAddKey))
-    {
-        // 不存在子项，新建之
-        if (RegCreateKeyEx(hKey, lpSubItem, 0L, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hAddKey, &dwDisp))
-            return FALSE;
-        RegSetValueEx(hAddKey, lpKey, 0L, dwType, (const BYTE *)lpValue, wcslen(lpValue)*2+2); // unicode
-    }
-    else
-    {
-        RegSetValueEx(hAddKey, lpKey, 0L, dwType, (const BYTE *)lpValue, wcslen(lpValue)*2+2); // unicode
-    }
-
-    RegCloseKey(hAddKey);
-    return TRUE;
-}
-
 WTL::CString CSettingDlg::FindRegKey(LPCTSTR extension)
 {
     WTL::CString path(L"Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts\\");
@@ -126,10 +105,8 @@ WTL::CString CSettingDlg::FindRegKey(LPCTSTR extension)
 // 注册到关联文件右键菜单
 LRESULT CSettingDlg::OnBnClickedSettingRegisterbutton(WORD, WORD, HWND, BOOL&)
 {
-    TCHAR AppPathName[MAX_PATH]; //最长260
-    GetModuleFileName(NULL, AppPathName, MAX_PATH);
     WTL::CString PathValue("\"");
-    PathValue += AppPathName;
+    PathValue += GetProcessPath();
     PathValue += _T("\" \"%1\"");
 
     AddRegKey(HKEY_CLASSES_ROOT,_T(".uni"),_T(""),_T("UniCue.UNI"));                                    // [HKEY_CLASSES_ROOT\.uni], @="UniCue.UNI"
@@ -195,12 +172,10 @@ LRESULT CSettingDlg::OnBnClickedSettingRegisterbutton(WORD, WORD, HWND, BOOL&)
     AddRegKey(HKEY_CLASSES_ROOT,_T("Applications\\Unicue.exe\\shell\\open\\command"),_T(""),(LPCTSTR)PathValue); // [HKEY_CLASSES_ROOT\Applications\Unicue.exe\shell\open\command], @="\"AppPathName\" \"%1\""
 
     // icon
-    WTL::CString uniIco(AppPathName);
-    int pos = uniIco.ReverseFind('\\');
-    uniIco = uniIco.Left(pos);
-    WTL::CString cueIco(uniIco);
-    uniIco += _T("\\icons\\uni.ico");
-    cueIco += _T("\\icons\\cue.ico");
+    WTL::CString uniIco(GetProcessFolder());
+    WTL::CString cueIco(GetProcessFolder());
+    uniIco += _T("icons\\uni.ico");
+    cueIco += _T("icons\\cue.ico");
 
     AddRegKey(HKEY_CLASSES_ROOT,_T("UniCue.UNI\\DefaultIcon"),_T(""),(LPCTSTR)uniIco);                  // [HKEY_CLASSES_ROOT\UniCue.UNI\DefaultIcon], @="AppFolder\\icons\\uni.ico"
     AddRegKey(HKEY_CLASSES_ROOT,_T("UniCue.CUE\\DefaultIcon"),_T(""),(LPCTSTR)cueIco);                  // [HKEY_CLASSES_ROOT\UniCue.CUE\DefaultIcon], @="AppFolder\\icons\\cue.ico"
@@ -286,13 +261,9 @@ LRESULT CSettingDlg::OnBnClickedTxtutf8Button(WORD, WORD, HWND, BOOL&)
     HKEY hKey;
     if (RegOpenKeyEx(HKEY_CLASSES_ROOT,_T(".txt\\ShellNew"),0L,KEY_ALL_ACCESS,&hKey)==ERROR_SUCCESS)
         RegDeleteValue(hKey,_T("NullFile"));
-    TCHAR AppPathName[MAX_PATH]; //最长260
-    GetModuleFileName(NULL, AppPathName, MAX_PATH);
 
-    WTL::CString PathValue(AppPathName);
-    int pos=PathValue.ReverseFind('\\');
-    PathValue=PathValue.Left(pos);
-    PathValue+=_T("\\null.uni");
+    WTL::CString PathValue(GetProcessFolder());
+    PathValue += _T("null.uni");
     /* [HKEY_CLASSES_ROOT\.txt\ShellNew], "FileName"="AppFolder\\null.uni" */
     AddRegKey(HKEY_CLASSES_ROOT,_T(".txt\\ShellNew"),_T("FileName"),(LPCTSTR)PathValue);
 
