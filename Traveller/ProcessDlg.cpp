@@ -125,6 +125,13 @@ void CProcessDlg::CloseDialog(int nVal)
 
 LRESULT CProcessDlg::OnBnClickedDo(WORD, WORD, HWND, BOOL&)
 {
+    // progress ctrl
+    CProgressBarCtrl &ctrl = (CProgressBarCtrl)GetDlgItem(IDC_PROGRESS);
+    ctrl.SetRange(0, m_files.size());
+    ctrl.SetStep(1);
+    ctrl.SetPos(0);
+    CStatic &status = (CStatic)GetDlgItem(IDC_STATUS);
+    status.SetWindowText(L"正在转换...");
     std::vector<WTL::CString>::iterator iter = m_files.begin();
     for (; iter != m_files.end(); ++iter)
     {
@@ -169,7 +176,9 @@ LRESULT CProcessDlg::OnBnClickedDo(WORD, WORD, HWND, BOOL&)
             delete []buffer;
             buffer = NULL;
         }
+        ctrl.StepIt();
     }
+    status.SetWindowText(L"转换完毕");
     reloadFileInfo();
 
     return 0;
@@ -234,6 +243,14 @@ void CProcessDlg::loadCueFiles()
     m_files.clear();
     m_fileInfoMap.RemoveAll();
     if (!m_cueFolders) return;
+    // progress ctrl
+    CProgressBarCtrl &ctrl = (CProgressBarCtrl)GetDlgItem(IDC_PROGRESS);
+    ctrl.SetRange(0, m_cueFoldersCount);
+    ctrl.SetStep(1);
+    ctrl.SetPos(0);
+    // status text
+    CStatic &status = (CStatic)GetDlgItem(IDC_STATUS);
+    status.SetWindowText(L"正在搜索...");
     for (int i=0; i<m_cueFoldersCount; ++i)
     {
         CFileTraverser t(m_cueFolders[i], CFileTraverser::FILE);
@@ -247,7 +264,9 @@ void CProcessDlg::loadCueFiles()
                 m_fileInfoMap[*iter] = CFileInfo();
             }
         }
+        ctrl.StepIt();
     }
+    status.SetWindowText(L"");
     preProcess();
 }
 
@@ -256,6 +275,13 @@ void CProcessDlg::preProcess()
     CListViewCtrl &list = (CListViewCtrl)GetDlgItem(IDC_FILELIST);
     list.DeleteAllItems();
     std::vector<WTL::CString>::iterator iter = m_files.begin();
+    // progress ctrl
+    CProgressBarCtrl &ctrl = (CProgressBarCtrl)GetDlgItem(IDC_PROGRESS);
+    ctrl.SetRange(0, m_files.size());
+    ctrl.SetStep(1);
+    ctrl.SetPos(0);
+    CStatic &status = (CStatic)GetDlgItem(IDC_STATUS);
+    status.SetWindowText(L"正在读取文件...");
     for (int i = 0; iter != m_files.end(); ++iter, ++i)
     {
         CFileInfo &fileInfo = m_fileInfoMap[*iter];
@@ -266,7 +292,9 @@ void CProcessDlg::preProcess()
         list.SetItemText(row, 2, fileInfo.encodeName);
         list.SetItemText(row, 3, CueStatusToString(fileInfo.status));
         list.SetItemData(row, (DWORD_PTR)i);
+        ctrl.StepIt();
     }
+    status.SetWindowText(L"就绪");
 }
 
 void CProcessDlg::reloadFileInfo()
