@@ -1,5 +1,6 @@
 ﻿#include "stdafx.h"
 #include "resource.h"
+#include <fstream>
 #include "ProcessDlg.h"
 #include "filetraverser.h"
 #include "SettingDlg.h"
@@ -294,8 +295,31 @@ void CProcessDlg::loadCueFiles()
     status.SetWindowText(L"正在搜索...");
     for (int i=0; i<m_cueFoldersCount; ++i)
     {
-        CFileTraverser t(m_cueFolders[i], CFileTraverser::FILE);
-        std::vector<WTL::CString> &files = t.getFiles(L".cue");
+        wchar_t *folder = m_cueFolders[i];
+        wchar_t *ext = wcsrchr(folder, L'.');
+        if (ext)
+        {
+            ext++;
+            if ((*ext) && m_config.extensions.Find(ext) != -1)
+            {
+                // considered as a file path
+                std::fstream _file;
+                _file.open(folder, std::ios::in);
+                if (_file)
+                {
+                    _file.close();
+                    m_files.push_back(folder);
+                    m_fileInfoMap[folder] = CFileInfo();
+                    ctrl.StepIt();
+                    continue;
+                }
+            }
+        }
+        
+        CFileTraverser t(folder, CFileTraverser::FILE);
+        t.addFilter(m_config.extensions);
+        t.setIgnoreHidden(m_config.isIgnoreHidden);
+        std::vector<WTL::CString> &files = t.getFiles();
         std::vector<WTL::CString>::iterator iter = files.begin();
         for (; iter != files.end(); ++iter)
         {

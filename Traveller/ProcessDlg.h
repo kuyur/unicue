@@ -5,6 +5,7 @@
 #define PROCESSDLG_H_
 #include "cmdline.h"
 #include "config.h"
+#include "StringElementTraitX.h"
 
 enum CUESTATUS {
     NOT_A_FILE,
@@ -27,36 +28,6 @@ typedef struct FileInfo_tag
     CUESTATUS    status;
     WTL::CString encodeName;
 }CFileInfo;
-
-class CStringElementTraitX : public CElementTraitsBase<WTL::CString>
-{
-public:
-	typedef const WTL::CString& INARGTYPE;
-	typedef WTL::CString& OUTARGTYPE;
-
-    static ULONG Hash(_In_ INARGTYPE str)
-    {
-        ULONG nHash = 0;
-        const wchar_t* pch = str;
-        ATLENSURE( pch != NULL );
-        while (*pch != 0)
-        {
-            nHash = (nHash<<5)+nHash+(*pch); // case sensitive
-            pch++;
-        }
-        return nHash;
-    };
-
-    static bool CompareElements(_In_ INARGTYPE str1, _In_ INARGTYPE str2) throw()
-    {
-        return (wcscmp(str1, str2) == 0);
-    };
-
-    static int CompareElementsOrdered(_In_ INARGTYPE str1, _In_ INARGTYPE str2) throw()
-    {
-        return wcscmp(str1, str2);
-    };
-};
 
 class CProcessDlg : public CDialogImpl<CProcessDlg>, public CUpdateUI<CProcessDlg>,
         public CMessageFilter, public CIdleHandler

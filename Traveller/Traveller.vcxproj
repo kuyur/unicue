@@ -166,6 +166,7 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="SettingDlg.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="StringElementTraitX.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\common\win32helper.cpp" />

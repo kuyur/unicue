@@ -6,7 +6,10 @@
 #define FILETRAVERSER_H__
 
 #include <vector>
-#include <Windows.h>
+#include <map>
+#include <windows.h>
+#include <atlbase.h>
+#include <atlapp.h>
 #include <atlmisc.h>
 
 class CFileTraverser
@@ -20,12 +23,17 @@ public:
     CFileTraverser(const wchar_t* folderPath, UINT mode);
     CFileTraverser(const WTL::CString &folderPath, UINT mode);
     ~CFileTraverser();
-    std::vector<WTL::CString> getFiles(const wchar_t* extension = NULL);
+    void addFilter(const wchar_t* extension);
+    void removeFilter(const wchar_t* extension);
+    void setIgnoreHidden(BOOL isIgnoreHidden);
+    std::vector<WTL::CString> getFiles();
 
 private:
     WTL::CString m_folder;
     UINT         m_mode;
-    void getFiles_(std::vector<WTL::CString> &vec, const WTL::CString &folder, const wchar_t* extension);
+    BOOL         m_isIgnoreHidden;
+    std::map<std::wstring, bool> m_extensions;
+    void getFiles_(std::vector<WTL::CString> &vec, const WTL::CString &folder);
 };
 
 #endif // FILETRAVERSER_H__
