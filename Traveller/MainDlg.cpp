@@ -7,7 +7,37 @@
 #include "..\common\winfile.h"
 
 CMainDlg::CMainDlg()
+    : m_configPath(L"")
 {
+    SetDefault(m_config);
+    m_configPath += GetProcessFolder();
+    m_configPath += L"config-traveller.xml";
+
+    // load config file
+    CWinFile file(m_configPath, CWinFile::modeRead | CWinFile::shareDenyWrite);
+    if (!file.open())
+        SaveConfigFile(m_configPath, m_config);
+    else
+    {
+        UINT fileLength = file.length();
+        char *fileBuffer = new char[fileLength+1];
+        memset((void*)fileBuffer, 0, fileLength+1);
+        file.seek(0, CWinFile::begin);
+        file.read(fileBuffer, fileLength);
+        file.close();
+
+        TiXmlDocument *doc = new TiXmlDocument;
+        doc->Parse(fileBuffer, NULL, TIXML_ENCODING_UTF8);
+        if (doc->Error() || !LoadConfigFile(doc, m_config))
+        {
+            ::DeleteFile(m_configPath);
+            SetDefault(m_config);
+            SaveConfigFile(m_configPath, m_config);
+        }
+
+        delete []fileBuffer;
+        delete doc;
+    }
 }
 
 CMainDlg::~CMainDlg()
@@ -47,6 +77,7 @@ LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
 
 LRESULT CMainDlg::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
+    SaveConfigFile(m_configPath, m_config);
     // unregister message filtering and idle updates
     CMessageLoop* pLoop = _Module.GetMessageLoop();
     ATLASSERT(pLoop != NULL);
@@ -148,10 +179,10 @@ LRESULT CMainDlg::OnBnClickedUnregister(WORD, WORD, HWND, BOOL&)
 
 LRESULT CMainDlg::OnBnClickedSetting(WORD, WORD, HWND, BOOL&)
 {
-    CSettingDlg dlg;
+    CSettingDlg dlg(m_config);
     if (dlg.DoModal() == IDOK)
     {
-        // TODO
+        m_config = dlg.m_config;
     }
     return 0;
 }

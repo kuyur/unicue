@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<config>
+    <IgnoreUtf8>true</IgnoreUtf8>
+    <IgnoreUtf8WithoutBom>false</IgnoreUtf8WithoutBom>
+    <IgnoreHidden>false</IgnoreHidden>
+    <Override>true</Override>
+    <BackupOrig>true</BackupOrig>
+    <AutoFixAudioExt>true</AutoFixAudioExt>
+    <AutoFixCueError>true</AutoFixCueError>
+    <Extensions>cue</Extensions>
+    <Template>.utf-8</Template>
+    <CharmapConfig>charmap-anisong.xml</CharmapConfig>
+</config>

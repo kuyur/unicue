@@ -1,11 +1,15 @@
 #pragma once
 // maindlg.h
-#ifndef MAINDLG_H_
-#define MAINDLG_H_
+#ifndef TRAVELLER_MAINDLG_H_
+#define TRAVELLER_MAINDLG_H_
+#include "config.h"
 
 class CMainDlg : public CDialogImpl<CMainDlg>, public CUpdateUI<CMainDlg>,
         public CMessageFilter, public CIdleHandler
 {
+private:
+    WTL::CString m_configPath;
+    CConfig      m_config;
 public:
     enum { IDD = IDD_MAINDLG };
     CMainDlg();
@@ -36,4 +40,4 @@ public:
     LRESULT OnBnClickedSetting(WORD, WORD, HWND, BOOL&);
 };
 
-#endif // MAINDLG_H_
+#endif // TRAVELLER_MAINDLG_H_

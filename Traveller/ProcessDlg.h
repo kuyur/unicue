@@ -4,6 +4,7 @@
 #ifndef PROCESSDLG_H_
 #define PROCESSDLG_H_
 #include "cmdline.h"
+#include "config.h"
 
 enum CUESTATUS {
     NOT_A_FILE,
@@ -61,11 +62,13 @@ class CProcessDlg : public CDialogImpl<CProcessDlg>, public CUpdateUI<CProcessDl
         public CMessageFilter, public CIdleHandler
 {
 private:
-    wchar_t** m_cueFolders;
-    int m_cueFoldersCount;
+    WTL::CString m_configPath;
+    CConfig      m_config;
+    wchar_t**    m_cueFolders;
+    int          m_cueFoldersCount;
     CAtlMap<WTL::CString, CFileInfo, CStringElementTraitX> m_fileInfoMap;
     std::vector<WTL::CString> m_files;
-    CC4Context *m_context;
+    CC4Context*  m_context;
     void preProcess();
     void reloadFileInfo();
     void getFileInfo(const WTL::CString &filePath, CFileInfo &fileInfo);

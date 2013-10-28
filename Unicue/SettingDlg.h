@@ -25,7 +25,7 @@ protected:
     int m_nLangIndex;
 public:
     CSettingDlg(CConfig config);
-    ~CSettingDlg(void) {};
+    ~CSettingDlg() {};
     enum { IDD = IDD_SETTING };
     CConfig m_Config;
     WTL::CString FindRegKey(LPCTSTR extension);

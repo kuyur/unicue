@@ -33,8 +33,37 @@ WTL::CString CueStatusToString(CUESTATUS status)
 }
 
 CProcessDlg::CProcessDlg(void)
-    :m_files(), m_fileInfoMap(), m_context(NULL), m_cueFolders(NULL), m_cueFoldersCount(0)
+    : m_configPath(L""), m_files(), m_fileInfoMap(), m_context(NULL), m_cueFolders(NULL), m_cueFoldersCount(0)
 {
+    SetDefault(m_config);
+    m_configPath += GetProcessFolder();
+    m_configPath += L"config-traveller.xml";
+
+    // load config file
+    CWinFile file(m_configPath, CWinFile::modeRead | CWinFile::shareDenyWrite);
+    if (!file.open())
+        SaveConfigFile(m_configPath, m_config);
+    else
+    {
+        UINT fileLength = file.length();
+        char *fileBuffer = new char[fileLength+1];
+        memset((void*)fileBuffer, 0, fileLength+1);
+        file.seek(0, CWinFile::begin);
+        file.read(fileBuffer, fileLength);
+        file.close();
+
+        TiXmlDocument *doc = new TiXmlDocument;
+        doc->Parse(fileBuffer, NULL, TIXML_ENCODING_UTF8);
+        if (doc->Error() || !LoadConfigFile(doc, m_config))
+        {
+            ::DeleteFile(m_configPath);
+            SetDefault(m_config);
+            SaveConfigFile(m_configPath, m_config);
+        }
+
+        delete []fileBuffer;
+        delete doc;
+    }
 }
 
 CProcessDlg::~CProcessDlg(void)
@@ -87,7 +116,7 @@ LRESULT CProcessDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPa
     list.InsertColumn(3, _T("文件状态"), LVCFMT_LEFT, 80);
 
     // load charmaps
-    m_context = new CC4Context(std::wstring(L"charmap-anisong.xml"), GetProcessFolder());
+    m_context = new CC4Context(std::wstring(m_config.charmapConfig), GetProcessFolder());
     if (!m_context->init())
         MessageBox(L"载入字符映射表失败！", _T("Unicue Traveller"), MB_OK);
 
@@ -96,6 +125,7 @@ LRESULT CProcessDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPa
 
 LRESULT CProcessDlg::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
+    SaveConfigFile(m_configPath, m_config);
     // unregister message filtering and idle updates
     CMessageLoop* pLoop = _Module.GetMessageLoop();
     ATLASSERT(pLoop != NULL);
@@ -126,10 +156,10 @@ void CProcessDlg::CloseDialog(int nVal)
 
 LRESULT CProcessDlg::OnBnClickedSetting(WORD, WORD, HWND, BOOL&)
 {
-    CSettingDlg dlg;
+    CSettingDlg dlg(m_config);
     if (dlg.DoModal() == IDOK)
     {
-        // TODO
+        m_config = dlg.m_config;
     }
     return 0;
 }

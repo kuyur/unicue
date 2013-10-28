@@ -159,6 +159,7 @@
     <ClInclude Include="..\common\winfile.h" />
     <ClInclude Include="..\common\wtlhelper.h" />
     <ClInclude Include="cmdline.h" />
+    <ClInclude Include="config.h" />
     <ClInclude Include="filetraverser.h" />
     <ClInclude Include="MainDlg.h" />
     <ClInclude Include="ProcessDlg.h" />
@@ -170,6 +171,7 @@
     <ClCompile Include="..\common\win32helper.cpp" />
     <ClCompile Include="..\common\winfile.cpp" />
     <ClCompile Include="cmdline.cpp" />
+    <ClCompile Include="config.cpp" />
     <ClCompile Include="filetraverser.cpp" />
     <ClCompile Include="MainDlg.cpp" />
     <ClCompile Include="ProcessDlg.cpp" />
