@@ -38,7 +38,7 @@ CMainDlg::CMainDlg()
 
     // Load config file...
     m_ConfigPath += GetProcessFolder();
-    m_ConfigPath += L"Config.xml";
+    m_ConfigPath += L"config-unicue.xml";
 
     // Because TiXml does not support wchar_t file name,
     // use Win32 File Api to load xml file.
