@@ -2,6 +2,7 @@
 #include "resource.h"
 #include "ProcessDlg.h"
 #include "filetraverser.h"
+#include "SettingDlg.h"
 #include "..\common\winfile.h"
 #include "..\common\win32helper.h"
 #include "..\common\wtlhelper.h"
@@ -81,7 +82,7 @@ LRESULT CProcessDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPa
     CListViewCtrl &list = (CListViewCtrl)GetDlgItem(IDC_FILELIST);
     ListView_SetExtendedListViewStyle(list.m_hWnd, list.GetExStyle() | LVS_EX_CHECKBOXES | LVS_EX_FULLROWSELECT);
     list.InsertColumn(0, _T("选择"), LVCFMT_LEFT, 40);
-    list.InsertColumn(1, _T("CUE文件路径"), LVCFMT_LEFT, 450);
+    list.InsertColumn(1, _T("文件路径"), LVCFMT_LEFT, 450);
     list.InsertColumn(2, _T("编码检测结果"), LVCFMT_LEFT, 90);
     list.InsertColumn(3, _T("文件状态"), LVCFMT_LEFT, 80);
 
@@ -121,6 +122,16 @@ void CProcessDlg::CloseDialog(int nVal)
 {
     DestroyWindow();
     ::PostQuitMessage(nVal);
+}
+
+LRESULT CProcessDlg::OnBnClickedSetting(WORD, WORD, HWND, BOOL&)
+{
+    CSettingDlg dlg;
+    if (dlg.DoModal() == IDOK)
+    {
+        // TODO
+    }
+    return 0;
 }
 
 LRESULT CProcessDlg::OnBnClickedDo(WORD, WORD, HWND, BOOL&)

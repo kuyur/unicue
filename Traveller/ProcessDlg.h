@@ -86,6 +86,7 @@ public:
         MESSAGE_HANDLER(WM_DESTROY, OnDestroy)
         COMMAND_ID_HANDLER(IDOK, OnOK)
         COMMAND_ID_HANDLER(IDCANCEL, OnCancel)
+        COMMAND_HANDLER(IDC_BUTTON_SETTING, BN_CLICKED, OnBnClickedSetting)
         COMMAND_HANDLER(IDC_BUTTON_DO, BN_CLICKED, OnBnClickedDo)
         COMMAND_HANDLER(IDC_BUTTON_RELOAD, BN_CLICKED, OnBnClickedReload)
         NOTIFY_HANDLER(IDC_FILELIST, NM_DBLCLK, OnListDBClicked)
@@ -96,6 +97,7 @@ public:
     LRESULT OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
     LRESULT OnOK(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
     LRESULT OnCancel(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+    LRESULT OnBnClickedSetting(WORD, WORD, HWND, BOOL&);
     LRESULT OnBnClickedDo(WORD, WORD, HWND, BOOL&);
     LRESULT OnBnClickedReload(WORD, WORD, HWND, BOOL&);
     LRESULT OnListDBClicked(int idCtrl, LPNMHDR pnmh, BOOL& /*bHandled*/);

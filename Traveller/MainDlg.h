@@ -21,8 +21,9 @@ public:
         MESSAGE_HANDLER(WM_DESTROY, OnDestroy)
         COMMAND_ID_HANDLER(IDOK, OnOK)
         COMMAND_ID_HANDLER(IDCANCEL, OnCancel)
-        COMMAND_HANDLER(IDC_SETTINGREGISTER, BN_CLICKED, OnBnClickedRegister)
-        COMMAND_HANDLER(IDC_SETTINGUNREGISTER, BN_CLICKED, OnBnClickedUnregister)
+        COMMAND_HANDLER(IDC_REGISTER, BN_CLICKED, OnBnClickedRegister)
+        COMMAND_HANDLER(IDC_UNREGISTER, BN_CLICKED, OnBnClickedUnregister)
+        COMMAND_HANDLER(IDC_SETTING, BN_CLICKED, OnBnClickedSetting)
     END_MSG_MAP()
 
     void CloseDialog(int nVal);
@@ -32,6 +33,7 @@ public:
     LRESULT OnCancel(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
     LRESULT OnBnClickedRegister(WORD, WORD, HWND, BOOL&);
     LRESULT OnBnClickedUnregister(WORD, WORD, HWND, BOOL&);
+    LRESULT OnBnClickedSetting(WORD, WORD, HWND, BOOL&);
 };
 
 #endif // MAINDLG_H_

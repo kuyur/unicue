@@ -1,6 +1,7 @@
 ﻿#include "stdafx.h"
 #include "resource.h"
 #include "MainDlg.h"
+#include "SettingDlg.h"
 #include "..\common\win32helper.h"
 #include "..\common\wtlhelper.h"
 #include "..\common\winfile.h"
@@ -142,5 +143,15 @@ LRESULT CMainDlg::OnBnClickedUnregister(WORD, WORD, HWND, BOOL&)
 
     ShellExecute(NULL, _T("open"), path, dll, NULL, SW_HIDE);
 
+    return 0;
+}
+
+LRESULT CMainDlg::OnBnClickedSetting(WORD, WORD, HWND, BOOL&)
+{
+    CSettingDlg dlg;
+    if (dlg.DoModal() == IDOK)
+    {
+        // TODO
+    }
     return 0;
 }

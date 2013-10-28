@@ -163,6 +163,7 @@
     <ClInclude Include="MainDlg.h" />
     <ClInclude Include="ProcessDlg.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="SettingDlg.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
@@ -172,6 +173,7 @@
     <ClCompile Include="filetraverser.cpp" />
     <ClCompile Include="MainDlg.cpp" />
     <ClCompile Include="ProcessDlg.cpp" />
+    <ClCompile Include="SettingDlg.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="Traveller.cpp" />
   </ItemGroup>
