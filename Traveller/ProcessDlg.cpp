@@ -36,35 +36,8 @@ WTL::CString CueStatusToString(CUESTATUS status)
 CProcessDlg::CProcessDlg(void)
     : m_configPath(L""), m_files(), m_fileInfoMap(), m_context(NULL), m_cueFolders(NULL), m_cueFoldersCount(0)
 {
-    SetDefault(m_config);
     m_configPath += GetProcessFolder();
     m_configPath += L"config-traveller.xml";
-
-    // load config file
-    CWinFile file(m_configPath, CWinFile::modeRead | CWinFile::shareDenyWrite);
-    if (!file.open())
-        SaveConfigFile(m_configPath, m_config);
-    else
-    {
-        UINT fileLength = file.length();
-        char *fileBuffer = new char[fileLength+1];
-        memset((void*)fileBuffer, 0, fileLength+1);
-        file.seek(0, CWinFile::begin);
-        file.read(fileBuffer, fileLength);
-        file.close();
-
-        TiXmlDocument *doc = new TiXmlDocument;
-        doc->Parse(fileBuffer, NULL, TIXML_ENCODING_UTF8);
-        if (doc->Error() || !LoadConfigFile(doc, m_config))
-        {
-            ::DeleteFile(m_configPath);
-            SetDefault(m_config);
-            SaveConfigFile(m_configPath, m_config);
-        }
-
-        delete []fileBuffer;
-        delete doc;
-    }
 }
 
 CProcessDlg::~CProcessDlg(void)
@@ -107,6 +80,33 @@ LRESULT CProcessDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPa
     pLoop->AddIdleHandler(this);
 
     UIAddChildWindowContainer(m_hWnd);
+
+    SetDefault(m_config);
+    // load config file
+    CWinFile file(m_configPath, CWinFile::modeRead | CWinFile::shareDenyWrite);
+    if (!file.open())
+        SaveConfigFile(m_configPath, m_config);
+    else
+    {
+        UINT fileLength = file.length();
+        char *fileBuffer = new char[fileLength+1];
+        memset((void*)fileBuffer, 0, fileLength+1);
+        file.seek(0, CWinFile::begin);
+        file.read(fileBuffer, fileLength);
+        file.close();
+
+        TiXmlDocument *doc = new TiXmlDocument;
+        doc->Parse(fileBuffer, NULL, TIXML_ENCODING_UTF8);
+        if (doc->Error() || !LoadConfigFile(doc, m_config))
+        {
+            ::DeleteFile(m_configPath);
+            SetDefault(m_config);
+            SaveConfigFile(m_configPath, m_config);
+        }
+
+        delete []fileBuffer;
+        delete doc;
+    }
 
     // initialize CListViewCtrl
     CListViewCtrl &list = (CListViewCtrl)GetDlgItem(IDC_FILELIST);
@@ -257,7 +257,7 @@ LRESULT CProcessDlg::OnListDBClicked(int idCtrl, LPNMHDR pnmh, BOOL& /*bHandled*
         HINSTANCE hi = ShellExecute(NULL, _T("open"), unicuePath, cuePath, NULL, SW_SHOW);
         if ((int)hi <= 32)
         {
-            MessageBox(_T("启动Unicue失败，请检查文件路径。"));
+            MessageBox(_T("启动Unicue失败，请检查程序路径。"));
         }
     }
     
