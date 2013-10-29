@@ -26,10 +26,12 @@ public:
     void addFilter(const wchar_t* extension);
     void removeFilter(const wchar_t* extension);
     void setIgnoreHidden(BOOL isIgnoreHidden);
+    void setIgnoredFolderName(const wchar_t *folderName);
     std::vector<WTL::CString> getFiles();
 
 private:
     WTL::CString m_folder;
+    WTL::CString m_ignoredFolderName;
     UINT         m_mode;
     BOOL         m_isIgnoreHidden;
     std::map<std::wstring, bool> m_extensions;

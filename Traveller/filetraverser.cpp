@@ -3,7 +3,7 @@
 #include "filetraverser.h"
 
 CFileTraverser::CFileTraverser(const WTL::CString &folderPath, UINT mode)
-    :m_folder(folderPath), m_mode(mode)
+    :m_folder(folderPath), m_mode(mode), m_ignoredFolderName(L"")
 {
 }
 
@@ -89,6 +89,11 @@ void CFileTraverser::setIgnoreHidden(BOOL isIgnoreHidden)
     m_isIgnoreHidden = isIgnoreHidden;
 }
 
+void CFileTraverser::setIgnoredFolderName(const wchar_t *folderName)
+{
+    m_ignoredFolderName = folderName;
+}
+
 std::vector<WTL::CString> CFileTraverser::getFiles()
 {
     if (m_isIgnoreHidden && (GetFileAttributes(m_folder) & FILE_ATTRIBUTE_HIDDEN))
@@ -102,6 +107,9 @@ std::vector<WTL::CString> CFileTraverser::getFiles()
 
 void CFileTraverser::getFiles_(std::vector<WTL::CString> &vec, const WTL::CString &folder)
 {
+    if ((m_ignoredFolderName.GetLength() > 0) && (folder.Right(m_ignoredFolderName.GetLength()) == m_ignoredFolderName))
+        return;
+
     WIN32_FIND_DATA FindFileData;
     HANDLE hFind = INVALID_HANDLE_VALUE;
 

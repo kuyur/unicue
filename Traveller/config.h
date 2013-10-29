@@ -17,7 +17,6 @@ typedef struct CConfig_tag
     BOOL isIgnoreHidden;
     BOOL isOverride;
     BOOL isBackupOrig;
-    BOOL isAutoFixAudioExt;
     BOOL isAutoFixCueError;
     WTL::CString extensions;
     WTL::CString templateString;

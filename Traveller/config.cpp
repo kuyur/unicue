@@ -60,15 +60,6 @@ BOOL LoadConfigFile(TiXmlDocument *xmlfile, CConfig &config)
     else
         config.isBackupOrig = FALSE;
 
-    // AutoFixAudioExt node
-    pElem = hXmlHandle.FirstChild("AutoFixAudioExt").Element();
-    if (!pElem) return FALSE;
-    if (!pElem->GetText()) return FALSE;
-    if (_stricmp(pElem->GetText(),"true") == 0)
-        config.isAutoFixAudioExt = TRUE;
-    else
-        config.isAutoFixAudioExt = FALSE;
-
     // AutoFixCueError node
     pElem = hXmlHandle.FirstChild("AutoFixCueError").Element();
     if (!pElem) return FALSE;
@@ -150,15 +141,6 @@ BOOL SaveConfigFile(LPCTSTR configPath, const CConfig &config)
     BackupOrig->LinkEndChild(BackupOrigValue);
     configure->LinkEndChild(BackupOrig);
 
-    TiXmlElement *AutoFixAudioExt = new TiXmlElement("AutoFixAudioExt");
-    TiXmlText *AutoFixAudioExtValue;
-    if (config.isAutoFixAudioExt)
-        AutoFixAudioExtValue = new TiXmlText("true");
-    else
-        AutoFixAudioExtValue = new TiXmlText("false");
-    AutoFixAudioExt->LinkEndChild(AutoFixAudioExtValue);
-    configure->LinkEndChild(AutoFixAudioExt);
-
     TiXmlElement *AutoFixCueError = new TiXmlElement("AutoFixCueError");
     TiXmlText *AutoFixCueErrorValue;
     if (config.isAutoFixCueError)
@@ -208,7 +190,6 @@ void SetDefault(CConfig &config)
     config.isOverride = TRUE;
     config.isBackupOrig = TRUE;
     config.templateString = L".utf-8";
-    config.isAutoFixAudioExt = TRUE;
     config.isAutoFixCueError = TRUE;
     config.charmapConfig = L"charmap-anisong.xml";
 }

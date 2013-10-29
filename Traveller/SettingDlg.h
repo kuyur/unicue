@@ -32,7 +32,6 @@ public:
         DDX_RADIO(IDC_RADIO_OVERRIDE, m_savingMode)
         DDX_CHECK(IDC_CHECKBOX_BACKUPFILE, m_config.isBackupOrig)
         DDX_TEXT(IDC_EDIT_TEMPLATE, m_config.templateString)
-        DDX_CHECK(IDC_CHECKBOX_AUTOFIXEXT, m_config.isAutoFixAudioExt)
         DDX_CHECK(IDC_CHECKBOX_AUTOFIXCUE, m_config.isAutoFixCueError)
         DDX_TEXT(IDC_EDIT_CHARMAPCONF, m_config.charmapConfig)
     END_DDX_MAP()

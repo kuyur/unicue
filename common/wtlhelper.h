@@ -113,4 +113,14 @@ void inline SetThreadLocalSettings(LANGID Language, LANGID SubLanguage)
         ::SetThreadLocale(MAKELCID(MAKELANGID(Language, SubLanguage), SORT_DEFAULT)); // fallback
 }
 
+void inline RemoveFromEnd(WTL::CString &str, int count)
+{
+    int length = str.GetLength();
+    for (int i=0; i<count; ++i)
+    {
+        str.SetAt(length - i - 1, _T(' '));
+    }
+    str.TrimRight(_T(' '));
+}
+
 #endif // WTLHELPER_H_

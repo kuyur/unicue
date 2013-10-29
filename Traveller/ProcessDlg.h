@@ -7,27 +7,34 @@
 #include "config.h"
 #include "StringElementTraitX.h"
 
-enum CUESTATUS {
-    NOT_A_FILE,
-    READONLY_FILE,
-    READING_FAILED,
-    UTF16_LE,
-    UTF16_BE,
-    UTF8_BOM,
-    UTF8_NOBOM,
-    NO_MATCHED_ENCODE,
-    MATCHED_ENCODE_FOUND
+enum FILESTATUS {
+    EMPTY_STATUS           = (UINT)0x0000,
+    NOT_A_FILE             = (UINT)0x0001,
+    READONLY_FILE          = (UINT)0x0002,
+    READING_FAILED         = (UINT)0x0004,
+    UTF16_LE               = (UINT)0x0008,
+    UTF16_BE               = (UINT)0x0010,
+    UTF8_BOM               = (UINT)0x0020,
+    UTF8_NOBOM             = (UINT)0x0040,
+    NO_MATCHED_ENCODE      = (UINT)0x0080,
+    MATCHED_ENCODE_FOUND   = (UINT)0x0100,
+    ENCODECHOSEN_BY_USER   = (UINT)0x0200,
+    IGNORED_BY_CONFIG      = (UINT)0x0400,
+    FILE_CONVERTED         = (UINT)0x0800,
+    IS_A_CUEFILE           = (UINT)0x1000,
+    FILE_IGNORED           = IGNORED_BY_CONFIG | FILE_CONVERTED,
+    INVALID_FILE           = NOT_A_FILE | READONLY_FILE | READING_FAILED | NO_MATCHED_ENCODE
 };
-
-WTL::CString CueStatusToString(CUESTATUS status);
 
 typedef struct FileInfo_tag
 {
-    bool         isChecked;
-    bool         isInvalid;
-    CUESTATUS    status;
+    bool         isSelected;
+    UINT         status;
     WTL::CString encodeName;
 }CFileInfo;
+
+WTL::CString CueStatusToString(UINT status);
+void SetConvertedCueStatus(CFileInfo &fileInfo, BOOL isUtf8IgnoredByConfig);
 
 class CProcessDlg : public CDialogImpl<CProcessDlg>, public CUpdateUI<CProcessDlg>,
         public CMessageFilter, public CIdleHandler
@@ -41,8 +48,13 @@ private:
     std::vector<WTL::CString> m_files;
     CC4Context*  m_context;
     void preProcess();
-    void reloadFileInfo();
+    void rerenderFileInfo();
     void getFileInfo(const WTL::CString &filePath, CFileInfo &fileInfo);
+    BOOL backupFile(const WTL::CString &origPath, const char* buffer, UINT length);
+    void convertBEtoLE(wchar_t *bigEndianBuffer, UINT length);
+    void processCueContent(WTL::CString &cueContent, const WTL::CString &cueFilePath);
+    void fixAudioExtension(WTL::CString &cueContent, const WTL::CString &cueFilePath);
+    void fixTTAOutdatedTag(WTL::CString &cueContent);
 public:
     enum { IDD = IDD_PROCESSDLG };
     CProcessDlg(void);

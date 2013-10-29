@@ -1,6 +1,7 @@
 ﻿#include "stdafx.h"
 #include "resource.h"
 #include <fstream>
+#include <Shlwapi.h>
 #include "ProcessDlg.h"
 #include "filetraverser.h"
 #include "SettingDlg.h"
@@ -8,29 +9,39 @@
 #include "..\common\win32helper.h"
 #include "..\common\wtlhelper.h"
 
-WTL::CString CueStatusToString(CUESTATUS status)
+static const WCHAR TRAVELLER_BACKUP[] = L"\\ut-orig";
+
+WTL::CString CueStatusToString(UINT status)
 {
-    switch (status)
-    {
-    case NOT_A_FILE:
-        return WTL::CString(L"非文件");
-    case READONLY_FILE:
-        return WTL::CString(L"只读文件");
-    case READING_FAILED:
-        return WTL::CString(L"读取失败");
-    case UTF16_LE:
-        return WTL::CString(L"小尾序(LE)");
-    case UTF16_BE:
-        return WTL::CString(L"大尾序(BE)");
-    case UTF8_NOBOM:
-        return WTL::CString(L"无BOM");
-    case NO_MATCHED_ENCODE:
-        return WTL::CString(L"未知编码");
-    case UTF8_BOM:
-    case MATCHED_ENCODE_FOUND:
-    default:
-        return WTL::CString(L"");
-    }
+    WTL::CString msg(L"");
+
+    if (status & NOT_A_FILE)           msg += L"非文件,";
+    if (status & READONLY_FILE)        msg += L"只读文件,";
+    if (status & READING_FAILED)       msg += L"读取失败,";
+    if (status & UTF16_LE)             msg += L"小尾序(LE),";
+    if (status & UTF16_BE)             msg += L"大尾序(BE),";
+    /*if (status & UTF8_BOM)             msg += L"BOM,";*/
+    if (status & UTF8_NOBOM)           msg += L"无BOM,";
+    if (status & NO_MATCHED_ENCODE)    msg += L"未知编码,";
+    if (status & MATCHED_ENCODE_FOUND) msg += L"发现匹配编码,";
+    if (status & ENCODECHOSEN_BY_USER) msg += L"手动选择编码,";
+    if (status & IGNORED_BY_CONFIG)    msg += L"无视此文件,";
+    if (status & FILE_CONVERTED)       msg += L"已转换,";
+
+    if (msg.GetLength() > 0) msg.TrimRight(L',');
+    return msg;
+}
+
+void SetConvertedCueStatus(CFileInfo &fileInfo, BOOL isUtf8IgnoredByConfig)
+{
+    fileInfo.isSelected = false;
+    bool isCue = ((fileInfo.status & IS_A_CUEFILE) != 0);
+    fileInfo.status = UTF8_BOM | FILE_CONVERTED;
+    if (isUtf8IgnoredByConfig)
+        fileInfo.status |= IGNORED_BY_CONFIG;
+    if (isCue)
+        fileInfo.status |= IS_A_CUEFILE;
+    fileInfo.encodeName = CC4EncodeUTF8::_getName().c_str();
 }
 
 CProcessDlg::CProcessDlg(void)
@@ -112,9 +123,9 @@ LRESULT CProcessDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPa
     CListViewCtrl &list = (CListViewCtrl)GetDlgItem(IDC_FILELIST);
     ListView_SetExtendedListViewStyle(list.m_hWnd, list.GetExStyle() | LVS_EX_CHECKBOXES | LVS_EX_FULLROWSELECT);
     list.InsertColumn(0, _T("选择"), LVCFMT_LEFT, 40);
-    list.InsertColumn(1, _T("文件路径"), LVCFMT_LEFT, 450);
+    list.InsertColumn(1, _T("文件路径"), LVCFMT_LEFT, 470);
     list.InsertColumn(2, _T("编码检测结果"), LVCFMT_LEFT, 90);
-    list.InsertColumn(3, _T("文件状态"), LVCFMT_LEFT, 80);
+    list.InsertColumn(3, _T("文件状态"), LVCFMT_LEFT, 150);
 
     // load charmaps
     m_context = new CC4Context(std::wstring(m_config.charmapConfig), GetProcessFolder());
@@ -175,10 +186,10 @@ LRESULT CProcessDlg::OnBnClickedDo(WORD, WORD, HWND, BOOL&)
     CStatic &status = (CStatic)GetDlgItem(IDC_STATUS);
     status.SetWindowText(L"正在转换...");
     std::vector<WTL::CString>::iterator iter = m_files.begin();
-    for (; iter != m_files.end(); ++iter)
+    for (; iter != m_files.end(); ++iter, ctrl.StepIt())
     {
         CFileInfo &fileInfo = m_fileInfoMap[*iter];
-        if (fileInfo.isChecked && !fileInfo.isInvalid)
+        if (fileInfo.isSelected && !(fileInfo.status & FILE_IGNORED) && !(fileInfo.status & INVALID_FILE))
         {
             CWinFile inFile(*iter, CWinFile::modeRead|CWinFile::shareExclusive);
             if (!inFile.open())
@@ -190,38 +201,78 @@ LRESULT CProcessDlg::OnBnClickedDo(WORD, WORD, HWND, BOOL&)
             const CC4Encode *encode = m_context->getEncode(std::wstring(fileInfo.encodeName));
             if (encode)
             {
-                CWinFile outFile(*iter, CWinFile::modeWrite|CWinFile::shareExclusive);
+                // backup first
+                if (m_config.isOverride && m_config.isBackupOrig)
+                    backupFile(*iter, buffer, length);
+                // convert
+                WTL::CString outputTarget(*iter);
+                if (!m_config.isOverride)
+                    outputTarget.Insert(outputTarget.ReverseFind(L'.'), m_config.templateString);
+                CWinFile outFile(outputTarget, CWinFile::modeCreate|CWinFile::modeWrite|CWinFile::shareExclusive);
                 if (!outFile.open())
+                {
+                    delete []buffer;
+                    buffer = NULL;
                     continue;
+                }
                 outFile.write(CC4Encode::UTF_8_BOM, 3);
                 if (encode == (const CC4Encode*)CC4EncodeUTF8::getInstance())
                 {
-                    outFile.write(buffer, length);
+                    if ((fileInfo.status & IS_A_CUEFILE) && m_config.isAutoFixCueError)
+                    {
+                        WTL::CString unicodeStr(CC4EncodeUTF8::convert2unicode(buffer, length).c_str());
+                        processCueContent(unicodeStr, *iter);
+                        std::string &utf8str = CC4EncodeUTF16::convert2utf8(unicodeStr, unicodeStr.GetLength());
+                        outFile.write(utf8str.c_str(), utf8str.length());
+                    }
+                    else
+                        outFile.write(buffer, length);
                 }
                 else if(encode == (const CC4Encode*)CC4EncodeUTF16::getInstance())
                 {
-                    bool isLitterEndian = (fileInfo.status == UTF16_LE);
-                    std::string &utf8str = CC4EncodeUTF16::convert2utf8(buffer, length, isLitterEndian);
-                    outFile.write(utf8str.c_str(), utf8str.length());
+                    bool isLitterEndian = ((fileInfo.status & UTF16_LE) != 0);
+                    if ((fileInfo.status & IS_A_CUEFILE) && m_config.isAutoFixCueError)
+                    {
+                        if ((length & 1) == 0)
+                        {
+                            if (!isLitterEndian) convertBEtoLE((wchar_t*)buffer, length>>1);
+                            WTL::CString unicodeStr((wchar_t*)buffer, length>>1);
+                            processCueContent(unicodeStr, *iter);
+                            std::string &utf8str = CC4EncodeUTF16::convert2utf8(unicodeStr, unicodeStr.GetLength());
+                            outFile.write(utf8str.c_str(), utf8str.length());
+                        }
+                    }
+                    else
+                    {
+                        std::string &utf8str = CC4EncodeUTF16::convert2utf8(buffer, length, isLitterEndian);
+                        outFile.write(utf8str.c_str(), utf8str.length());
+                    }
                 }
                 else
                 {
                     std::wstring &unicodeStr = encode->wconvertText(buffer, length);
-                    std::string &utf8str = CC4EncodeUTF16::convert2utf8(unicodeStr.c_str(), unicodeStr.length());
-                    outFile.write(utf8str.c_str(), utf8str.length());
+                    if ((fileInfo.status & IS_A_CUEFILE) && m_config.isAutoFixCueError)
+                    {
+                        WTL::CString unicodeStr(unicodeStr.c_str());
+                        processCueContent(unicodeStr, *iter);
+                        std::string &utf8str = CC4EncodeUTF16::convert2utf8(unicodeStr, unicodeStr.GetLength());
+                        outFile.write(utf8str.c_str(), utf8str.length());
+                    }
+                    else
+                    {
+                        std::string &utf8str = CC4EncodeUTF16::convert2utf8(unicodeStr.c_str(), unicodeStr.length());
+                        outFile.write(utf8str.c_str(), utf8str.length());
+                    }
                 }
                 outFile.close();
-                fileInfo.isChecked = false;
-                fileInfo.status = UTF8_BOM;
-                fileInfo.encodeName = CC4EncodeUTF8::_getName().c_str();
+                SetConvertedCueStatus(fileInfo, m_config.isIgnoreUtf8);
             }
             delete []buffer;
             buffer = NULL;
         }
-        ctrl.StepIt();
     }
     status.SetWindowText(L"转换完毕");
-    reloadFileInfo();
+    rerenderFileInfo();
 
     return 0;
 }
@@ -293,7 +344,7 @@ void CProcessDlg::loadCueFiles()
     // status text
     CStatic &status = (CStatic)GetDlgItem(IDC_STATUS);
     status.SetWindowText(L"正在搜索...");
-    for (int i=0; i<m_cueFoldersCount; ++i)
+    for (int i=0; i<m_cueFoldersCount; ++i, ctrl.StepIt())
     {
         wchar_t *folder = m_cueFolders[i];
         wchar_t *ext = wcsrchr(folder, L'.');
@@ -310,7 +361,6 @@ void CProcessDlg::loadCueFiles()
                     _file.close();
                     m_files.push_back(folder);
                     m_fileInfoMap[folder] = CFileInfo();
-                    ctrl.StepIt();
                     continue;
                 }
             }
@@ -319,6 +369,7 @@ void CProcessDlg::loadCueFiles()
         CFileTraverser t(folder, CFileTraverser::FILE);
         t.addFilter(m_config.extensions);
         t.setIgnoreHidden(m_config.isIgnoreHidden);
+        t.setIgnoredFolderName(TRAVELLER_BACKUP);
         std::vector<WTL::CString> &files = t.getFiles();
         std::vector<WTL::CString>::iterator iter = files.begin();
         for (; iter != files.end(); ++iter)
@@ -329,7 +380,6 @@ void CProcessDlg::loadCueFiles()
                 m_fileInfoMap[*iter] = CFileInfo();
             }
         }
-        ctrl.StepIt();
     }
     status.SetWindowText(L"");
     preProcess();
@@ -351,18 +401,21 @@ void CProcessDlg::preProcess()
     {
         CFileInfo &fileInfo = m_fileInfoMap[*iter];
         getFileInfo(*iter, fileInfo);
-        int row = list.InsertItem(i, L"");
-        list.SetCheckState(row, fileInfo.isChecked);
-        list.SetItemText(row, 1, *iter);
-        list.SetItemText(row, 2, fileInfo.encodeName);
-        list.SetItemText(row, 3, CueStatusToString(fileInfo.status));
-        list.SetItemData(row, (DWORD_PTR)i);
+        if (!(fileInfo.status & FILE_IGNORED))
+        {
+            int row = list.InsertItem(i, L"");
+            list.SetCheckState(row, fileInfo.isSelected);
+            list.SetItemText(row, 1, *iter);
+            list.SetItemText(row, 2, fileInfo.encodeName);
+            list.SetItemText(row, 3, CueStatusToString(fileInfo.status));
+            list.SetItemData(row, (DWORD_PTR)i);
+        }
         ctrl.StepIt();
     }
     status.SetWindowText(L"就绪");
 }
 
-void CProcessDlg::reloadFileInfo()
+void CProcessDlg::rerenderFileInfo()
 {
     CListViewCtrl &list = (CListViewCtrl)GetDlgItem(IDC_FILELIST);
     list.DeleteAllItems();
@@ -370,41 +423,41 @@ void CProcessDlg::reloadFileInfo()
     for (int i = 0; iter != m_files.end(); ++iter, ++i)
     {
         CFileInfo &fileInfo = m_fileInfoMap[*iter];
-        int row = list.InsertItem(i, L"");
-        list.SetCheckState(row, fileInfo.isChecked);
-        list.SetItemText(row, 1, *iter);
-        list.SetItemText(row, 2, fileInfo.encodeName);
-        list.SetItemText(row, 3, CueStatusToString(fileInfo.status));
-        list.SetItemData(row, (DWORD_PTR)i);
+        if (!(fileInfo.status & FILE_IGNORED))
+        {
+            int row = list.InsertItem(i, L"");
+            list.SetCheckState(row, fileInfo.isSelected);
+            list.SetItemText(row, 1, *iter);
+            list.SetItemText(row, 2, fileInfo.encodeName);
+            list.SetItemText(row, 3, CueStatusToString(fileInfo.status));
+            list.SetItemData(row, (DWORD_PTR)i);
+        }
     }
 }
 
 void CProcessDlg::getFileInfo(const WTL::CString &filePath, CFileInfo &fileInfo)
 {
-    fileInfo.isChecked = false;
-    fileInfo.isInvalid = false;
-    fileInfo.status = NO_MATCHED_ENCODE;
+    fileInfo.isSelected = false;
+    fileInfo.status = EMPTY_STATUS;
     fileInfo.encodeName = L"";
 
     DWORD dwAttrs = GetFileAttributes(filePath);
     if ((dwAttrs == INVALID_FILE_ATTRIBUTES) || (dwAttrs&FILE_ATTRIBUTE_DIRECTORY))
     {
-        fileInfo.isInvalid = true;
-        fileInfo.status = NOT_A_FILE;
+        fileInfo.status |= NOT_A_FILE;
         return;
     }
     else if (dwAttrs&FILE_ATTRIBUTE_READONLY)
     {
-        fileInfo.isInvalid = true;
-        fileInfo.status = READONLY_FILE;
+        fileInfo.status |= READONLY_FILE;
         return;
     }
+    if (filePath.Right(4) == L".cue") fileInfo.status |= IS_A_CUEFILE;
     // check encoding
     CWinFile file(filePath, CWinFile::modeRead | CWinFile::shareDenyWrite);
     if (!file.open())
     {
-        fileInfo.isInvalid = true;
-        fileInfo.status = READING_FAILED;
+        fileInfo.status |= READING_FAILED;
         file.close();
         return;
     }
@@ -417,43 +470,355 @@ void CProcessDlg::getFileInfo(const WTL::CString &filePath, CFileInfo &fileInfo)
     buffer[fileLength + 1] = '\0';
     if (((unsigned char)buffer[0] == 0xFF) && ((unsigned char)buffer[1] == 0xFE) && ((fileLength & 1) == 0))
     {
-        fileInfo.isChecked = true;
+        fileInfo.isSelected = true;
         fileInfo.encodeName = CC4EncodeUTF16::_getName().c_str();
-        fileInfo.status = UTF16_LE;
+        fileInfo.status |= UTF16_LE;
     }
     else if (((unsigned char)buffer[0] == 0xFE) && ((unsigned char)buffer[1] == 0xFF) && ((fileLength & 1) == 0))
     {
-        fileInfo.isChecked = true;
+        fileInfo.isSelected = true;
         fileInfo.encodeName = CC4EncodeUTF16::_getName().c_str();
-        fileInfo.status = UTF16_BE;
+        fileInfo.status |= UTF16_BE;
     }
     else if (((unsigned char)buffer[0] == 0xEF) &&
         ((unsigned char)buffer[1] == 0xBB) &&
         ((unsigned char)buffer[2] == 0xBF))
     {
-        fileInfo.isChecked = false;
+        fileInfo.isSelected = false;
         fileInfo.encodeName = CC4EncodeUTF8::_getName().c_str();
-        fileInfo.status = UTF8_BOM;
+        fileInfo.status |= UTF8_BOM;
+        if (m_config.isIgnoreUtf8)
+            fileInfo.status |= IGNORED_BY_CONFIG;
     }
     else
     {
         const CC4Encode *encode = m_context->getMostPossibleEncode(buffer);
         if (encode)
         {
-            fileInfo.isChecked = true;
+            fileInfo.isSelected = true;
             fileInfo.encodeName = encode->getName().c_str();
+            fileInfo.status |= MATCHED_ENCODE_FOUND;
             if (encode == (CC4Encode*)CC4EncodeUTF8::getInstance())
-                fileInfo.status = UTF8_NOBOM;
-            else
-                fileInfo.status = MATCHED_ENCODE_FOUND;
+            {
+                fileInfo.status |= UTF8_NOBOM;
+                if (m_config.isIgnoreUtf8 && m_config.isIgnoreUtf8WithoutBom)
+                {
+                    fileInfo.isSelected = false;
+                    fileInfo.status |= IGNORED_BY_CONFIG;
+                }
+            }
         }
         else
         {
-            fileInfo.isChecked = false;
+            fileInfo.isSelected = false;
             fileInfo.encodeName = L"";
-            fileInfo.status = NO_MATCHED_ENCODE;
+            fileInfo.status |= NO_MATCHED_ENCODE;
         }
     }
     
     delete []buffer;
+}
+
+BOOL CProcessDlg::backupFile(const WTL::CString &origPath, const char* buffer, UINT length)
+{
+    WTL::CString &backupFolder = origPath.Left(origPath.ReverseFind(L'\\'));
+    backupFolder += TRAVELLER_BACKUP;
+    WTL::CString backupFilePath(origPath);
+    backupFilePath.Insert(backupFilePath.ReverseFind(L'\\'), TRAVELLER_BACKUP);
+    if (!PathIsDirectory(backupFolder))
+    {
+        if (PathFileExists(backupFolder))
+            DeleteFile(backupFolder);
+        CreateDirectory(backupFolder, NULL);
+    }
+    CWinFile outFile(backupFilePath, CWinFile::modeCreate|CWinFile::modeWrite|CWinFile::shareExclusive);
+    if (!outFile.open())
+        return FALSE;
+    outFile.write(buffer, length);
+    outFile.close();
+    return TRUE;
+}
+
+void CProcessDlg::convertBEtoLE(wchar_t *bigEndianBuffer, UINT length)
+{
+    for (UINT i=0; i<length; ++i)
+    {
+        unsigned char *chr = (unsigned char *)(bigEndianBuffer + i);
+        unsigned char temp = *chr;
+        *chr = *(chr + 1);
+        *(chr + 1) = temp;
+    }
+}
+
+void CProcessDlg::processCueContent(WTL::CString &cueContent, const WTL::CString &cueFilePath)
+{
+    if (m_config.isAutoFixCueError)
+    {
+        fixTTAOutdatedTag(cueContent);
+        fixAudioExtension(cueContent, cueFilePath);
+    }
+}
+
+void CProcessDlg::fixAudioExtension(WTL::CString &cueContent, const WTL::CString &cueFilePath)
+{
+    int BeginPos = cueContent.Find(L"FILE \"");
+    if (BeginPos == -1) return;
+    int EndPos = cueContent.Find(L"\" WAVE");
+    if (EndPos == -1) return;
+    BeginPos += 6;
+    if (BeginPos >= EndPos) return;
+
+    WTL::CString &audioFileName = cueContent.Mid(BeginPos, EndPos - BeginPos); // origin audio file name
+    WTL::CString &audioFilePath = cueFilePath.Left(cueFilePath.ReverseFind(L'\\'));
+    audioFilePath += L"\\";
+    audioFilePath += audioFileName;
+
+    if (PathFileExists(audioFilePath)) return; // no need to fix
+
+    // 替换扩展名查找
+    int pos = audioFileName.ReverseFind(L'.');
+    int extensionLength = 0;
+    WTL::CString audioFileNameFound(L"");
+    if (-1 != pos)
+    {
+        extensionLength += audioFileName.GetLength() - pos; // contain .
+        audioFileNameFound += audioFileName.Left(pos);
+    }
+    else
+        audioFileNameFound += audioFileName;
+
+    RemoveFromEnd(audioFilePath, extensionLength);
+    audioFilePath += L".ape";
+    if (PathFileExists(audioFilePath))
+    {
+        audioFileNameFound += L".ape";
+        cueContent.Replace(audioFileName, audioFileNameFound);
+        return;
+    }
+
+    RemoveFromEnd(audioFilePath, 4);
+    audioFilePath += L".flac";
+    if (PathFileExists(audioFilePath))
+    {
+        audioFileNameFound += L".flac";
+        cueContent.Replace(audioFileName, audioFileNameFound);
+        return;
+    }
+
+    RemoveFromEnd(audioFilePath, 5);
+    audioFilePath += L".tta";
+    if (PathFileExists(audioFilePath))
+    {
+        audioFileNameFound += L".tta";
+        cueContent.Replace(audioFileName, audioFileNameFound);
+        return;
+    }
+
+    RemoveFromEnd(audioFilePath, 4);
+    audioFilePath += L".tak";
+    if (PathFileExists(audioFilePath))
+    {
+        audioFileNameFound += L".tak";
+        cueContent.Replace(audioFileName, audioFileNameFound);
+        return;
+    }
+
+    RemoveFromEnd(audioFilePath, 4);
+    audioFilePath += L".wv";
+    if (PathFileExists(audioFilePath))
+    {
+        audioFileNameFound += L".wv";
+        cueContent.Replace(audioFileName, audioFileNameFound);
+        return;
+    }
+
+    RemoveFromEnd(audioFilePath, 3);
+    audioFilePath += L".m4a";
+    if (PathFileExists(audioFilePath))
+    {
+        audioFileNameFound += L".m4a";
+        cueContent.Replace(audioFileName, audioFileNameFound);
+        return;
+    }
+
+    RemoveFromEnd(audioFilePath, 4);
+    audioFilePath += L".wma";
+    if (PathFileExists(audioFilePath))
+    {
+        audioFileNameFound += L".wma";
+        cueContent.Replace(audioFileName, audioFileNameFound);
+        return;
+    }
+
+    RemoveFromEnd(audioFilePath, 4);
+    audioFilePath += L".wav";
+    if (PathFileExists(audioFilePath))
+    {
+        audioFileNameFound += L".wav";
+        cueContent.Replace(audioFileName, audioFileNameFound);
+        return;
+    }
+
+    RemoveFromEnd(audioFilePath, 4);
+    audioFilePath += L".mac";
+    if (PathFileExists(audioFilePath))
+    {
+        audioFileNameFound += L".mac";
+        cueContent.Replace(audioFileName, audioFileNameFound);
+        return;
+    }
+
+    RemoveFromEnd(audioFilePath, 4);
+    audioFilePath += L".fla";
+    if (PathFileExists(audioFilePath))
+    {
+        audioFileNameFound += L".fla";
+        cueContent.Replace(audioFileName, audioFileNameFound);
+        return;
+    }
+
+    RemoveFromEnd(audioFilePath, 4);
+    audioFilePath += L".wave";
+    if (PathFileExists(audioFilePath))
+    {
+        audioFileNameFound += L".wave";
+        cueContent.Replace(audioFileName, audioFileNameFound);
+        return;
+    }
+
+    RemoveFromEnd(audioFilePath, 5);
+    audioFilePath += L".mp3";
+    if (PathFileExists(audioFilePath))
+    {
+        audioFileNameFound += L".mp3";
+        cueContent.Replace(audioFileName, audioFileNameFound);
+        return;
+    }
+
+    // also guess from cue file name
+    WTL::CString audioFilePathImplicit(cueFilePath);
+    WTL::CString &audioFileNameImplicit = cueFilePath.Right(cueFilePath.GetLength() - cueFilePath.ReverseFind(L'\\') - 1);
+    //For first time, length is 4 (.cue)
+    RemoveFromEnd(audioFileNameImplicit, 4);
+
+    RemoveFromEnd(audioFilePathImplicit, 4);
+    audioFilePathImplicit += L".ape";
+    if (PathFileExists(audioFilePathImplicit))
+    {
+        audioFileNameImplicit += L".ape";
+        cueContent.Replace(audioFileName, audioFileNameImplicit);
+        return;
+    }
+
+    RemoveFromEnd(audioFilePathImplicit, 4);
+    audioFilePathImplicit += L".flac";
+    if (PathFileExists(audioFilePathImplicit))
+    {
+        audioFileNameImplicit += L".flac";
+        cueContent.Replace(audioFileName, audioFileNameImplicit);
+        return;
+    }
+
+    RemoveFromEnd(audioFilePathImplicit, 5);
+    audioFilePathImplicit += L".tta";
+    if (PathFileExists(audioFilePathImplicit))
+    {
+        audioFileNameImplicit += L".tta";
+        cueContent.Replace(audioFileName, audioFileNameImplicit);
+        return;
+    }
+
+    RemoveFromEnd(audioFilePathImplicit, 4);
+    audioFilePathImplicit += L".tak";
+    if (PathFileExists(audioFilePathImplicit))
+    {
+        audioFileNameImplicit += L".tak";
+        cueContent.Replace(audioFileName, audioFileNameImplicit);
+        return;
+    }
+
+    RemoveFromEnd(audioFilePathImplicit, 4);
+    audioFilePathImplicit += L".wv";
+    if (PathFileExists(audioFilePathImplicit))
+    {
+        audioFileNameImplicit += L".wv";
+        cueContent.Replace(audioFileName, audioFileNameImplicit);
+        return;
+    }
+
+    RemoveFromEnd(audioFilePathImplicit, 3);
+    audioFilePathImplicit += L".m4a";
+    if (PathFileExists(audioFilePathImplicit))
+    {
+        audioFileNameImplicit += L".m4a";
+        cueContent.Replace(audioFileName, audioFileNameImplicit);
+        return;
+    }
+
+    RemoveFromEnd(audioFilePathImplicit, 4);
+    audioFilePathImplicit += L".wma";
+    if (PathFileExists(audioFilePathImplicit))
+    {
+        audioFileNameImplicit += L".wma";
+        cueContent.Replace(audioFileName, audioFileNameImplicit);
+        return;
+    }
+
+    RemoveFromEnd(audioFilePathImplicit, 4);
+    audioFilePathImplicit += L".wav";
+    if (PathFileExists(audioFilePathImplicit))
+    {
+        audioFileNameImplicit += L".wav";
+        cueContent.Replace(audioFileName, audioFileNameImplicit);
+        return;
+    }
+
+    RemoveFromEnd(audioFilePathImplicit, 4);
+    audioFilePathImplicit += L".mac";
+    if (PathFileExists(audioFilePathImplicit))
+    {
+        audioFileNameImplicit += L".mac";
+        cueContent.Replace(audioFileName, audioFileNameImplicit);
+        return;
+    }
+
+    RemoveFromEnd(audioFilePathImplicit, 4);
+    audioFilePathImplicit += L".fla";
+    if (PathFileExists(audioFilePathImplicit))
+    {
+        audioFileNameImplicit += L".fla";
+        cueContent.Replace(audioFileName, audioFileNameImplicit);
+        return;
+    }
+
+    RemoveFromEnd(audioFilePathImplicit, 4);
+    audioFilePathImplicit += L".wave";
+    if (PathFileExists(audioFilePathImplicit))
+    {
+        audioFileNameImplicit += L".wave";
+        cueContent.Replace(audioFileName, audioFileNameImplicit);
+        return;
+    }
+
+    RemoveFromEnd(audioFilePathImplicit, 5);
+    audioFilePathImplicit += L".mp3";
+    if (PathFileExists(audioFilePathImplicit))
+    {
+        audioFileNameImplicit += L".mp3";
+        cueContent.Replace(audioFileName, audioFileNameImplicit);
+        return;
+    }
+
+    // no audio file found
+    return;
+}
+
+void CProcessDlg::fixTTAOutdatedTag(WTL::CString &cueContent)
+{
+    WTL::CString lowerStr(cueContent);
+    lowerStr.MakeLower();
+
+    int pos = lowerStr.Find(L"the true audio");
+    if (pos <= 0) return;
+    cueContent.Replace(cueContent.Mid(pos, 14), L"WAVE");
 }

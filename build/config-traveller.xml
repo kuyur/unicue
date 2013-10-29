@@ -5,7 +5,6 @@
     <IgnoreHidden>false</IgnoreHidden>
     <Override>true</Override>
     <BackupOrig>true</BackupOrig>
-    <AutoFixAudioExt>true</AutoFixAudioExt>
     <AutoFixCueError>true</AutoFixCueError>
     <Extensions>cue</Extensions>
     <Template>.utf-8</Template>
