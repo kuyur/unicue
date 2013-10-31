@@ -15,20 +15,20 @@ WTL::CString CueStatusToString(UINT status)
 {
     WTL::CString msg(L"");
 
-    if (status & NOT_A_FILE)           msg += L"非文件,";
-    if (status & READONLY_FILE)        msg += L"只读文件,";
-    if (status & READING_FAILED)       msg += L"读取失败,";
-    if (status & UTF16_LE)             msg += L"小尾序(LE),";
-    if (status & UTF16_BE)             msg += L"大尾序(BE),";
-    /*if (status & UTF8_BOM)             msg += L"BOM,";*/
-    if (status & UTF8_NOBOM)           msg += L"无BOM,";
-    if (status & NO_MATCHED_ENCODE)    msg += L"未知编码,";
-    if (status & MATCHED_ENCODE_FOUND) msg += L"发现匹配编码,";
-    if (status & ENCODECHOSEN_BY_USER) msg += L"手动选择编码,";
-    if (status & IGNORED_BY_CONFIG)    msg += L"无视此文件,";
-    if (status & FILE_CONVERTED)       msg += L"已转换,";
+    if (status & NOT_A_FILE)           msg += L"非文件, ";
+    if (status & READONLY_FILE)        msg += L"只读文件, ";
+    if (status & READING_FAILED)       msg += L"读取失败, ";
+    if (status & UTF16_LE)             msg += L"小尾序(LE), ";
+    if (status & UTF16_BE)             msg += L"大尾序(BE), ";
+    /*if (status & UTF8_BOM)             msg += L"BOM, ";*/
+    if (status & UTF8_NOBOM)           msg += L"无BOM, ";
+    if (status & NO_MATCHED_ENCODE)    msg += L"未知编码, ";
+    if (status & MATCHED_ENCODE_FOUND) msg += L"发现匹配编码, ";
+    if (status & ENCODECHOSEN_BY_USER) msg += L"手动选择编码, ";
+    if (status & IGNORED_BY_CONFIG)    msg += L"无视此文件, ";
+    if (status & FILE_CONVERTED)       msg += L"已转换, ";
 
-    if (msg.GetLength() > 0) msg.TrimRight(L',');
+    if (msg.GetLength() > 0) msg.TrimRight(L", ");
     return msg;
 }
 
@@ -587,226 +587,55 @@ void CProcessDlg::fixAudioExtension(WTL::CString &cueContent, const WTL::CString
     else
         audioFileNameFound += audioFileName;
 
-    RemoveFromEnd(audioFilePath, extensionLength);
-    audioFilePath += L".ape";
-    if (PathFileExists(audioFilePath))
+    const static wchar_t* FORMAT[12] =
     {
-        audioFileNameFound += L".ape";
-        cueContent.Replace(audioFileName, audioFileNameFound);
-        return;
-    }
+        L".ape",
+        L".flac",
+        L".tta",
+        L".tak",
+        L".wv",
+        L".m4a",
+        L".wma",
+        L".wav",
+        L".mac",
+        L".fla",
+        L".wave",
+        L".mp3"
+    };
 
-    RemoveFromEnd(audioFilePath, 4);
-    audioFilePath += L".flac";
-    if (PathFileExists(audioFilePath))
+    for (int i = 0; i < 12; ++i)
     {
-        audioFileNameFound += L".flac";
-        cueContent.Replace(audioFileName, audioFileNameFound);
-        return;
-    }
-
-    RemoveFromEnd(audioFilePath, 5);
-    audioFilePath += L".tta";
-    if (PathFileExists(audioFilePath))
-    {
-        audioFileNameFound += L".tta";
-        cueContent.Replace(audioFileName, audioFileNameFound);
-        return;
-    }
-
-    RemoveFromEnd(audioFilePath, 4);
-    audioFilePath += L".tak";
-    if (PathFileExists(audioFilePath))
-    {
-        audioFileNameFound += L".tak";
-        cueContent.Replace(audioFileName, audioFileNameFound);
-        return;
-    }
-
-    RemoveFromEnd(audioFilePath, 4);
-    audioFilePath += L".wv";
-    if (PathFileExists(audioFilePath))
-    {
-        audioFileNameFound += L".wv";
-        cueContent.Replace(audioFileName, audioFileNameFound);
-        return;
-    }
-
-    RemoveFromEnd(audioFilePath, 3);
-    audioFilePath += L".m4a";
-    if (PathFileExists(audioFilePath))
-    {
-        audioFileNameFound += L".m4a";
-        cueContent.Replace(audioFileName, audioFileNameFound);
-        return;
-    }
-
-    RemoveFromEnd(audioFilePath, 4);
-    audioFilePath += L".wma";
-    if (PathFileExists(audioFilePath))
-    {
-        audioFileNameFound += L".wma";
-        cueContent.Replace(audioFileName, audioFileNameFound);
-        return;
-    }
-
-    RemoveFromEnd(audioFilePath, 4);
-    audioFilePath += L".wav";
-    if (PathFileExists(audioFilePath))
-    {
-        audioFileNameFound += L".wav";
-        cueContent.Replace(audioFileName, audioFileNameFound);
-        return;
-    }
-
-    RemoveFromEnd(audioFilePath, 4);
-    audioFilePath += L".mac";
-    if (PathFileExists(audioFilePath))
-    {
-        audioFileNameFound += L".mac";
-        cueContent.Replace(audioFileName, audioFileNameFound);
-        return;
-    }
-
-    RemoveFromEnd(audioFilePath, 4);
-    audioFilePath += L".fla";
-    if (PathFileExists(audioFilePath))
-    {
-        audioFileNameFound += L".fla";
-        cueContent.Replace(audioFileName, audioFileNameFound);
-        return;
-    }
-
-    RemoveFromEnd(audioFilePath, 4);
-    audioFilePath += L".wave";
-    if (PathFileExists(audioFilePath))
-    {
-        audioFileNameFound += L".wave";
-        cueContent.Replace(audioFileName, audioFileNameFound);
-        return;
-    }
-
-    RemoveFromEnd(audioFilePath, 5);
-    audioFilePath += L".mp3";
-    if (PathFileExists(audioFilePath))
-    {
-        audioFileNameFound += L".mp3";
-        cueContent.Replace(audioFileName, audioFileNameFound);
-        return;
+        RemoveFromEnd(audioFilePath, extensionLength);
+        const wchar_t *format = FORMAT[i];
+        audioFilePath += format;
+        if (PathFileExists(audioFilePath))
+        {
+            audioFileNameFound += format;
+            cueContent.Replace(audioFileName, audioFileNameFound);
+            return;
+        }
+        extensionLength = wcslen(format);
     }
 
     // also guess from cue file name
     WTL::CString audioFilePathImplicit(cueFilePath);
     WTL::CString &audioFileNameImplicit = cueFilePath.Right(cueFilePath.GetLength() - cueFilePath.ReverseFind(L'\\') - 1);
     //For first time, length is 4 (.cue)
-    RemoveFromEnd(audioFileNameImplicit, 4);
+    extensionLength = 4;
+    RemoveFromEnd(audioFileNameImplicit, extensionLength);
 
-    RemoveFromEnd(audioFilePathImplicit, 4);
-    audioFilePathImplicit += L".ape";
-    if (PathFileExists(audioFilePathImplicit))
+    for (int i = 0; i < 12; ++i)
     {
-        audioFileNameImplicit += L".ape";
-        cueContent.Replace(audioFileName, audioFileNameImplicit);
-        return;
-    }
-
-    RemoveFromEnd(audioFilePathImplicit, 4);
-    audioFilePathImplicit += L".flac";
-    if (PathFileExists(audioFilePathImplicit))
-    {
-        audioFileNameImplicit += L".flac";
-        cueContent.Replace(audioFileName, audioFileNameImplicit);
-        return;
-    }
-
-    RemoveFromEnd(audioFilePathImplicit, 5);
-    audioFilePathImplicit += L".tta";
-    if (PathFileExists(audioFilePathImplicit))
-    {
-        audioFileNameImplicit += L".tta";
-        cueContent.Replace(audioFileName, audioFileNameImplicit);
-        return;
-    }
-
-    RemoveFromEnd(audioFilePathImplicit, 4);
-    audioFilePathImplicit += L".tak";
-    if (PathFileExists(audioFilePathImplicit))
-    {
-        audioFileNameImplicit += L".tak";
-        cueContent.Replace(audioFileName, audioFileNameImplicit);
-        return;
-    }
-
-    RemoveFromEnd(audioFilePathImplicit, 4);
-    audioFilePathImplicit += L".wv";
-    if (PathFileExists(audioFilePathImplicit))
-    {
-        audioFileNameImplicit += L".wv";
-        cueContent.Replace(audioFileName, audioFileNameImplicit);
-        return;
-    }
-
-    RemoveFromEnd(audioFilePathImplicit, 3);
-    audioFilePathImplicit += L".m4a";
-    if (PathFileExists(audioFilePathImplicit))
-    {
-        audioFileNameImplicit += L".m4a";
-        cueContent.Replace(audioFileName, audioFileNameImplicit);
-        return;
-    }
-
-    RemoveFromEnd(audioFilePathImplicit, 4);
-    audioFilePathImplicit += L".wma";
-    if (PathFileExists(audioFilePathImplicit))
-    {
-        audioFileNameImplicit += L".wma";
-        cueContent.Replace(audioFileName, audioFileNameImplicit);
-        return;
-    }
-
-    RemoveFromEnd(audioFilePathImplicit, 4);
-    audioFilePathImplicit += L".wav";
-    if (PathFileExists(audioFilePathImplicit))
-    {
-        audioFileNameImplicit += L".wav";
-        cueContent.Replace(audioFileName, audioFileNameImplicit);
-        return;
-    }
-
-    RemoveFromEnd(audioFilePathImplicit, 4);
-    audioFilePathImplicit += L".mac";
-    if (PathFileExists(audioFilePathImplicit))
-    {
-        audioFileNameImplicit += L".mac";
-        cueContent.Replace(audioFileName, audioFileNameImplicit);
-        return;
-    }
-
-    RemoveFromEnd(audioFilePathImplicit, 4);
-    audioFilePathImplicit += L".fla";
-    if (PathFileExists(audioFilePathImplicit))
-    {
-        audioFileNameImplicit += L".fla";
-        cueContent.Replace(audioFileName, audioFileNameImplicit);
-        return;
-    }
-
-    RemoveFromEnd(audioFilePathImplicit, 4);
-    audioFilePathImplicit += L".wave";
-    if (PathFileExists(audioFilePathImplicit))
-    {
-        audioFileNameImplicit += L".wave";
-        cueContent.Replace(audioFileName, audioFileNameImplicit);
-        return;
-    }
-
-    RemoveFromEnd(audioFilePathImplicit, 5);
-    audioFilePathImplicit += L".mp3";
-    if (PathFileExists(audioFilePathImplicit))
-    {
-        audioFileNameImplicit += L".mp3";
-        cueContent.Replace(audioFileName, audioFileNameImplicit);
-        return;
+        RemoveFromEnd(audioFilePathImplicit, extensionLength);
+        const wchar_t *format = FORMAT[i];
+        audioFilePathImplicit += format;
+        if (PathFileExists(audioFilePathImplicit))
+        {
+            audioFileNameImplicit += format;
+            cueContent.Replace(audioFileName, audioFileNameImplicit);
+            return;
+        }
+        extensionLength = wcslen(format);
     }
 
     // no audio file found
