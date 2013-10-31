@@ -12,6 +12,7 @@
 /************************************************************************/
 
 #include "stdafx.h"
+#include <Shlwapi.h>
 #include "..\common\winfile.h"
 #include "..\common\utils.h"
 #include "..\common\win32helper.h"
@@ -29,7 +30,7 @@ BOOL CMainDlg::PreTranslateMessage(MSG* pMsg)
 CMainDlg::CMainDlg()
     :m_bNeedConvert(TRUE), m_RawStringLength(0), m_StringLength(0), m_UnicodeLength(0),
     m_ConfigPath(L""), m_FilePathName(L""), m_CodeStatus(L""), m_StringCodeType(L"Local Codepage"),
-    m_bCueFile(FALSE), m_bTransferString(FALSE)
+    m_bCueFile(FALSE), m_bTransferString(FALSE), m_context(NULL)
 {
     m_RawString = NULL;
     m_String = NULL;
@@ -104,10 +105,6 @@ CMainDlg::CMainDlg()
     default:
         SetThreadLocalSettings(LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED);
     }
-    // init C4 Context and load charmaps
-    m_context = new CC4Context(std::wstring(m_Config.MapConfName), GetProcessFolder());
-    if (!m_context->init())
-        MessageBox(getString(IDS_FAILEDTOLOAD), _T("Unicue"), MB_OK);
 }
 
 CMainDlg::~CMainDlg()
@@ -153,6 +150,11 @@ LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
 
     // always on top
     SetDialogPos();
+
+    // init C4 Context and load charmaps
+    m_context = new CC4Context(std::wstring(m_Config.MapConfName), GetProcessFolder());
+    if (!m_context->init())
+        MessageBox(getString(IDS_FAILEDTOLOAD), _T("Unicue"), MB_OK);
 
     // add encode items
     CComboBox &theCombo = (CComboBox)GetDlgItem(IDC_COMBO_SELECTCODE);
@@ -1424,16 +1426,16 @@ void CMainDlg::FixCue()
 
     FixTTACue();
 
-    WTL::CString CueString;
-    getWindowText(GetDlgItem(IDC_EDIT_UNICODE), CueString);
+    WTL::CString cueContent;
+    getWindowText(GetDlgItem(IDC_EDIT_UNICODE), cueContent);
 
-    int BeginPos = CueString.Find(_T("FILE \""));
+    int BeginPos = cueContent.Find(_T("FILE \""));
     if (BeginPos == -1)
     {
         if (!m_Config.CloseCuePrompt) MessageBox(getString(IDS_CORRUPTCUE));
         return;
     }
-    int EndPos = CueString.Find(_T("\" WAVE"));
+    int EndPos = cueContent.Find(_T("\" WAVE"));
     if (EndPos == -1)
     {
         if (!m_Config.CloseCuePrompt) MessageBox(getString(IDS_CORRUPTCUE));
@@ -1447,151 +1449,80 @@ void CMainDlg::FixCue()
     }
 
     // 依据文档路径：m_FilePathName查找音频文件
-    WTL::CString &MusicFileName = CueString.Mid(BeginPos, EndPos - BeginPos); // 音频文件名
-    int pos = m_FilePathName.ReverseFind('\\');
-    WTL::CString MusicFilePath = m_FilePathName.Left(pos); // 路径
-    MusicFilePath += _T("\\");
-    MusicFilePath += MusicFileName;
+    WTL::CString &audioFileName = cueContent.Mid(BeginPos, EndPos - BeginPos); // 音频文件名
+    WTL::CString &audioFilePath = m_FilePathName.Left(m_FilePathName.ReverseFind(L'\\'));
+    audioFilePath += _T('\\');
+    audioFilePath += audioFileName;
 
-    WIN32_FIND_DATA FindFileData;
-    HANDLE hFind;
-    hFind=FindFirstFile(MusicFilePath, &FindFileData);
-    if (hFind == INVALID_HANDLE_VALUE) // 没找到cue中音频文件
+    if (PathFileExists(audioFileName)) return; // no need to fix
+
+    // 替换扩展名查找
+    int pos = audioFileName.ReverseFind(L'.');
+    int extensionLength = 0;
+    WTL::CString audioFileNameFound(_T(""));
+    if (-1 != pos)
     {
-        pos = MusicFilePath.ReverseFind('.');
-        MusicFilePath = MusicFilePath.Left(pos);
-        // 替换扩展名查找
-        WTL::CString FindFilePath;
-
-        FindFilePath = MusicFilePath + _T(".ape"); // ape
-        hFind = FindFirstFile(FindFilePath, &FindFileData);
-        if (hFind != INVALID_HANDLE_VALUE)
-        {
-            CueString.Replace(MusicFileName, FindFileData.cFileName);
-            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString);
-            FindClose(hFind);
-            return;
-        }
-
-        FindFilePath = MusicFilePath + _T(".mac"); // ape
-        hFind = FindFirstFile(FindFilePath, &FindFileData);
-        if (hFind != INVALID_HANDLE_VALUE)
-        {
-            CueString.Replace(MusicFileName, FindFileData.cFileName);
-            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString);
-            FindClose(hFind);
-            return;
-        }
-
-        FindFilePath = MusicFilePath + _T(".flac"); //flac
-        hFind=FindFirstFile(FindFilePath, &FindFileData);
-        if (hFind != INVALID_HANDLE_VALUE)
-        {
-            CueString.Replace(MusicFileName, FindFileData.cFileName);
-            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString);
-            FindClose(hFind);
-            return;
-        }
-
-        FindFilePath = MusicFilePath + _T(".fla"); //flac
-        hFind = FindFirstFile(FindFilePath, &FindFileData);
-        if (hFind != INVALID_HANDLE_VALUE)
-        {
-            CueString.Replace(MusicFileName, FindFileData.cFileName);
-            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString);
-            FindClose(hFind);
-            return;
-        }
-
-        FindFilePath = MusicFilePath + _T(".tta"); //tta
-        hFind = FindFirstFile(FindFilePath, &FindFileData);
-        if (hFind != INVALID_HANDLE_VALUE)
-        {
-            CueString.Replace(MusicFileName, FindFileData.cFileName);
-            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString);
-            FindClose(hFind);
-            return;
-        }
-
-        FindFilePath = MusicFilePath+_T(".tak"); //tak
-        hFind=FindFirstFile(FindFilePath, &FindFileData);
-        if (hFind != INVALID_HANDLE_VALUE)
-        {
-            CueString.Replace(MusicFileName, FindFileData.cFileName);
-            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString);
-            FindClose(hFind);
-            return;
-        }
-
-        FindFilePath = MusicFilePath + _T(".wv"); //wv
-        hFind=FindFirstFile(FindFilePath, &FindFileData);
-        if (hFind != INVALID_HANDLE_VALUE)
-        {
-            CueString.Replace(MusicFileName, FindFileData.cFileName);
-            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString);
-            FindClose(hFind);
-            return;
-        }
-
-        FindFilePath = MusicFilePath + _T(".m4a"); //apple lossless
-        hFind = FindFirstFile(FindFilePath, &FindFileData);
-        if (hFind != INVALID_HANDLE_VALUE)
-        {
-            CueString.Replace(MusicFileName, FindFileData.cFileName);
-            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString);
-            FindClose(hFind);
-            return;
-        }
-
-        FindFilePath = MusicFilePath + _T(".wma"); //wma
-        hFind = FindFirstFile(FindFilePath, &FindFileData);
-        if (hFind != INVALID_HANDLE_VALUE)
-        {
-            CueString.Replace(MusicFileName, FindFileData.cFileName);
-            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString);
-            FindClose(hFind);
-            return;
-        }
-
-        FindFilePath = MusicFilePath + _T(".wav"); //wav
-        hFind = FindFirstFile(FindFilePath, &FindFileData);
-        if (hFind != INVALID_HANDLE_VALUE)
-        {
-            CueString.Replace(MusicFileName, FindFileData.cFileName);
-            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString);
-            FindClose(hFind);
-            return;
-        }
-
-        FindFilePath = MusicFilePath + _T(".wave"); //wav
-        hFind = FindFirstFile(FindFilePath, &FindFileData);
-        if (hFind != INVALID_HANDLE_VALUE)
-        {
-            CueString.Replace(MusicFileName, FindFileData.cFileName);
-            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString);
-            FindClose(hFind);
-            return;
-        }
-
-        FindFilePath = MusicFilePath + _T(".mp3"); //mp3
-        hFind = FindFirstFile(FindFilePath, &FindFileData);
-        if (hFind != INVALID_HANDLE_VALUE)
-        {
-            CueString.Replace(MusicFileName, FindFileData.cFileName);
-            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString);
-            FindClose(hFind);
-            return;
-        }
-
-        //最后还是没找到
-        FindClose(hFind);
-        return;
+        extensionLength += audioFileName.GetLength() - pos; // contain .
+        audioFileNameFound += audioFileName.Left(pos);
     }
     else
+        audioFileNameFound += audioFileName;
+
+    const static wchar_t* FORMAT[12] =
     {
-        FindClose(hFind);
-        return;
+        L".ape",
+        L".flac",
+        L".tta",
+        L".tak",
+        L".wv",
+        L".m4a",
+        L".wma",
+        L".wav",
+        L".mac",
+        L".fla",
+        L".wave",
+        L".mp3"
+    };
+
+    for (int i = 0; i < 12; ++i)
+    {
+        RemoveFromEnd(audioFilePath, extensionLength);
+        const wchar_t *format = FORMAT[i];
+        audioFilePath += format;
+        if (PathFileExists(audioFilePath))
+        {
+            audioFileNameFound += format;
+            cueContent.Replace(audioFileName, audioFileNameFound);
+            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(cueContent);
+            return;
+        }
+        extensionLength = wcslen(format);
     }
+    
+    // also guess from cue file name
+    WTL::CString audioFilePathImplicit(m_FilePathName);
+    WTL::CString &audioFileNameImplicit = m_FilePathName.Right(m_FilePathName.GetLength() - m_FilePathName.ReverseFind(L'\\') - 1);
+    //For first time, length is 4 (.cue)
+    extensionLength = 4;
+    RemoveFromEnd(audioFileNameImplicit, extensionLength);
+
+    for (int i = 0; i < 12; ++i)
+    {
+        RemoveFromEnd(audioFilePathImplicit, extensionLength);
+        const wchar_t *format = FORMAT[i];
+        audioFilePathImplicit += format;
+        if (PathFileExists(audioFilePathImplicit))
+        {
+            audioFileNameImplicit += format;
+            cueContent.Replace(audioFileName, audioFileNameImplicit);
+            GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(cueContent);
+            return;
+        }
+        extensionLength = wcslen(format);
+    }
+
+    // 最后还是没找到
+    return;
 }
 
 void CMainDlg::FixInternalCue(WTL::CString AudioFileName)
@@ -1631,7 +1562,7 @@ void CMainDlg::FixTTACue()
     getWindowText(GetDlgItem(IDC_EDIT_UNICODE), cueString);
     cueString.MakeLower();
 
-    int pos=cueString.Find(_T("the true audio"));
+    int pos = cueString.Find(_T("the true audio"));
     if (pos <= 0) return;
     getWindowText(GetDlgItem(IDC_EDIT_UNICODE), cueString);
     WTL::CString &NewCueString = cueString.Left(pos) + _T("WAVE") + cueString.Right(cueString.GetLength() - pos - 14);
