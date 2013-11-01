@@ -8,6 +8,7 @@
 #include "..\common\winfile.h"
 #include "..\common\win32helper.h"
 #include "..\common\wtlhelper.h"
+#include "..\common\utils.h"
 
 static const WCHAR TRAVELLER_BACKUP[] = L"\\ut-orig";
 
@@ -537,17 +538,6 @@ BOOL CProcessDlg::backupFile(const WTL::CString &origPath, const char* buffer, U
     outFile.write(buffer, length);
     outFile.close();
     return TRUE;
-}
-
-void CProcessDlg::convertBEtoLE(wchar_t *bigEndianBuffer, UINT length)
-{
-    for (UINT i=0; i<length; ++i)
-    {
-        unsigned char *chr = (unsigned char *)(bigEndianBuffer + i);
-        unsigned char temp = *chr;
-        *chr = *(chr + 1);
-        *(chr + 1) = temp;
-    }
 }
 
 void CProcessDlg::processCueContent(WTL::CString &cueContent, const WTL::CString &cueFilePath)

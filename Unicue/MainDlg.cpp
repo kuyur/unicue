@@ -301,7 +301,7 @@ BOOL CMainDlg::DealFile()
         theCombo.SetCurSel(nIndex);
         m_String = m_RawString + 2; // 真正的起始地址
         m_StringLength = m_RawStringLength - 2; // 真正的长度
-        if ((m_RawStringLength%2) != 0)
+        if ((m_RawStringLength&1) != 0)
         {
             MessageBox(getString(IDS_CORRUPTFILE));
             return FALSE;
@@ -311,13 +311,7 @@ BOOL CMainDlg::DealFile()
         memcpy((void*)m_UnicodeString, m_String, m_StringLength);
         m_UnicodeString[m_UnicodeLength] = '\0';
         // 调整高低位顺序
-        for (UINT i=0; i<m_UnicodeLength; i++)
-        {
-            unsigned char chars[2];
-            memcpy(chars,(void*)(m_UnicodeString+i),2);
-            wchar_t theChr = chars[0] * 256 + chars[1];
-            m_UnicodeString[i] = theChr;
-        }
+        convertBEtoLE(m_UnicodeString, m_UnicodeLength);
     }
     // UTF-8(with BOM)
     if (((unsigned char)m_RawString[0] == 0xEF) &&

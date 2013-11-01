@@ -236,6 +236,7 @@
     <ClInclude Include="..\c4-lib\c4segment.h" />
     <ClInclude Include="..\c4-lib\tinystr.h" />
     <ClInclude Include="..\c4-lib\tinyxml.h" />
+    <ClInclude Include="..\common\utils.h" />
     <ClInclude Include="..\common\win32helper.h" />
     <ClInclude Include="..\common\winfile.h" />
     <ClInclude Include="..\common\wtlhelper.h" />

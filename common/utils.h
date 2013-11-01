@@ -67,4 +67,15 @@ inline void toLower(std::wstring &str)
     std::transform(str.begin(), str.end(), str.begin(), _wchartolower);
 }
 
+inline void convertBEtoLE(wchar_t *bigEndianBuffer, unsigned int length)
+{
+    for (unsigned int i=0; i<length; ++i)
+    {
+        unsigned char *chr = (unsigned char *)(bigEndianBuffer + i);
+        unsigned char temp = *chr;
+        *chr = *(chr + 1);
+        *(chr + 1) = temp;
+    }
+}
+
 #endif // UTILS_H_

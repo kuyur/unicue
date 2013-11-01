@@ -51,7 +51,6 @@ private:
     void rerenderFileInfo();
     void getFileInfo(const WTL::CString &filePath, CFileInfo &fileInfo);
     BOOL backupFile(const WTL::CString &origPath, const char* buffer, UINT length);
-    void convertBEtoLE(wchar_t *bigEndianBuffer, UINT length);
     void processCueContent(WTL::CString &cueContent, const WTL::CString &cueFilePath);
     void fixAudioExtension(WTL::CString &cueContent, const WTL::CString &cueFilePath);
     void fixTTAOutdatedTag(WTL::CString &cueContent);

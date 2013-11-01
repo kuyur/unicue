@@ -5,6 +5,7 @@
 #include "..\common\winfile.h"
 #include "..\common\win32helper.h"
 #include "..\common\wtlhelper.h"
+#include "..\common\utils.h"
 
 CMainDlg::CMainDlg()
     :m_String(0), m_UnicodeString(0), m_FilePathName(L""),
@@ -195,17 +196,11 @@ BOOL CMainDlg::DealFile()
         m_StringLength = (fileLength>>1) - 1;
         m_String = new wchar_t[m_StringLength+1];
         OpenFile.seek(2, CWinFile::begin);
-        OpenFile.read((char*)m_String,m_StringLength*sizeof(wchar_t));
+        OpenFile.read((char*)m_String, m_StringLength*sizeof(wchar_t));
         OpenFile.close();
-        m_String[m_StringLength]=0x0000;
+        m_String[m_StringLength] = 0;
         // 调整高低位顺序
-        for (UINT i=0; i<m_StringLength; i++)
-        {
-            unsigned char *chr = (unsigned char *)(m_String + i);
-            unsigned char temp = *chr;
-            *chr = *(chr + 1);
-            *(chr + 1) = temp;
-        }
+        convertBEtoLE(m_String, m_StringLength);
     }
     else if ((bom[0] == 0xEF) && (bom[1] == 0xBB) && (bom[2] == 0xBF)) // UTF-8
     {
