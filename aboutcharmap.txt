@@ -37,5 +37,11 @@ Cyrillic(西里尔字母) to Unicode
 映射表物理文件cyrillic2u-little-endian.map为按CP1251顺序存放的Unicode字符，范围为0x80～0xFF，不含ASCII部分
 和Windows平台CP1251的差异：一致
 
+Windows-1252 to Unicode
+采用微软CP1252版本，http://unicode.org/Public/MAPPINGS/VENDORS/MICSFT/WINDOWS/CP1252.TXT
+码表空间为0x00～0xFF
+映射表物理文件latin2u-little-endian.map为按CP1252顺序存放的Unicode字符，范围为0x80～0xFF，不含ASCII部分
+和Windows平台CP1252的差异：一致
+
 ==English Version==
 // TODO
