@@ -59,6 +59,7 @@ extern CAppModule _Module;
 #include <atlimage.h>
 #include <atlmisc.h>
 #include <atlddx.h>
+#include <atlctrlx.h>
 
 // for memory leak debug
 #if defined( WIN32 ) && defined( _DEBUG )

@@ -239,7 +239,6 @@
     <ClCompile Include="..\common\win32helper.cpp" />
     <ClCompile Include="..\common\winfile.cpp" />
     <ClCompile Include="AboutDlg.cpp" />
-    <ClCompile Include="HyperLink.cpp" />
     <ClCompile Include="MainDlg.cpp" />
     <ClCompile Include="SettingDlg.cpp" />
     <ClCompile Include="stdafx.cpp">
@@ -262,7 +261,6 @@
     <ClInclude Include="..\common\wtlhelper.h" />
     <ClInclude Include="AboutDlg.h" />
     <ClInclude Include="config.h" />
-    <ClInclude Include="HyperLink.h" />
     <ClInclude Include="MainDlg.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="SettingDlg.h" />

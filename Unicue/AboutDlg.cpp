@@ -20,7 +20,10 @@ LRESULT CAboutDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPara
     CenterWindow(GetParent());
 
     // hyperlink
-    m_link.Attach(GetDlgItem(IDC_STATIC_KUYUR).m_hWnd);
+    m_link.SubclassWindow(GetDlgItem(IDC_STATIC_KUYUR));
+    DWORD linkStyle = m_link.GetHyperLinkExtendedStyle() | HLINK_NOTIFYBUTTON | HLINK_COMMANDBUTTON;
+    m_link.SetHyperLinkExtendedStyle(linkStyle);
+    m_link.SetHyperLink(L"http://kuyur.info/blog");
 
     // Use CImage to load resource from Stream or file
     HGLOBAL  hGlobal = NULL;
@@ -91,4 +94,10 @@ LRESULT CAboutDlg::OnPaint(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, 
     EndPaint(&ps);
 
     return 0;
+}
+
+LRESULT CAboutDlg::OnClickHyperLink(int /*idCtrl*/, LPNMHDR /*pnmh*/, BOOL& /*bHandled*/)
+{
+    ::ShellExecute(NULL, L"open", L"http://kuyur.info/blog/", NULL, NULL, SW_SHOWNORMAL);
+    return 0;  
 }

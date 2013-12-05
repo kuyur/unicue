@@ -17,8 +17,6 @@
 #ifndef ABOUTDLG_H_
 #define ABOUTDLG_H_
 
-#include "HyperLink.h"
-
 class CAboutDlg : public CDialogImpl<CAboutDlg>
 {
 public:
@@ -29,6 +27,7 @@ public:
         MESSAGE_HANDLER(WM_PAINT, OnPaint)
         COMMAND_ID_HANDLER(IDOK, OnCloseCmd)
         COMMAND_ID_HANDLER(IDCANCEL, OnCloseCmd)
+        NOTIFY_HANDLER(IDC_STATIC_KUYUR, NM_CLICK, OnClickHyperLink)
     END_MSG_MAP()
 
 // Handler prototypes (uncomment arguments if needed):
@@ -39,6 +38,7 @@ public:
     LRESULT OnPaint(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
     LRESULT OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
     LRESULT OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+    LRESULT OnClickHyperLink(int /*idCtrl*/, LPNMHDR /*pnmh*/, BOOL& /*bHandled*/);
 
 private:
     CImage m_png;

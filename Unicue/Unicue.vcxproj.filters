@@ -30,9 +30,6 @@
     <ClCompile Include="SettingDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="HyperLink.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\common\winfile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -72,9 +69,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="config.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="HyperLink.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\common\wtlhelper.h">
