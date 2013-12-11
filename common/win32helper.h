@@ -1,7 +1,7 @@
 ﻿/************************************************************************/
 /*                                                                      */
-/* Unicue 1.2                                                           */
-/* A tool to convert file from ansi code-page to Unicode                */
+/* Common helper functions for Unicue Project.                          */
+/* It is a part of Unicue Project.                                      */
 /*                                                                      */
 /* Author:  kuyur (kuyur@kuyur.info)                                    */
 /* Published under GPLv3                                                */
