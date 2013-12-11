@@ -1,7 +1,7 @@
 ﻿/************************************************************************/
 /*                                                                      */
 /* Common helper functions for Unicue Project.                          */
-/* It is a part of Unicue Project.                                      */
+/* The file is a part of Unicue Project.                                */
 /*                                                                      */
 /* Author:  kuyur (kuyur@kuyur.info)                                    */
 /* Published under GPLv3                                                */
