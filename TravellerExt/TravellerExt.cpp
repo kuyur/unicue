@@ -1,4 +1,16 @@
-﻿// TravellerExt.cpp : DLL 导出的实现。
+﻿/************************************************************************/
+/*                                                                      */
+/* Traveller 1.2                                                        */
+/* A batch tool to convert files from ansi code-page to Unicode.        */
+/* It is a part of Unicue Project.                                      */
+/*                                                                      */
+/* Author:  kuyur (kuyur@kuyur.info)                                    */
+/* Published under GPLv3                                                */
+/* http://www.gnu.org/licenses/gpl-3.0.en.html                          */
+/*                                                                      */
+/* Project URL: http://github.com/kuyur/unicue                          */
+/*                                                                      */
+/************************************************************************/
 
 //
 // 注意: COM+ 1.0 信息:

@@ -1,5 +1,16 @@
-// Traveller.cpp : Defines the entry point for the console application.
-//
+/************************************************************************/
+/*                                                                      */
+/* Traveller 1.2                                                        */
+/* A batch tool to convert files from ansi code-page to Unicode.        */
+/* It is a part of Unicue Project.                                      */
+/*                                                                      */
+/* Author:  kuyur (kuyur@kuyur.info)                                    */
+/* Published under GPLv3                                                */
+/* http://www.gnu.org/licenses/gpl-3.0.en.html                          */
+/*                                                                      */
+/* Project URL: http://github.com/kuyur/unicue                          */
+/*                                                                      */
+/************************************************************************/
 
 #include "stdafx.h"
 #include "resource.h"
