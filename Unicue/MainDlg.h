@@ -36,11 +36,9 @@ protected:
     WTL::CString  m_ConfigPath;          // File path of config
     BOOL          m_bCueFile;            // Type of file to be converted is a cue
     BOOL          m_bTransferString;     // Transfer string mode if TRUE, Transfer file mode if FALSE
-    CC4Context*   m_context;             // converting context
+    CC4Context*   m_context;             // Converting context
+    CMenu         m_popupMenu;           // Popup menu
 
-    BOOL LoadConfigFile(TiXmlDocument *xmlfile);
-    BOOL CreateConfigFile();
-    BOOL SaveConfigFile();
     void FixCue();
     void FixInternalCue(WTL::CString AudioFileName);
     void FixTTACue();
@@ -72,10 +70,15 @@ public:
         COMMAND_ID_HANDLER(IDM_FILE_OPEN, OnFileOpen)
         COMMAND_ID_HANDLER(IDM_FILE_SAVE, OnFileSave)
         COMMAND_ID_HANDLER(IDM_FILE_OPTION, OnFileOption)
+        COMMAND_ID_HANDLER(IDM_UTF_8_WITH_BOM, OnPopupUTF8)
+        COMMAND_ID_HANDLER(IDM_UTF_8_WITHOUT_BOM, OnPopupUTF8NoBom)
+        COMMAND_ID_HANDLER(IDM_UTF_16_LITTLE_ENDIAN, OnPopupUTF16LE)
+        COMMAND_ID_HANDLER(IDM_UTF_16_BIG_ENDIAN, OnPopupUTF16BE)
         COMMAND_HANDLER(IDC_CHECK_AUTOCHECKCODE, BN_CLICKED, OnBnClickedCheckAutocheckcode)
         COMMAND_HANDLER(IDC_CHECK_ALWAYSONTOP, BN_CLICKED, OnBnClickedCheckAlwaysontop)
         COMMAND_HANDLER(IDC_COMBO_SELECTCODE, CBN_SELCHANGE, OnCbnSelchangeComboSelectcode)
         COMMAND_HANDLER(IDC_BUTTON_DO, BN_CLICKED, OnBnClickedButtonDo)
+        COMMAND_HANDLER(IDC_BUTTON_SELECTSAVECODE, BN_CLICKED, OnBnClickedButtonSelectOutputCode);
         COMMAND_HANDLER(IDC_BUTTON_SAVE, BN_CLICKED, OnBnClickedButtonSave)
         COMMAND_HANDLER(IDC_BUTTON_SAVEAS, BN_CLICKED, OnBnClickedButtonSaveas)
         COMMAND_HANDLER(IDC_BUTTON_TRANSFERSTRING, BN_CLICKED, OnBnClickedButtonTransferstring)
@@ -102,6 +105,10 @@ public:
     LRESULT OnFileOpen(WORD, WORD, HWND, BOOL&);
     LRESULT OnFileSave(WORD, WORD, HWND, BOOL&);
     LRESULT OnFileOption(WORD, WORD, HWND, BOOL&);
+    LRESULT OnPopupUTF8(WORD, WORD, HWND, BOOL&);
+    LRESULT OnPopupUTF8NoBom(WORD, WORD, HWND, BOOL&);
+    LRESULT OnPopupUTF16LE(WORD, WORD, HWND, BOOL&);
+    LRESULT OnPopupUTF16BE(WORD, WORD, HWND, BOOL&);
     LRESULT OnDropFiles(UINT, WPARAM, LPARAM, BOOL&);
     LRESULT OnCbnSelchangeComboSelectcode(WORD, WORD, HWND, BOOL&);
     LRESULT OnBnClickedButtonDo(WORD, WORD, HWND, BOOL&);
@@ -110,6 +117,7 @@ public:
     LRESULT OnBnClickedCheckAutocheckcode(WORD, WORD, HWND, BOOL&);
     LRESULT OnBnClickedCheckAlwaysontop(WORD, WORD, HWND, BOOL&);
     LRESULT OnBnClickedButtonTransferstring(WORD, WORD, HWND, BOOL&);
+    LRESULT OnBnClickedButtonSelectOutputCode(WORD, WORD, HWND, BOOL&);
 
     void CloseDialog(int nVal);
 };

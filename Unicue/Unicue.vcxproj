@@ -239,6 +239,7 @@
     <ClCompile Include="..\common\win32helper.cpp" />
     <ClCompile Include="..\common\winfile.cpp" />
     <ClCompile Include="AboutDlg.cpp" />
+    <ClCompile Include="config.cpp" />
     <ClCompile Include="MainDlg.cpp" />
     <ClCompile Include="SettingDlg.cpp" />
     <ClCompile Include="stdafx.cpp">

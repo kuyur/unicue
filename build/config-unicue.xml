@@ -9,4 +9,5 @@
     <AlwaysOnTop>true</AlwaysOnTop>
     <CharmapConfPath>charmap-anisong.xml</CharmapConfPath>
     <Language>chn</Language>
+    <Output>UTF_8_BOM</Output>
 </config>

@@ -18,13 +18,23 @@
 #define CONFIG_H_
 
 #include <windows.h>
+#include <atlbase.h>
+#include <atlapp.h>
 #include <atlmisc.h>
+#include "..\c4-lib\tinyxml.h"
 
 enum LANG {
     EN  = (int)0x00,
     CHN = (int)0x01,
     CHT = (int)0x02,
     JPN = (int)0x03
+};
+
+enum OUTPUT_ENCODING {
+    O_UTF_8       = (int)0x00,
+    O_UTF_8_NOBOM = (int)0x01,
+    O_UTF_16_LE   = (int)0x02,
+    O_UTF_16_BE   = (int)0x03
 };
 
 typedef struct CConfig_tag
@@ -36,9 +46,14 @@ typedef struct CConfig_tag
     BOOL AutoCheckCode;                    // 是否自动检查编码
     BOOL AlwaysOnTop;                      // 是否总在最前
     BOOL CloseCuePrompt;                   // 是否关闭cue文件有错误的提示
-    BOOL RegNewUniFile;                    // 注册新建uni文件
+    //BOOL RegNewUniFile;                    // 注册新建uni文件
     WTL::CString MapConfName;              // 字符映射表配置文件路径
-    LANG Lang;
+    LANG Lang;                             // Language for GUI
+    OUTPUT_ENCODING OutputEncoding;        // Output encoding
 }CConfig;
+
+BOOL LoadConfigFile(TiXmlDocument *xmlfile, CConfig &config);
+BOOL SaveConfigFile(LPCTSTR configPath, const CConfig &config);
+void SetDefault(CConfig &config);
 
 #endif // CONFIG_H_

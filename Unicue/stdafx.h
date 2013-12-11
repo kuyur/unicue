@@ -30,6 +30,9 @@
 #endif // _WTL_SUPPORT_SDK_ATL3
 
 #include <atlbase.h>
+#if (_ATL_VER >= 0x0700)
+#define _WTL_NO_WTYPES
+#endif
 #include <atlstdthunk.h>
 
 // Support for VS2005 Express & SDK ATL

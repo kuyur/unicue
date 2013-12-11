@@ -22,11 +22,6 @@
 #include "SettingDlg.h"
 #include "MainDlg.h"
 
-BOOL CMainDlg::PreTranslateMessage(MSG* pMsg)
-{
-    return CWindow::IsDialogMessage(pMsg);
-}
-
 CMainDlg::CMainDlg()
     :m_bNeedConvert(TRUE), m_RawStringLength(0), m_StringLength(0), m_UnicodeLength(0),
     m_ConfigPath(L""), m_FilePathName(L""), m_CodeStatus(L""), m_StringCodeType(L"Local Codepage"),
@@ -35,28 +30,17 @@ CMainDlg::CMainDlg()
     m_RawString = NULL;
     m_String = NULL;
     m_UnicodeString = NULL;
-    m_Config.RegNewUniFile = FALSE;
-
-    // Load config file...
     m_ConfigPath += GetProcessFolder();
     m_ConfigPath += L"config-unicue.xml";
 
+    SetDefault(m_Config);
+    // TODO Loading config file in Constructor is not a good choice.
+    // Load config file...
     // Because TiXml does not support wchar_t file name,
     // use Win32 File Api to load xml file.
     CWinFile file(m_ConfigPath, CWinFile::modeRead | CWinFile::shareDenyWrite);
     if (!file.open())
-    {
-        CreateConfigFile();
-        m_Config.TemplateStr = _T(".utf-8");
-        m_Config.AutoFixCue = TRUE;
-        m_Config.AutoFixTTA = FALSE;
-        m_Config.AcceptDragAudioFile = TRUE;
-        m_Config.AutoCheckCode = TRUE;
-        m_Config.AlwaysOnTop = TRUE;
-        m_Config.CloseCuePrompt = FALSE;
-        m_Config.MapConfName = _T("charmap-anisong.xml");
-        m_Config.Lang = CHN;
-    }
+        SaveConfigFile(m_ConfigPath, m_Config);
     else
     {
         UINT fileLength = file.length();
@@ -68,19 +52,11 @@ CMainDlg::CMainDlg()
 
         TiXmlDocument *doc = new TiXmlDocument;
         doc->Parse(fileBuffer, NULL, TIXML_ENCODING_UTF8);
-        if (doc->Error() || !LoadConfigFile(doc))
+        if (doc->Error() || !LoadConfigFile(doc, m_Config))
         {
             ::DeleteFile(m_ConfigPath);
-            CreateConfigFile();
-            m_Config.TemplateStr = _T(".utf-8");
-            m_Config.AutoFixCue = TRUE;
-            m_Config.AutoFixTTA = FALSE;
-            m_Config.AcceptDragAudioFile = TRUE;
-            m_Config.AutoCheckCode = TRUE;
-            m_Config.AlwaysOnTop = TRUE;
-            m_Config.CloseCuePrompt = FALSE;
-            m_Config.MapConfName = _T("charmap-anisong.xml");
-            m_Config.Lang = CHN;
+            SetDefault(m_Config);
+            SaveConfigFile(m_ConfigPath, m_Config);
         }
 
         delete []fileBuffer;
@@ -120,6 +96,11 @@ CMainDlg::~CMainDlg()
     }
 }
 
+BOOL CMainDlg::PreTranslateMessage(MSG* pMsg)
+{
+    return CWindow::IsDialogMessage(pMsg);
+}
+
 BOOL CMainDlg::OnIdle()
 {
     return FALSE;
@@ -129,11 +110,12 @@ LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
 {
     // center the dialog on the screen
     CenterWindow();
-    DoDataExchange(FALSE);
     // init menu
     CMenu menu;
     menu.LoadMenu(IDR_MENU1);
     CWindow::SetMenu(menu);
+    // popup menu
+    m_popupMenu.LoadMenu(IDR_MENU_POPUP);
     // set icons
     HICON hIcon = AtlLoadIconImage(IDR_MAINFRAME_BIG, LR_DEFAULTCOLOR, ::GetSystemMetrics(SM_CXICON), ::GetSystemMetrics(SM_CYICON));
     SetIcon(hIcon, TRUE);
@@ -150,6 +132,9 @@ LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
 
     // always on top
     SetDialogPos();
+
+    // DDX
+    DoDataExchange(FALSE);
 
     // init C4 Context and load charmaps
     m_context = new CC4Context(std::wstring(m_Config.MapConfName), GetProcessFolder());
@@ -274,7 +259,7 @@ BOOL CMainDlg::DealFile()
     // Unicode(little-endian)
     if (((unsigned char)m_RawString[0] == 0xFF) && ((unsigned char)m_RawString[1] == 0xFE))
     {
-        m_CodeStatus = _T("Unicode (little endian)");
+        m_CodeStatus = _T("UTF-16 (little endian)");
         m_bNeedConvert = FALSE;
         m_StringCodeType = CC4EncodeUTF16::_getName().c_str();
         int nIndex = theCombo.FindStringExact(0, m_StringCodeType);
@@ -294,7 +279,7 @@ BOOL CMainDlg::DealFile()
     // Unicode(big-endian)
     if (((unsigned char)m_RawString[0] == 0xFE) && ((unsigned char)m_RawString[1] == 0xFF))
     {
-        m_CodeStatus = _T("Unicode (big endian)");
+        m_CodeStatus = _T("UTF-16 (big endian)");
         m_bNeedConvert = FALSE;
         m_StringCodeType = CC4EncodeUTF16::_getName().c_str();
         int nIndex = theCombo.FindStringExact(0, m_StringCodeType);
@@ -389,7 +374,7 @@ BOOL CMainDlg::DealFile()
 
 LRESULT CMainDlg::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
-    SaveConfigFile();
+    SaveConfigFile(m_ConfigPath, m_Config);
     // unregister message filtering and idle updates
     CMessageLoop* pLoop = _Module.GetMessageLoop();
     ATLASSERT(pLoop != NULL);
@@ -470,6 +455,30 @@ LRESULT CMainDlg::OnFileOpen(WORD, WORD, HWND, BOOL&)
             }
         }
     }
+    return 0;
+}
+
+LRESULT CMainDlg::OnPopupUTF8(WORD, WORD, HWND, BOOL&)
+{
+    m_Config.OutputEncoding = O_UTF_8;
+    return 0;
+}
+
+LRESULT CMainDlg::OnPopupUTF8NoBom(WORD, WORD, HWND, BOOL&)
+{
+    m_Config.OutputEncoding = O_UTF_8_NOBOM;
+    return 0;
+}
+
+LRESULT CMainDlg::OnPopupUTF16LE(WORD, WORD, HWND, BOOL&)
+{
+    m_Config.OutputEncoding = O_UTF_16_LE;
+    return 0;
+}
+
+LRESULT CMainDlg::OnPopupUTF16BE(WORD, WORD, HWND, BOOL&)
+{
+    m_Config.OutputEncoding = O_UTF_16_BE;
     return 0;
 }
 
@@ -668,9 +677,37 @@ LRESULT CMainDlg::OnBnClickedButtonSave(WORD, WORD, HWND, BOOL&)
     }
     WTL::CString UnicodeStr;
     getWindowText(GetDlgItem(IDC_EDIT_UNICODE), UnicodeStr);
-    std::string &utf8str = CC4EncodeUTF16::convert2utf8((LPCTSTR)UnicodeStr, UnicodeStr.GetLength());
-    file.write(CC4Encode::UTF_8_BOM, 3);
-    file.write(utf8str.c_str(), utf8str.length());
+
+    switch (m_Config.OutputEncoding)
+    {
+    case O_UTF_8_NOBOM:
+        {
+            std::string &utf8str = CC4EncodeUTF16::convert2utf8((LPCTSTR)UnicodeStr, UnicodeStr.GetLength());
+            file.write(utf8str.c_str(), utf8str.length());
+        }
+        break;
+    case O_UTF_16_LE:
+        file.write(CC4Encode::LITTLEENDIAN_BOM, 2);
+        file.write((const char*)(LPCTSTR)UnicodeStr, UnicodeStr.GetLength()*sizeof(wchar_t));
+        break;
+    case O_UTF_16_BE:
+        file.write(CC4Encode::BIGENDIAN_BOM, 2);
+        for (int i = 0; i < UnicodeStr.GetLength(); ++i)
+        {
+            wchar_t chr = UnicodeStr.GetAt(i);
+            file.write(((char*)(&chr)) + 1, 1);
+            file.write((char*)(&chr), 1);
+        }
+        break;
+    case O_UTF_8:
+    default:
+        {
+            std::string &utf8str = CC4EncodeUTF16::convert2utf8((LPCTSTR)UnicodeStr, UnicodeStr.GetLength());
+            file.write(CC4Encode::UTF_8_BOM, 3);
+            file.write(utf8str.c_str(), utf8str.length());
+        }
+    }
+
     file.close();
 
     return 0;
@@ -692,9 +729,35 @@ LRESULT CMainDlg::OnBnClickedButtonSaveas(WORD, WORD, HWND, BOOL&)
     }
     WTL::CString UnicodeStr;
     getWindowText(GetDlgItem(IDC_EDIT_UNICODE), UnicodeStr);
-    std::string &utf8str = CC4EncodeUTF16::convert2utf8((LPCTSTR)UnicodeStr, UnicodeStr.GetLength());
-    file.write(CC4Encode::UTF_8_BOM, 3);
-    file.write(utf8str.c_str(), utf8str.length());
+    switch (m_Config.OutputEncoding)
+    {
+    case O_UTF_8_NOBOM:
+        {
+            std::string &utf8str = CC4EncodeUTF16::convert2utf8((LPCTSTR)UnicodeStr, UnicodeStr.GetLength());
+            file.write(utf8str.c_str(), utf8str.length());
+        }
+        break;
+    case O_UTF_16_LE:
+        file.write(CC4Encode::LITTLEENDIAN_BOM, 2);
+        file.write((const char*)(LPCTSTR)UnicodeStr, UnicodeStr.GetLength()*sizeof(wchar_t));
+        break;
+    case O_UTF_16_BE:
+        file.write(CC4Encode::BIGENDIAN_BOM, 2);
+        for (int i = 0; i < UnicodeStr.GetLength(); ++i)
+        {
+            wchar_t chr = UnicodeStr.GetAt(i);
+            file.write(((char*)(&chr)) + 1, 1);
+            file.write((char*)(&chr), 1);
+        }
+        break;
+    case O_UTF_8:
+    default:
+        {
+            std::string &utf8str = CC4EncodeUTF16::convert2utf8((LPCTSTR)UnicodeStr, UnicodeStr.GetLength());
+            file.write(CC4Encode::UTF_8_BOM, 3);
+            file.write(utf8str.c_str(), utf8str.length());
+        }
+    }
     file.close();
 
     return 0;
@@ -721,6 +784,7 @@ LRESULT CMainDlg::OnBnClickedButtonTransferstring(WORD, WORD, HWND, BOOL&)
         GetDlgItem(IDC_BUTTON_TRANSFERSTRING).SetWindowText(getString(IDS_FILEMODE));
         GetDlgItem(IDC_BUTTON_SAVE).EnableWindow(FALSE);
         GetDlgItem(IDC_BUTTON_SAVEAS).EnableWindow(FALSE);
+        GetDlgItem(IDC_BUTTON_SELECTSAVECODE).EnableWindow(FALSE);
         GetDlgItem(IDC_BUTTON_DO).EnableWindow(TRUE);
         GetDlgItem(IDC_STATIC_STAT).SetWindowText(getString(IDS_STRDETECTRESULT));
         UIEnable(IDM_FILE_OPEN, FALSE);
@@ -730,6 +794,7 @@ LRESULT CMainDlg::OnBnClickedButtonTransferstring(WORD, WORD, HWND, BOOL&)
         GetDlgItem(IDC_BUTTON_TRANSFERSTRING).SetWindowText(getString(IDS_STRINGMODE));
         GetDlgItem(IDC_BUTTON_SAVE).EnableWindow(TRUE);
         GetDlgItem(IDC_BUTTON_SAVEAS).EnableWindow(TRUE);
+        GetDlgItem(IDC_BUTTON_SELECTSAVECODE).EnableWindow(TRUE);
         GetDlgItem(IDC_BUTTON_DO).EnableWindow(FALSE);
         GetDlgItem(IDC_STATIC_STAT).SetWindowText(getString(IDS_FILEDETECTRESULT) + _T("\n\n") + getString(IDS_FILEPATH));
         // 恢复
@@ -750,279 +815,36 @@ LRESULT CMainDlg::OnBnClickedButtonTransferstring(WORD, WORD, HWND, BOOL&)
     return 0;
 }
 
-BOOL CMainDlg::LoadConfigFile(TiXmlDocument *xmlfile)
+LRESULT CMainDlg::OnBnClickedButtonSelectOutputCode(WORD, WORD, HWND, BOOL&)
 {
-    TiXmlHandle hRoot(xmlfile);
-    TiXmlElement *pElem;
-    TiXmlHandle hXmlHandle(0);
-
-    //config节点
-    pElem=hRoot.FirstChildElement().Element();
-    if (!pElem) return FALSE;
-    if (strcmp(pElem->Value(),"config")!=0)
-        return FALSE;
-
-    //TemplateStr节点
-    hXmlHandle=TiXmlHandle(pElem);
-    pElem=hXmlHandle.FirstChild("TemplateStr").Element();
-    if (!pElem) return FALSE;
-    if (!pElem->GetText()) return FALSE;
-    m_Config.TemplateStr = CC4EncodeUTF8::convert2unicode(pElem->GetText(), strlen(pElem->GetText())).c_str();
-
-    //AutoFixCue节点
-    pElem=hXmlHandle.FirstChild("AutoFixCue").Element();
-    if (!pElem) return FALSE;
-    if (!pElem->GetText()) return FALSE;
-    if (_stricmp(pElem->GetText(),"true") == 0)
-        m_Config.AutoFixCue = TRUE;
-    else
-        m_Config.AutoFixCue = FALSE;
-
-    //AutoFixTTA节点
-    pElem=hXmlHandle.FirstChild("AutoFixTTA").Element();
-    if (!pElem) return FALSE;
-    if (!pElem->GetText()) return FALSE;
-    if (_stricmp(pElem->GetText(),"true")==0)
-        m_Config.AutoFixTTA=TRUE;
-    else
-        m_Config.AutoFixTTA=FALSE;
-
-    //AcceptDragAudioFile节点
-    pElem=hXmlHandle.FirstChild("AcceptDragAudioFile").Element();
-    if (!pElem) return FALSE;
-    if (!pElem->GetText()) return FALSE;
-    if (_stricmp(pElem->GetText(),"true")==0)
-        m_Config.AcceptDragAudioFile=TRUE;
-    else
-        m_Config.AcceptDragAudioFile=FALSE;
-
-    //CloseCuePrompt节点
-    pElem=hXmlHandle.FirstChild("CloseCuePrompt").Element();
-    if (!pElem) return FALSE;
-    if (!pElem->GetText()) return FALSE;
-    if (_stricmp(pElem->GetText(),"true")==0)
-        m_Config.CloseCuePrompt=TRUE;
-    else
-        m_Config.CloseCuePrompt=FALSE;
-
-    //AutoCheckCode节点
-    pElem=hXmlHandle.FirstChild("AutoCheckCode").Element();
-    if (!pElem) return FALSE;
-    if (!pElem->GetText()) return FALSE;
-    if (_stricmp(pElem->GetText(),"true")==0)
-        m_Config.AutoCheckCode=TRUE;
-    else
-        m_Config.AutoCheckCode=FALSE;
-
-    //AlwaysOnTop节点
-    pElem=hXmlHandle.FirstChild("AlwaysOnTop").Element();
-    if (!pElem) return FALSE;
-    if (!pElem->GetText()) return FALSE;
-    if (_stricmp(pElem->GetText(),"true")==0)
-        m_Config.AlwaysOnTop=TRUE;
-    else
-        m_Config.AlwaysOnTop=FALSE;
-
-    //CharmapConfPath节点
-    pElem=hXmlHandle.FirstChild("CharmapConfPath").Element();
-    if (!pElem) return FALSE;
-    if (!pElem->GetText()) return FALSE;
-    m_Config.MapConfName = CC4EncodeUTF8::convert2unicode(pElem->GetText(), strlen(pElem->GetText())).c_str();
-
-    // Lang node
-    pElem = hXmlHandle.FirstChild("Language").Element();
-    if (!pElem) return FALSE;
-    if (!pElem->GetText()) return FALSE;
-    if (_stricmp(pElem->GetText(),"en") == 0)
-        m_Config.Lang = EN;
-    else if (_stricmp(pElem->GetText(),"chn") == 0)
-        m_Config.Lang = CHN;
-    else if (_stricmp(pElem->GetText(),"cht") == 0)
-        m_Config.Lang = CHT;
-    else if (_stricmp(pElem->GetText(),"jpn") == 0)
-        m_Config.Lang = JPN;
-    else
-        m_Config.Lang = CHN;
-
-    return TRUE;
-}
-
-BOOL CMainDlg::CreateConfigFile()
-{
-    TiXmlDocument configdoc;
-    TiXmlDeclaration *dec=new TiXmlDeclaration("1.0","utf-8","");
-    TiXmlElement *configure=new TiXmlElement("config");
-
-    TiXmlElement *TemplateStr=new TiXmlElement("TemplateStr");
-    TiXmlText *TemplateStrValue=new TiXmlText(".utf-8");
-    TemplateStr->LinkEndChild(TemplateStrValue);
-    configure->LinkEndChild(TemplateStr);
-
-    TiXmlElement *AutoFixCue=new TiXmlElement("AutoFixCue");
-    TiXmlText *AutoFixCueValue=new TiXmlText("true");
-    AutoFixCue->LinkEndChild(AutoFixCueValue);
-    configure->LinkEndChild(AutoFixCue);
-
-    TiXmlElement *AutoFixTTA=new TiXmlElement("AutoFixTTA");
-    TiXmlText *AutoFixTTAValue=new TiXmlText("false");
-    AutoFixTTA->LinkEndChild(AutoFixTTAValue);
-    configure->LinkEndChild(AutoFixTTA);
-
-    TiXmlElement *AcceptDragAudioFile=new TiXmlElement("AcceptDragAudioFile");
-    TiXmlText *AcceptDragAudioFileValue=new TiXmlText("true");
-    AcceptDragAudioFile->LinkEndChild(AcceptDragAudioFileValue);
-    configure->LinkEndChild(AcceptDragAudioFile);
-
-    TiXmlElement *CloseCuePrompt=new TiXmlElement("CloseCuePrompt");
-    TiXmlText *CloseCuePromptValue=new TiXmlText("false");
-    CloseCuePrompt->LinkEndChild(CloseCuePromptValue);
-    configure->LinkEndChild(CloseCuePrompt);
-
-    TiXmlElement *AutoCheckCode=new TiXmlElement("AutoCheckCode");
-    TiXmlText *AutoCheckCodeValue=new TiXmlText("true");
-    AutoCheckCode->LinkEndChild(AutoCheckCodeValue);
-    configure->LinkEndChild(AutoCheckCode);
-
-    TiXmlElement *AlwaysOnTop=new TiXmlElement("AlwaysOnTop");
-    TiXmlText *AlwaysOnTopValue=new TiXmlText("true");
-    AlwaysOnTop->LinkEndChild(AlwaysOnTopValue);
-    configure->LinkEndChild(AlwaysOnTop);
-
-    TiXmlElement *CharmapConfPath = new TiXmlElement("CharmapConfPath");
-    TiXmlText *CharmapConfPathValue = new TiXmlText("charmap-anisong.xml");
-    CharmapConfPath->LinkEndChild(CharmapConfPathValue);
-    configure->LinkEndChild(CharmapConfPath);
-
-    TiXmlElement *Lang = new TiXmlElement("Language");
-    TiXmlText *LangValue = new TiXmlText("chn");
-    Lang->LinkEndChild(LangValue);
-    configure->LinkEndChild(Lang);
-
-    configdoc.LinkEndChild(dec);
-    configdoc.LinkEndChild(configure);
-
-    TiXmlPrinter printer;
-    configdoc.Accept(&printer);
-
-    CWinFile file(m_ConfigPath, CWinFile::modeWrite | CWinFile::modeCreate | CWinFile::shareExclusive);
-    if (file.open())
+    CMenuHandle hMenu;
+    hMenu = m_popupMenu.GetSubMenu(0);
+    CheckMenuItem(hMenu, IDM_UTF_8_WITH_BOM, MF_UNCHECKED);
+    CheckMenuItem(hMenu, IDM_UTF_8_WITHOUT_BOM, MF_UNCHECKED);
+    CheckMenuItem(hMenu, IDM_UTF_16_LITTLE_ENDIAN, MF_UNCHECKED);
+    CheckMenuItem(hMenu, IDM_UTF_16_BIG_ENDIAN, MF_UNCHECKED);
+    switch (m_Config.OutputEncoding)
     {
-        file.write(CC4Encode::UTF_8_BOM, 3);
-        file.write(printer.CStr(), strlen(printer.CStr()));
-        file.close();
-    }
-
-    return TRUE;
-}
-
-BOOL CMainDlg::SaveConfigFile()
-{
-    TiXmlDocument configdoc;
-    TiXmlDeclaration *dec=new TiXmlDeclaration("1.0","utf-8","");
-    TiXmlElement *configure=new TiXmlElement("config");
-
-    TiXmlElement *TemplateStr=new TiXmlElement("TemplateStr");
-    std::string &UTF8Str = CC4EncodeUTF16::getInstance()->convertWideString(m_Config.TemplateStr);
-    TiXmlText *TemplateStrValue=new TiXmlText(UTF8Str.c_str());
-    TemplateStr->LinkEndChild(TemplateStrValue);
-    configure->LinkEndChild(TemplateStr);
-
-    TiXmlElement *AutoFixCue=new TiXmlElement("AutoFixCue");
-    TiXmlText *AutoFixCueValue;
-    if (m_Config.AutoFixCue)
-        AutoFixCueValue=new TiXmlText("true");
-    else
-        AutoFixCueValue=new TiXmlText("false");
-    AutoFixCue->LinkEndChild(AutoFixCueValue);
-    configure->LinkEndChild(AutoFixCue);
-
-    TiXmlElement *AutoFixTTA=new TiXmlElement("AutoFixTTA");
-    TiXmlText *AutoFixTTAValue;
-    if (m_Config.AutoFixTTA)
-        AutoFixTTAValue=new TiXmlText("true");
-    else
-        AutoFixTTAValue=new TiXmlText("false");
-    AutoFixTTA->LinkEndChild(AutoFixTTAValue);
-    configure->LinkEndChild(AutoFixTTA);
-
-    TiXmlElement *AcceptDragAudioFile=new TiXmlElement("AcceptDragAudioFile");
-    TiXmlText *AcceptDragAudioFileValue;
-    if (m_Config.AcceptDragAudioFile)
-        AcceptDragAudioFileValue=new TiXmlText("true");
-    else
-        AcceptDragAudioFileValue=new TiXmlText("false");
-    AcceptDragAudioFile->LinkEndChild(AcceptDragAudioFileValue);
-    configure->LinkEndChild(AcceptDragAudioFile);
-
-    TiXmlElement *CloseCuePrompt=new TiXmlElement("CloseCuePrompt");
-    TiXmlText *CloseCuePromptValue;
-    if (m_Config.CloseCuePrompt)
-        CloseCuePromptValue=new TiXmlText("true");
-    else
-        CloseCuePromptValue=new TiXmlText("false");
-    CloseCuePrompt->LinkEndChild(CloseCuePromptValue);
-    configure->LinkEndChild(CloseCuePrompt);
-
-    TiXmlElement *AutoCheckCode=new TiXmlElement("AutoCheckCode");
-    TiXmlText *AutoCheckCodeValue;
-    if (m_Config.AutoCheckCode)
-        AutoCheckCodeValue=new TiXmlText("true");
-    else
-        AutoCheckCodeValue=new TiXmlText("false");
-    AutoCheckCode->LinkEndChild(AutoCheckCodeValue);
-    configure->LinkEndChild(AutoCheckCode);
-
-    TiXmlElement *AlwaysOnTop=new TiXmlElement("AlwaysOnTop");
-    TiXmlText *AlwaysOnTopValue;
-    if (m_Config.AlwaysOnTop)
-        AlwaysOnTopValue=new TiXmlText("true");
-    else
-        AlwaysOnTopValue=new TiXmlText("false");
-    AlwaysOnTop->LinkEndChild(AlwaysOnTopValue);
-    configure->LinkEndChild(AlwaysOnTop);
-
-    TiXmlElement *CharmapConfPath = new TiXmlElement("CharmapConfPath");
-    TiXmlText *CharmapConfPathValue;
-    CharmapConfPathValue = new TiXmlText(CC4EncodeUTF16::getInstance()->convertWideString(m_Config.MapConfName).c_str());
-    CharmapConfPath->LinkEndChild(CharmapConfPathValue);
-    configure->LinkEndChild(CharmapConfPath);
-
-    TiXmlElement *Lang = new TiXmlElement("Language");
-    TiXmlText *LangValue;
-    switch (m_Config.Lang)
-    {
-    case EN:
-        LangValue = new TiXmlText("en");
+    case O_UTF_8:
+        CheckMenuItem(hMenu, IDM_UTF_8_WITH_BOM, MF_CHECKED);
         break;
-    case CHN:
-        LangValue = new TiXmlText("chn");
+    case O_UTF_8_NOBOM:
+        CheckMenuItem(hMenu, IDM_UTF_8_WITHOUT_BOM, MF_CHECKED);
         break;
-    case CHT:
-        LangValue = new TiXmlText("cht");
+    case O_UTF_16_LE:
+        CheckMenuItem(hMenu, IDM_UTF_16_LITTLE_ENDIAN, MF_CHECKED);
         break;
-    case JPN:
-        LangValue = new TiXmlText("jpn");
+    case O_UTF_16_BE:
+        CheckMenuItem(hMenu, IDM_UTF_16_BIG_ENDIAN, MF_CHECKED);
         break;
     default:
-        LangValue = new TiXmlText("chn");
+        CheckMenuItem(hMenu, IDM_UTF_8_WITH_BOM, MF_CHECKED);
     }
-    Lang->LinkEndChild(LangValue);
-    configure->LinkEndChild(Lang);
+    CPoint point;
+    GetCursorPos(&point);
+    hMenu.TrackPopupMenu(TPM_LEFTALIGN|TPM_LEFTBUTTON, point.x, point.y, this->m_hWnd);
 
-    configdoc.LinkEndChild(dec);
-    configdoc.LinkEndChild(configure);
-
-    TiXmlPrinter printer;
-    configdoc.Accept(&printer);
-    CWinFile file(m_ConfigPath, CWinFile::modeWrite | CWinFile::modeCreate | CWinFile::shareExclusive);
-    if (file.open())
-    {
-        file.write(CC4Encode::UTF_8_BOM, 3);
-        file.write(printer.CStr(), strlen(printer.CStr()));
-        file.close();
-    }
-
-    return TRUE;
+    return 0;
 }
 
 BOOL CMainDlg::ExtractTakInternalCue(WTL::CString AudioFileName)
