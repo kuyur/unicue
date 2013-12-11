@@ -1,5 +1,16 @@
-﻿// ExtractAkaiito.cpp : Defines the entry point for the console application.
-//
+﻿/************************************************************************/
+/*                                                                      */
+/* ExtractAkaiito                                                       */
+/* Extract script from Akaiito which is a PS2 game put on sale in 2004. */
+/* The tool is a part of Unicue Project.                                */
+/*                                                                      */
+/* Author:  kuyur (kuyur@kuyur.info)                                    */
+/* Published under GPLv3                                                */
+/* http://www.gnu.org/licenses/gpl-3.0.en.html                          */
+/*                                                                      */
+/* Project URL: http://github.com/kuyur/unicue                          */
+/*                                                                      */
+/************************************************************************/
 
 #include "stdafx.h"
 #include "..\common\win32helper.h"
