@@ -1,6 +1,16 @@
-// aboutdlg.h : interface of the CAboutDlg class
-//
-/////////////////////////////////////////////////////////////////////////////
+/************************************************************************/
+/*                                                                      */
+/* ChineseConverter 1.2                                                 */
+/* A two-way transforming tool for Simplified Chinese and Traditional   */
+/* Chinese. It is a part of Unicue Project.                             */
+/*                                                                      */
+/* Author:  kuyur (kuyur@kuyur.info)                                    */
+/* Published under GPLv3                                                */
+/* http://www.gnu.org/licenses/gpl-3.0.en.html                          */
+/*                                                                      */
+/* Project URL: http://github.com/kuyur/unicue                          */
+/*                                                                      */
+/************************************************************************/
 
 #pragma once
 
