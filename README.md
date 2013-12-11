@@ -11,7 +11,7 @@ you should add path of WTL's header files into project.
 
 #####If your Visual C++ 2010 is Express version, you need to own a copy of *ATL*.
 
-You can get an old version of ATL from [Windows Driver Kit](http://msdn.microsoft.com/en-us/library/windows/hardware/hh852362.aspx).  
+You can get an old version of ATL from [Windows Driver Kit 7.1](http://www.microsoft.com/en-us/download/details.aspx?id=11800).  
 After installing of Windows Driver Kit, you might find header files of ATL in such folder:
 
     D:\WinDDK\7600.16385.1\inc\atl71
