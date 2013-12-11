@@ -84,9 +84,10 @@ inline wchar_t _wchartolower(wchar_t chr)
     return chr;
 }
 
-inline void toLower(std::wstring &str)
+template <typename T>
+inline void toLower(std::basic_string<T> &str)
 {
-    std::transform(str.begin(), str.end(), str.begin(), _wchartolower);
+    std::transform(str.begin(), str.end(), str.begin(), std::tolower);
 }
 
 inline void convertBEtoLE(wchar_t *bigEndianBuffer, unsigned int length)
