@@ -14,6 +14,7 @@
 
 #include "stdafx.h"
 #include "filetraverser.h"
+#include "..\common\utils.h"
 
 CFileTraverser::CFileTraverser(const WTL::CString &folderPath, UINT mode)
     :m_folder(folderPath), m_mode(mode), m_ignoredFolderName(L"")
@@ -46,7 +47,7 @@ void CFileTraverser::addFilter(const wchar_t* extensions)
                     wchar_t *ext = new wchar_t[len + 1];
                     wmemcpy(ext, begin, len);
                     ext[len] = L'\0';
-                    m_extensions[std::wstring(ext)] = true;
+                    m_extensions[trim(std::wstring(ext))] = true;
                     delete []ext;
                 }
                 // next
@@ -55,7 +56,7 @@ void CFileTraverser::addFilter(const wchar_t* extensions)
             }
             else
             {
-                m_extensions[std::wstring(begin)] = true;
+                m_extensions[trim(std::wstring(begin))] = true;
                 begin = last;
                 end = NULL;
             }
@@ -80,7 +81,7 @@ void CFileTraverser::removeFilter(const wchar_t* extensions)
                     wchar_t *ext = new wchar_t[len + 1];
                     wmemcpy(ext, begin, len);
                     ext[len] = L'\0';
-                    m_extensions.erase(std::wstring(ext));
+                    m_extensions.erase(trim(std::wstring(ext)));
                     delete []ext;
                 }
                 // next
@@ -89,7 +90,7 @@ void CFileTraverser::removeFilter(const wchar_t* extensions)
             }
             else
             {
-                m_extensions.erase(std::wstring(begin));
+                m_extensions.erase(trim(std::wstring(begin)));
                 begin = last;
                 end = NULL;
             }

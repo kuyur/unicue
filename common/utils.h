@@ -20,6 +20,8 @@
 #include <string.h>
 #include <string>
 #include <algorithm>
+#include <cctype>
+#include <locale>
 
 template <typename T>
 inline void replace(std::basic_string<T> &str, const std::basic_string<T> &oldstr, const std::basic_string<T> &newstr)
@@ -44,6 +46,26 @@ inline void replace(std::basic_string<T> &str, const std::basic_string<T> &oldst
         str.replace(pos, oldstr_len, newstr);
         pos += newstr_len;
     }
+}
+
+template <typename T>
+inline std::basic_string<T> &trim_left(std::basic_string<T> &str)
+{
+    str.erase(str.begin(), std::find_if_not(str.begin(), str.end(), std::isspace));
+    return str;
+}
+
+template <typename T>
+inline std::basic_string<T> &trim_right(std::basic_string<T> &str)
+{
+    str.erase(std::find_if_not(str.rbegin(), str.rend(), std::isspace).base(), str.end());
+    return str;
+}
+
+template <typename T>
+inline std::basic_string<T> &trim(std::basic_string<T> &str)
+{
+    return trim_left(trim_right(str));
 }
 
 template <typename T>
