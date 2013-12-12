@@ -86,6 +86,9 @@
     <ClInclude Include="..\common\win32helper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="colorhyperlink.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Unicue.rc">

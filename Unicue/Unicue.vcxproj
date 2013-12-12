@@ -263,6 +263,7 @@
     <ClInclude Include="AboutDlg.h" />
     <ClInclude Include="config.h" />
     <ClInclude Include="MainDlg.h" />
+    <ClInclude Include="colorhyperlink.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="SettingDlg.h" />
     <ClInclude Include="stdafx.h" />

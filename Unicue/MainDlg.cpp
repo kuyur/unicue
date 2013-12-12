@@ -121,6 +121,13 @@ LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
     SetIcon(hIcon, TRUE);
     HICON hIconSmall = AtlLoadIconImage(IDR_MAINFRAME_LITTLE, LR_DEFAULTCOLOR, ::GetSystemMetrics(SM_CXSMICON), ::GetSystemMetrics(SM_CYSMICON));
     SetIcon(hIconSmall, FALSE);
+    // file hyperlink
+    m_fileLink.SubclassWindow(GetDlgItem(IDC_STATIC_FILELINK));
+    DWORD linkStyle = m_fileLink.GetHyperLinkExtendedStyle() | HLINK_NOTIFYBUTTON | HLINK_COMMANDBUTTON | HLINK_UNDERLINEHOVER | HLINK_NOTOOLTIP;
+    m_fileLink.SetHyperLinkExtendedStyle(linkStyle);
+    m_fileLink.SetLinkColor(RGB(0, 0, 0));
+    m_fileLink.SetVisitedColor(RGB(0, 0, 0));
+    m_fileLink.SetHoverColor(RGB(0, 0, 255));
 
     // register object for message filtering and idle updates
     CMessageLoop* pLoop = _Module.GetMessageLoop();
@@ -226,6 +233,10 @@ BOOL CMainDlg::DealFile()
         MessageBox(getString(IDS_OPENFAILED), L"Unicue", MB_OK);
         return FALSE;
     }
+
+    m_fileLink.SetHyperLink(m_FilePathName);
+    m_fileLink.Invalidate();
+
     m_bNeedConvert = TRUE;
     if (m_RawString)
     {
@@ -251,7 +262,6 @@ BOOL CMainDlg::DealFile()
     m_StringLength = m_RawStringLength;
 
     CComboBox &theCombo  = (CComboBox)GetDlgItem(IDC_COMBO_SELECTCODE);
-    CStatic   &theStatic = (CStatic)GetDlgItem(IDC_STATIC_STAT);
     m_CodeStatus = getString(IDS_UNKNOWNCODE);
     CEdit &LeftEdit  = (CEdit)GetDlgItem(IDC_EDIT_ANSI);
     CEdit &RightEdit = (CEdit)GetDlgItem(IDC_EDIT_UNICODE);
@@ -314,7 +324,7 @@ BOOL CMainDlg::DealFile()
 
     if (!m_bNeedConvert)
     {
-        theStatic.SetWindowText(getString(IDS_FILEDETECTRESULT) + m_CodeStatus + _T("\n\n") + getString(IDS_FILEPATH) + m_FilePathName);
+        GetDlgItem(IDC_STATIC_STAT).SetWindowText(m_CodeStatus);
         if (m_StringCodeType == CC4EncodeUTF16::_getName().c_str())
         {
             RightEdit.SetWindowText(m_UnicodeString);
@@ -349,7 +359,7 @@ BOOL CMainDlg::DealFile()
         else
             m_CodeStatus = getString(IDS_DETECTDISABLED);
 
-        theStatic.SetWindowText(getString(IDS_FILEDETECTRESULT) + m_CodeStatus + _T("\n\n") + getString(IDS_FILEPATH) + m_FilePathName);
+        GetDlgItem(IDC_STATIC_STAT).SetWindowText(m_CodeStatus);
 
         // 左
         /*
@@ -496,9 +506,37 @@ LRESULT CMainDlg::OnFileSave(WORD, WORD, HWND, BOOL&)
         }
         WTL::CString UnicodeStr;
         getWindowText(GetDlgItem(IDC_EDIT_UNICODE), UnicodeStr);
-        std::string &utf8str = CC4EncodeUTF16::convert2utf8((LPCTSTR)UnicodeStr, UnicodeStr.GetLength());
-        file.write(CC4Encode::UTF_8_BOM, 3);
-        file.write(utf8str.c_str(), utf8str.length());
+
+        switch (m_Config.OutputEncoding)
+        {
+        case O_UTF_8_NOBOM:
+            {
+                std::string &utf8str = CC4EncodeUTF16::convert2utf8((LPCTSTR)UnicodeStr, UnicodeStr.GetLength());
+                file.write(utf8str.c_str(), utf8str.length());
+            }
+            break;
+        case O_UTF_16_LE:
+            file.write(CC4Encode::LITTLEENDIAN_BOM, 2);
+            file.write((const char*)(LPCTSTR)UnicodeStr, UnicodeStr.GetLength()*sizeof(wchar_t));
+            break;
+        case O_UTF_16_BE:
+            file.write(CC4Encode::BIGENDIAN_BOM, 2);
+            for (int i = 0; i < UnicodeStr.GetLength(); ++i)
+            {
+                wchar_t chr = UnicodeStr.GetAt(i);
+                file.write(((char*)(&chr)) + 1, 1);
+                file.write((char*)(&chr), 1);
+            }
+            break;
+        case O_UTF_8:
+        default:
+            {
+                std::string &utf8str = CC4EncodeUTF16::convert2utf8((LPCTSTR)UnicodeStr, UnicodeStr.GetLength());
+                file.write(CC4Encode::UTF_8_BOM, 3);
+                file.write(utf8str.c_str(), utf8str.length());
+            }
+        }
+
         file.close();
     }
 
@@ -632,7 +670,6 @@ LRESULT CMainDlg::OnBnClickedButtonDo(WORD, WORD, HWND, BOOL&)
         std::string &LeftAnsiStr = msConvertBack(LeftStr);
 
         CComboBox &theCombo  =(CComboBox)GetDlgItem(IDC_COMBO_SELECTCODE);
-        CStatic   &theStatic =(CStatic)GetDlgItem(IDC_STATIC_STAT);
         getWindowText(theCombo, m_StringCodeType);
         m_CodeStatus = getString(IDS_UNKNOWNCODE);
 
@@ -655,7 +692,7 @@ LRESULT CMainDlg::OnBnClickedButtonDo(WORD, WORD, HWND, BOOL&)
         else
             m_CodeStatus = getString(IDS_DETECTDISABLED);
 
-        theStatic.SetWindowText(getString(IDS_STRDETECTRESULT) + m_CodeStatus);
+        GetDlgItem(IDC_STATIC_STAT).SetWindowText(m_CodeStatus);
 
         //右
         const CC4Encode *encode = m_context->getEncode(std::wstring(m_StringCodeType));
@@ -786,7 +823,10 @@ LRESULT CMainDlg::OnBnClickedButtonTransferstring(WORD, WORD, HWND, BOOL&)
         GetDlgItem(IDC_BUTTON_SAVEAS).EnableWindow(FALSE);
         GetDlgItem(IDC_BUTTON_SELECTSAVECODE).EnableWindow(FALSE);
         GetDlgItem(IDC_BUTTON_DO).EnableWindow(TRUE);
-        GetDlgItem(IDC_STATIC_STAT).SetWindowText(getString(IDS_STRDETECTRESULT));
+        GetDlgItem(IDC_STATIC_STAT).SetWindowText(_T(""));
+        m_fileLink.SetHyperLink(_T(""));
+        m_fileLink.Invalidate();
+        GetDlgItem(IDC_STATIC_PATH).ShowWindow(SW_HIDE);
         UIEnable(IDM_FILE_OPEN, FALSE);
     }
     else
@@ -796,7 +836,8 @@ LRESULT CMainDlg::OnBnClickedButtonTransferstring(WORD, WORD, HWND, BOOL&)
         GetDlgItem(IDC_BUTTON_SAVEAS).EnableWindow(TRUE);
         GetDlgItem(IDC_BUTTON_SELECTSAVECODE).EnableWindow(TRUE);
         GetDlgItem(IDC_BUTTON_DO).EnableWindow(FALSE);
-        GetDlgItem(IDC_STATIC_STAT).SetWindowText(getString(IDS_FILEDETECTRESULT) + _T("\n\n") + getString(IDS_FILEPATH));
+        GetDlgItem(IDC_STATIC_STAT).SetWindowText(_T(""));
+        GetDlgItem(IDC_STATIC_PATH).ShowWindow(SW_SHOW);
         // 恢复
         UIEnable(IDM_FILE_OPEN, TRUE);
         GetDlgItem(IDC_EDIT_ANSI).SetWindowText(_T(""));
@@ -847,6 +888,15 @@ LRESULT CMainDlg::OnBnClickedButtonSelectOutputCode(WORD, WORD, HWND, BOOL&)
     return 0;
 }
 
+LRESULT CMainDlg::OnClickFileLink(int, LPNMHDR, BOOL&)
+{
+    if (m_FilePathName.GetLength() > 0)
+    {
+        ::ShellExecute(NULL, L"open", m_FilePathName.Left(m_FilePathName.ReverseFind(L'\\')), NULL, NULL, SW_SHOWNORMAL);
+    }
+    return 0;  
+}
+
 BOOL CMainDlg::ExtractTakInternalCue(WTL::CString AudioFileName)
 {
     m_CodeStatus = _T("UTF-8 (Internal Cue File)");
@@ -855,8 +905,9 @@ BOOL CMainDlg::ExtractTakInternalCue(WTL::CString AudioFileName)
     int nIndex = ((CComboBox)GetDlgItem(IDC_COMBO_SELECTCODE)).FindStringExact(0, m_StringCodeType);
     ((CComboBox)GetDlgItem(IDC_COMBO_SELECTCODE)).SetCurSel(nIndex);
 
-    WTL::CString statusText = getString(IDS_FILEDETECTRESULT) + m_CodeStatus + _T("\n\n") + getString(IDS_FILEPATH) + m_FilePathName;
-    GetDlgItem(IDC_STATIC_STAT).SetWindowText(statusText);
+    GetDlgItem(IDC_STATIC_STAT).SetWindowText(m_CodeStatus);
+    m_fileLink.SetHyperLink(m_FilePathName);
+    m_fileLink.Invalidate();
     GetDlgItem(IDC_EDIT_ANSI).SetWindowText(_T(""));
     GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(_T(""));
 
@@ -883,8 +934,8 @@ BOOL CMainDlg::ExtractTakInternalCue(WTL::CString AudioFileName)
     }
 
     m_FilePathName += _T(".cue");
-    statusText += _T(".cue");
-    GetDlgItem(IDC_STATIC_STAT).SetWindowText(statusText);
+    m_fileLink.SetHyperLink(m_FilePathName);
+    m_fileLink.Invalidate();
 
     if (OpenFile.length() < 20480) // 小于20K，文档太小了
     {
@@ -1016,8 +1067,9 @@ BOOL CMainDlg::ExtractFlacInternalCue(WTL::CString AudioFileName)
     int nIndex = ((CComboBox)GetDlgItem(IDC_COMBO_SELECTCODE)).FindStringExact(0, m_StringCodeType);
     ((CComboBox)GetDlgItem(IDC_COMBO_SELECTCODE)).SetCurSel(nIndex);
 
-    WTL::CString statusText = getString(IDS_FILEDETECTRESULT) + m_CodeStatus + _T("\n\n") + getString(IDS_FILEPATH) + m_FilePathName;
-    GetDlgItem(IDC_STATIC_STAT).SetWindowText(statusText);
+    GetDlgItem(IDC_STATIC_STAT).SetWindowText(m_CodeStatus);
+    m_fileLink.SetHyperLink(m_FilePathName);
+    m_fileLink.Invalidate();
     GetDlgItem(IDC_EDIT_ANSI).SetWindowText(_T(""));
     GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(_T(""));
 
@@ -1044,8 +1096,8 @@ BOOL CMainDlg::ExtractFlacInternalCue(WTL::CString AudioFileName)
     }
 
     m_FilePathName += _T(".cue");
-    statusText += _T(".cue");
-    GetDlgItem(IDC_STATIC_STAT).SetWindowText(statusText);
+    m_fileLink.SetHyperLink(m_FilePathName);
+    m_fileLink.Invalidate();
 
     if (OpenFile.length() < 1048576) // 小于1M，文档太小了
     {

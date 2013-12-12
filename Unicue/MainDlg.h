@@ -17,6 +17,7 @@
 #define MAINDLG_H_
 
 #include "config.h"
+#include "colorhyperlink.h"
 
 class CMainDlg : public CDialogImpl<CMainDlg>, public CUpdateUI<CMainDlg>,
         public CMessageFilter, public CIdleHandler, public CWinDataExchange<CMainDlg>
@@ -38,6 +39,7 @@ protected:
     BOOL          m_bTransferString;     // Transfer string mode if TRUE, Transfer file mode if FALSE
     CC4Context*   m_context;             // Converting context
     CMenu         m_popupMenu;           // Popup menu
+    CColorHyperLink    m_fileLink;       // Hyperlink for file
 
     void FixCue();
     void FixInternalCue(WTL::CString AudioFileName);
@@ -82,6 +84,7 @@ public:
         COMMAND_HANDLER(IDC_BUTTON_SAVE, BN_CLICKED, OnBnClickedButtonSave)
         COMMAND_HANDLER(IDC_BUTTON_SAVEAS, BN_CLICKED, OnBnClickedButtonSaveas)
         COMMAND_HANDLER(IDC_BUTTON_TRANSFERSTRING, BN_CLICKED, OnBnClickedButtonTransferstring)
+        NOTIFY_HANDLER(IDC_STATIC_FILELINK, NM_CLICK, OnClickFileLink)
     END_MSG_MAP()
 
     // DDX
@@ -118,6 +121,7 @@ public:
     LRESULT OnBnClickedCheckAlwaysontop(WORD, WORD, HWND, BOOL&);
     LRESULT OnBnClickedButtonTransferstring(WORD, WORD, HWND, BOOL&);
     LRESULT OnBnClickedButtonSelectOutputCode(WORD, WORD, HWND, BOOL&);
+    LRESULT OnClickFileLink(int, LPNMHDR, BOOL&);
 
     void CloseDialog(int nVal);
 };
