@@ -136,12 +136,20 @@ LRESULT CProcessDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPa
     }
 
     // initialize CListViewCtrl
+    //m_list.SubclassWindow(GetDlgItem(IDC_FILELIST));
+    //ListView_SetExtendedListViewStyle(m_list.m_hWnd, m_list.GetExStyle() | LVS_EX_CHECKBOXES | LVS_EX_FULLROWSELECT);
+    m_list.InsertColumn(0, _T("选择"), LVCFMT_LEFT, 40);
+    m_list.InsertColumn(1, _T("文件路径"), LVCFMT_LEFT, 470);
+    m_list.InsertColumn(2, _T("编码检测结果"), LVCFMT_LEFT, 90);
+    m_list.InsertColumn(3, _T("文件状态"), LVCFMT_LEFT, 150);
+    /*
     CListViewCtrl &list = (CListViewCtrl)GetDlgItem(IDC_FILELIST);
     ListView_SetExtendedListViewStyle(list.m_hWnd, list.GetExStyle() | LVS_EX_CHECKBOXES | LVS_EX_FULLROWSELECT);
     list.InsertColumn(0, _T("选择"), LVCFMT_LEFT, 40);
     list.InsertColumn(1, _T("文件路径"), LVCFMT_LEFT, 470);
     list.InsertColumn(2, _T("编码检测结果"), LVCFMT_LEFT, 90);
     list.InsertColumn(3, _T("文件状态"), LVCFMT_LEFT, 150);
+    */
 
     // load charmaps
     m_context = new CC4Context(std::wstring(m_config.charmapConfig), Unicue::GetProcessFolder());
@@ -308,11 +316,11 @@ LRESULT CProcessDlg::OnListDBClicked(int idCtrl, LPNMHDR pnmh, BOOL& /*bHandled*
     CListViewCtrl &list = (CListViewCtrl)GetDlgItem(IDC_FILELIST);
     int row = list.HitTest(cPoint, NULL);
     */
-    CListViewCtrl &list = (CListViewCtrl)GetDlgItem(IDC_FILELIST);
-    int row = list.GetSelectionMark();
+    /*CListViewCtrl &list = (CListViewCtrl)GetDlgItem(IDC_FILELIST);*/
+    int row = m_list.GetSelectionMark();
     if (-1 != row)
     {
-        UINT index = (UINT)list.GetItemData(row);
+        UINT index = (UINT)m_list.GetItemData(row);
         if (index > m_files.size() - 1)
             return 0;
         WTL::CString unicuePath(L"\"");
@@ -403,8 +411,8 @@ void CProcessDlg::loadCueFiles()
 
 void CProcessDlg::preProcess()
 {
-    CListViewCtrl &list = (CListViewCtrl)GetDlgItem(IDC_FILELIST);
-    list.DeleteAllItems();
+    /*CListViewCtrl &list = (CListViewCtrl)GetDlgItem(IDC_FILELIST);*/
+    m_list.DeleteAllItems();
     std::vector<WTL::CString>::iterator iter = m_files.begin();
     // progress ctrl
     CProgressBarCtrl &ctrl = (CProgressBarCtrl)GetDlgItem(IDC_PROGRESS);
@@ -419,12 +427,12 @@ void CProcessDlg::preProcess()
         getFileInfo(*iter, fileInfo);
         if (!(fileInfo.status & FILE_IGNORED))
         {
-            int row = list.InsertItem(i, L"");
-            list.SetCheckState(row, fileInfo.isSelected);
-            list.SetItemText(row, 1, *iter);
-            list.SetItemText(row, 2, fileInfo.encodeName);
-            list.SetItemText(row, 3, CueStatusToString(fileInfo.status));
-            list.SetItemData(row, (DWORD_PTR)i);
+            int row = m_list.InsertItem(i, L"");
+            m_list.SetCheckState(row, fileInfo.isSelected);
+            m_list.SetItemText(row, 1, *iter);
+            m_list.SetItemText(row, 2, fileInfo.encodeName);
+            m_list.SetItemText(row, 3, CueStatusToString(fileInfo.status));
+            m_list.SetItemData(row, (DWORD_PTR)i);
         }
         ctrl.StepIt();
     }
@@ -433,20 +441,20 @@ void CProcessDlg::preProcess()
 
 void CProcessDlg::rerenderFileInfo()
 {
-    CListViewCtrl &list = (CListViewCtrl)GetDlgItem(IDC_FILELIST);
-    list.DeleteAllItems();
+    /*CListViewCtrl &list = (CListViewCtrl)GetDlgItem(IDC_FILELIST);*/
+    m_list.DeleteAllItems();
     std::vector<WTL::CString>::iterator iter = m_files.begin();
     for (int i = 0; iter != m_files.end(); ++iter, ++i)
     {
         CFileInfo &fileInfo = m_fileInfoMap[*iter];
         if (!(fileInfo.status & FILE_IGNORED))
         {
-            int row = list.InsertItem(i, L"");
-            list.SetCheckState(row, fileInfo.isSelected);
-            list.SetItemText(row, 1, *iter);
-            list.SetItemText(row, 2, fileInfo.encodeName);
-            list.SetItemText(row, 3, CueStatusToString(fileInfo.status));
-            list.SetItemData(row, (DWORD_PTR)i);
+            int row = m_list.InsertItem(i, L"");
+            m_list.SetCheckState(row, fileInfo.isSelected);
+            m_list.SetItemText(row, 1, *iter);
+            m_list.SetItemText(row, 2, fileInfo.encodeName);
+            m_list.SetItemText(row, 3, CueStatusToString(fileInfo.status));
+            m_list.SetItemData(row, (DWORD_PTR)i);
         }
     }
 }

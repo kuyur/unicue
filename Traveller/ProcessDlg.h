@@ -20,6 +20,7 @@
 #include "cmdline.h"
 #include "config.h"
 #include "StringElementTraitX.h"
+#include "CustomListView.h"
 
 enum FILESTATUS {
     EMPTY_STATUS           = (UINT)0x0000,
@@ -54,10 +55,11 @@ class CProcessDlg : public CDialogImpl<CProcessDlg>, public CUpdateUI<CProcessDl
         public CMessageFilter, public CIdleHandler
 {
 private:
-    WTL::CString m_configPath;
-    CConfig      m_config;
-    wchar_t**    m_cueFolders;
-    int          m_cueFoldersCount;
+    WTL::CString    m_configPath;
+    CConfig         m_config;
+    wchar_t**       m_cueFolders;
+    int             m_cueFoldersCount;
+    CCustomListView m_list;
     CAtlMap<WTL::CString, CFileInfo, CStringElementTraitX> m_fileInfoMap;
     std::vector<WTL::CString> m_files;
     CC4Context*  m_context;

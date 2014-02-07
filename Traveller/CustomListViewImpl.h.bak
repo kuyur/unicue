@@ -1,0 +1,93 @@
+
+#pragma once
+
+#ifndef CCUSTOMLISTVIEWIMPL_H_
+#define CCUSTOMLISTVIEWIMPL_H_
+
+#include <atlbase.h>
+#include <atlapp.h>
+#include <atlwin.h>
+#include <atlctrls.h>
+
+template<class T, class TBase = CListViewCtrl, class TWinTraits = CWinTraitsOR<LVS_REPORT|LVS_SHOWSELALWAYS>>
+class ATL_NO_VTABLE CCustomListViewImpl :
+    public CWindowImpl<T, TBase, TWinTraits>,
+    public CCustomDraw<T>
+{
+public:
+    DECLARE_WND_SUPERCLASS(NULL, TBase::GetWndClassName())
+
+    CCustomListViewImpl() {}
+    ~CCustomListViewImpl() {}
+
+    // Operations
+    BOOL SubclassWindow(HWND hWnd)
+    {
+        ATLASSERT(m_hWnd == NULL);
+        ATLASSERT(::IsWindow(hWnd));
+        BOOL bRet = CWindowImpl<T, TBase, TWinTraits>::SubclassWindow(hWnd);
+        if (bRet)
+        {
+            T* pT = static_cast<T*>(this);
+            // TODO
+        }
+        return bRet;
+    }
+
+    BEGIN_MSG_MAP(CCustomListViewImpl)
+        MESSAGE_HANDLER(WM_CREATE, OnCreate)
+        CHAIN_MSG_MAP_ALT(CCustomDraw<T>, 1)
+        DEFAULT_REFLECTION_HANDLER()
+    END_MSG_MAP()
+
+    LRESULT OnCreate(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& /*bHandled*/)
+    {
+        LRESULT lRes = DefWindowProc();
+        // TODO
+        return lRes;
+    }
+
+    // Custom painting
+    DWORD OnPrePaint(int /*idCtrl*/, LPNMCUSTOMDRAW /*lpNMCustomDraw*/)
+    {
+        return CDRF_NOTIFYITEMDRAW;
+    }
+
+    DWORD OnItemPrePaint(int /*idCtrl*/, LPNMCUSTOMDRAW /*lpNMCustomDraw*/)
+    {
+        return CDRF_NOTIFYSUBITEMDRAW;
+    }
+
+    DWORD OnSubItemPrePaint(int /*idCtrl*/, LPNMCUSTOMDRAW lpNMCustomDraw)
+    {
+      T* pT = static_cast<T*>(this);
+      LPNMLVCUSTOMDRAW lpNMLVCustomDraw = (LPNMLVCUSTOMDRAW) lpNMCustomDraw;
+      pT->DrawItem(lpNMLVCustomDraw->nmcd.hdc, 
+         (int) lpNMLVCustomDraw->nmcd.dwItemSpec, 
+         lpNMLVCustomDraw->iSubItem,
+         lpNMLVCustomDraw->nmcd.uItemState);
+      return CDRF_SKIPDEFAULT;
+    }
+
+    // override
+    void DrawItem(CDCHandle dc, int iItem, int iSubItem, UINT iState)
+    {
+        //MessageBox(L"Call");
+        // TODO
+    }
+};
+
+class CCustomListView : public CCustomListViewImpl<CCustomListView>
+{
+private:
+    typedef CCustomListViewImpl<CCustomListView> baseClass;
+public:
+    DECLARE_WND_SUPERCLASS(_T("WTL_CustomListView"), GetWndClassName())
+    /*
+    BEGIN_MSG_MAP(CCustomListView)
+        CHAIN_MSG_MAP(baseClass)
+    END_MSG_MAP()
+    */
+};
+
+#endif // CCUSTOMLISTVIEWIMPL_H_
