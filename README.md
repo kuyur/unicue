@@ -1,7 +1,7 @@
 Unicue
 ======
 
-Tools for converting character encodings.
+Tools for character encodings converting.
 
 ##How to build
 
