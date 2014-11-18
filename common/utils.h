@@ -17,8 +17,12 @@
 #ifndef UTILS_H_
 #define UTILS_H_
 
+#define MIN(a,b) (((a)<(b))?(a):(b))
+#define MAX(a,b) (((a)>(b))?(a):(b))
+
 #include <string.h>
 #include <string>
+#include <sstream>
 #include <algorithm>
 #include <cctype>
 #include <locale>
@@ -99,6 +103,14 @@ inline void convertBEtoLE(wchar_t *bigEndianBuffer, unsigned int length)
         *chr = *(chr + 1);
         *(chr + 1) = temp;
     }
+}
+
+template <class T>
+inline std::string toSTLString(const T& t)
+{
+  std::stringstream ss;
+  ss << t;
+  return ss.str();
 }
 
 #endif // UTILS_H_

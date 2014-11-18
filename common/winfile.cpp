@@ -95,16 +95,18 @@ BOOL CWinFile::open()
         dwShareMode = 0; // default will be shareExclusive if share flag not set.
     }
 
-    DWORD dwCreateFlag;
-    if (m_nFlags & modeCreate)
-    {
-        if (m_nFlags & modeNoTruncate)
-            dwCreateFlag = OPEN_ALWAYS;
-        else
-            dwCreateFlag = CREATE_ALWAYS;
-    }
-    else
+    DWORD dwCreateFlag = OPEN_EXISTING;
+    if (m_nFlags & modeRead) {
         dwCreateFlag = OPEN_EXISTING;
+    } else {
+        if (m_nFlags & openCreateAlways)
+            dwCreateFlag = CREATE_ALWAYS;
+        else if (m_nFlags & openAppend)
+        {
+            dwCreateFlag = OPEN_ALWAYS;
+            dwAccess = FILE_APPEND_DATA;
+        }
+    }
 
     m_hFile = ::CreateFileW(m_filename, dwAccess, dwShareMode, NULL, dwCreateFlag, FILE_ATTRIBUTE_NORMAL, NULL);
     if (m_hFile == INVALID_HANDLE_VALUE)

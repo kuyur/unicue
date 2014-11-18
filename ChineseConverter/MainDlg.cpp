@@ -315,7 +315,7 @@ LRESULT CMainDlg::OnBnClickedButtonSaveas(WORD, WORD, HWND, BOOL&)
     FilePath+=_T(".convert");
     FilePath+=FileType;
 
-    CWinFile SaveFile(FilePath,CWinFile::modeCreate|CWinFile::modeWrite|CWinFile::shareExclusive);
+    CWinFile SaveFile(FilePath,CWinFile::openCreateAlways|CWinFile::modeWrite|CWinFile::shareExclusive);
     if (!SaveFile.open())
     {
         MessageBox(_T("无法写入文件！"), _T("简繁转换"), MB_OK);

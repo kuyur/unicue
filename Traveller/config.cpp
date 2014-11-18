@@ -183,7 +183,7 @@ BOOL SaveConfigFile(LPCTSTR configPath, const CConfig &config)
 
     TiXmlPrinter printer;
     configdoc.Accept(&printer);
-    CWinFile file(configPath, CWinFile::modeWrite | CWinFile::modeCreate | CWinFile::shareExclusive);
+    CWinFile file(configPath, CWinFile::modeWrite | CWinFile::openCreateAlways | CWinFile::shareExclusive);
     if (file.open())
     {
         file.write(CC4Encode::UTF_8_BOM, 3);

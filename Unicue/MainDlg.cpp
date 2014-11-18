@@ -1,6 +1,6 @@
 ﻿/************************************************************************/
 /*                                                                      */
-/* Unicue 1.2                                                           */
+/* Unicue 1.3                                                           */
 /* A tool to convert file from ansi code-page to Unicode                */
 /*                                                                      */
 /* Author:  kuyur (kuyur@kuyur.info)                                    */
@@ -18,69 +18,17 @@
 #include "..\common\win32helper.h"
 #include "..\common\wtlhelper.h"
 #include "resource.h"
-#include "aboutdlg.h"
-#include "SettingDlg.h"
 #include "MainDlg.h"
+#include "MainFrame.h"
 
 CMainDlg::CMainDlg()
     :m_bNeedConvert(TRUE), m_RawStringLength(0), m_StringLength(0), m_UnicodeLength(0),
-    m_ConfigPath(L""), m_FilePathName(L""), m_CodeStatus(L""), m_StringCodeType(L"Local Codepage"),
+    m_FilePathName(L""), m_CodeStatus(L""), m_StringCodeType(L"Local Codepage"),
     m_bCueFile(FALSE), m_bTransferString(FALSE), m_context(NULL)
 {
     m_RawString = NULL;
     m_String = NULL;
     m_UnicodeString = NULL;
-    m_ConfigPath += GetProcessFolder();
-    m_ConfigPath += L"config-unicue.xml";
-
-    SetDefault(m_Config);
-    // TODO Loading config file in Constructor is not a good choice.
-    // Load config file...
-    // Because TiXml does not support wchar_t file name,
-    // use Win32 File Api to load xml file.
-    CWinFile file(m_ConfigPath, CWinFile::modeRead | CWinFile::shareDenyWrite);
-    if (!file.open())
-        SaveConfigFile(m_ConfigPath, m_Config);
-    else
-    {
-        UINT fileLength = file.length();
-        char *fileBuffer = new char[fileLength+1];
-        memset((void*)fileBuffer, 0, fileLength+1);
-        file.seek(0, CWinFile::begin);
-        file.read(fileBuffer, fileLength);
-        file.close();
-
-        TiXmlDocument *doc = new TiXmlDocument;
-        doc->Parse(fileBuffer, NULL, TIXML_ENCODING_UTF8);
-        if (doc->Error() || !LoadConfigFile(doc, m_Config))
-        {
-            ::DeleteFile(m_ConfigPath);
-            SetDefault(m_Config);
-            SaveConfigFile(m_ConfigPath, m_Config);
-        }
-
-        delete []fileBuffer;
-        fileBuffer = NULL;
-        delete doc;
-    }
-    // set local here
-    switch (m_Config.Lang)
-    {
-    case EN:
-        SetThreadLocalSettings(LANG_ENGLISH, SUBLANG_ENGLISH_US);
-        break;
-    case CHN:
-        SetThreadLocalSettings(LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED);
-        break;
-    case CHT:
-        SetThreadLocalSettings(LANG_CHINESE, SUBLANG_CHINESE_TRADITIONAL);
-        break;
-    case JPN:
-        SetThreadLocalSettings(LANG_JAPANESE, SUBLANG_JAPANESE_JAPAN);
-        break;
-    default:
-        SetThreadLocalSettings(LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED);
-    }
 }
 
 CMainDlg::~CMainDlg()
@@ -108,12 +56,6 @@ BOOL CMainDlg::OnIdle()
 
 LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
-    // center the dialog on the screen
-    CenterWindow();
-    // init menu
-    CMenu menu;
-    menu.LoadMenu(IDR_MENU1);
-    CWindow::SetMenu(menu);
     // popup menu
     m_popupMenu.LoadMenu(IDR_MENU_POPUP);
     // set icons
@@ -138,13 +80,16 @@ LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
     UIAddChildWindowContainer(m_hWnd);
 
     // always on top
-    SetDialogPos();
+    SetMainWndPos();
 
     // DDX
     DoDataExchange(FALSE);
 
+    // Resize
+    DlgResize_Init(/*false, true, WS_CLIPCHILDREN*/);
+
     // init C4 Context and load charmaps
-    m_context = new CC4Context(std::wstring(m_Config.MapConfName), GetProcessFolder());
+    m_context = new CC4Context(std::wstring(_Config.MapConfName), GetProcessFolder());
     if (!m_context->init())
         MessageBox(getString(IDS_FAILEDTOLOAD), _T("Unicue"), MB_OK);
 
@@ -169,53 +114,19 @@ LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
             filePath.Delete(0);
         if (filePath.GetAt(filePath.GetLength() - 1) == _T('\"'))
             filePath.Delete(filePath.GetLength() -1);
-        m_FilePathName = filePath;
-        WTL::CString &ExtensionName = filePath.Right(filePath.GetLength() - filePath.ReverseFind('.') - 1);
-        ExtensionName.MakeLower();
-        WTL::CString &FileName = filePath.Right(filePath.GetLength() - filePath.ReverseFind('\\') - 1);
-        if ((ExtensionName == _T("tak")) || (ExtensionName == _T("flac")) || (ExtensionName == _T("ape")))
-        {
-            if (m_Config.AcceptDragAudioFile)
-            {
-                if (ExtensionName==_T("flac"))
-                    ExtractFlacInternalCue(FileName);
-                else if ((ExtensionName==_T("tak"))||(ExtensionName==_T("ape")))
-                    ExtractTakInternalCue(FileName);
-            }
-            else
-            {
-                if (DealFile())
-                {
-                    if (m_Config.AutoFixTTA) FixTTACue();
-                    if (m_Config.AutoFixCue) FixCue();
-                }
-            }
-        }
-        else
-        {
-            if (DealFile())
-            {
-                if (m_Config.AutoFixTTA) FixTTACue();
-                if (m_Config.AutoFixCue) FixCue();
-            }
-        }
+        OpenFile(filePath);
     }
     LocalFree(szArglist);
 
     return TRUE;
 }
 
-BOOL CMainDlg::SetDialogPos()
+void CMainDlg::SetMainWndPos()
 {
-    RECT rc;
-    GetWindowRect(&rc);
-
-    if (m_Config.AlwaysOnTop)
-        return SetWindowPos(HWND_TOPMOST, &rc, SWP_NOMOVE|SWP_NOSIZE);
-    else
-        return SetWindowPos(HWND_NOTOPMOST, &rc, SWP_NOMOVE|SWP_NOSIZE);
+    // Get pointer of parent window
+    CMainFrame *mainWnd = (CMainFrame*) &GetParent();
+    mainWnd->SetAlwaysOnTop(_Config.AlwaysOnTop);
 }
-
 
 BOOL CMainDlg::DealFile()
 {
@@ -227,7 +138,7 @@ BOOL CMainDlg::DealFile()
     if (extendName == _T("cue"))
         m_bCueFile = TRUE;
 
-    CWinFile openFile(m_FilePathName, CWinFile::modeRead | CWinFile::shareDenyWrite);
+    CWinFile openFile(m_FilePathName, CWinFile::modeRead | CWinFile::openOnly | CWinFile::shareDenyWrite);
     if (!openFile.open())
     {
         MessageBox(getString(IDS_OPENFAILED), L"Unicue", MB_OK);
@@ -339,7 +250,7 @@ BOOL CMainDlg::DealFile()
     else
     {
         // 检测编码
-        if (m_Config.AutoCheckCode)
+        if (_Config.AutoCheckCode)
         {
             const CC4Encode *encode = m_context->getMostPossibleEncode(m_String);
             if (encode)
@@ -382,22 +293,94 @@ BOOL CMainDlg::DealFile()
     return TRUE;
 }
 
+void CMainDlg::OpenFile(LPCWSTR filePath)
+{
+    m_FilePathName = filePath;
+    WTL::CString &ExtensionName = m_FilePathName.Right(m_FilePathName.GetLength() - m_FilePathName.ReverseFind('.') - 1);
+    ExtensionName.MakeLower();
+    WTL::CString &FileName = m_FilePathName.Right(m_FilePathName.GetLength() - m_FilePathName.ReverseFind('\\') - 1);
+    if ((ExtensionName == _T("tak"))  ||
+        (ExtensionName == _T("flac")) ||
+        (ExtensionName == _T("ape")))
+    {
+        if (_Config.AcceptDragAudioFile)
+        {
+            if (ExtensionName == _T("flac"))
+                ExtractFlacInternalCue(FileName);
+            else
+                ExtractTakInternalCue(FileName);
+        }
+        else
+        {
+            if (DealFile())
+            {
+                if (_Config.AutoFixTTA) FixTTACue();
+                if (_Config.AutoFixCue) FixCue();
+            }
+        }
+    }
+    else
+    {
+        if (DealFile())
+        {
+            if (_Config.AutoFixTTA) FixTTACue();
+            if (_Config.AutoFixCue) FixCue();
+        }
+    }
+}
+
+void CMainDlg::SaveFile(LPCWSTR filePath)
+{
+    CWinFile file(filePath, CWinFile::openCreateAlways|CWinFile::modeWrite|CWinFile::shareExclusive);
+    if (!file.open())
+    {
+        MessageBox(getString(IDS_WRITEFAILED), _T("Unicue"), MB_OK);
+        return;
+    }
+    WTL::CString UnicodeStr;
+    getWindowText(GetDlgItem(IDC_EDIT_UNICODE), UnicodeStr);
+
+    switch (_Config.OutputEncoding)
+    {
+    case O_UTF_8_NOBOM:
+        {
+            std::string &utf8str = CC4EncodeUTF16::convert2utf8((LPCTSTR)UnicodeStr, UnicodeStr.GetLength());
+            file.write(utf8str.c_str(), utf8str.length());
+        }
+        break;
+    case O_UTF_16_LE:
+        file.write(CC4Encode::LITTLEENDIAN_BOM, 2);
+        file.write((const char*)(LPCTSTR)UnicodeStr, UnicodeStr.GetLength()*sizeof(wchar_t));
+        break;
+    case O_UTF_16_BE:
+        file.write(CC4Encode::BIGENDIAN_BOM, 2);
+        for (int i = 0; i < UnicodeStr.GetLength(); ++i)
+        {
+            wchar_t chr = UnicodeStr.GetAt(i);
+            file.write(((char*)(&chr)) + 1, 1);
+            file.write((char*)(&chr), 1);
+        }
+        break;
+    case O_UTF_8:
+    default:
+        {
+            std::string &utf8str = CC4EncodeUTF16::convert2utf8((LPCTSTR)UnicodeStr, UnicodeStr.GetLength());
+            file.write(CC4Encode::UTF_8_BOM, 3);
+            file.write(utf8str.c_str(), utf8str.length());
+        }
+    }
+
+    file.close();
+}
+
 LRESULT CMainDlg::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
-    SaveConfigFile(m_ConfigPath, m_Config);
     // unregister message filtering and idle updates
     CMessageLoop* pLoop = _Module.GetMessageLoop();
     ATLASSERT(pLoop != NULL);
     pLoop->RemoveMessageFilter(this);
     pLoop->RemoveIdleHandler(this);
 
-    return 0;
-}
-
-LRESULT CMainDlg::OnAbout(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
-{
-    CAboutDlg dlg;
-    dlg.DoModal();
     return 0;
 }
 
@@ -420,136 +403,27 @@ void CMainDlg::CloseDialog(int nVal)
     ::PostQuitMessage(nVal);
 }
 
-LRESULT CMainDlg::OnFileExit(WORD, WORD wID, HWND, BOOL&)
-{
-    CloseDialog(wID);
-    return 0;
-}
-
-LRESULT CMainDlg::OnFileOpen(WORD, WORD, HWND, BOOL&)
-{
-    CFileDialog openFile(TRUE, _T("*.txt"), NULL, OFN_EXTENSIONDIFFERENT|OFN_FILEMUSTEXIST|OFN_PATHMUSTEXIST,
-        _T("text file(*.txt;*.cue;*.log)\0*.txt;*.cue;*.log\0txt file(*.txt)\0*.txt\0cue file(*.cue)\0*.cue\0log file(*.log)\0*.log\0All Files (*.*)\0*.*\0\0"));
-    if (openFile.DoModal() == IDOK)
-    {
-        m_FilePathName = openFile.m_szFileName;
-        WTL::CString &ExtensionName = m_FilePathName.Right(m_FilePathName.GetLength() - m_FilePathName.ReverseFind('.') - 1);
-        ExtensionName.MakeLower();
-        WTL::CString &FileName = m_FilePathName.Right(m_FilePathName.GetLength() - m_FilePathName.ReverseFind('\\') - 1);
-        if ((ExtensionName == _T("tak"))  ||
-            (ExtensionName == _T("flac")) ||
-            (ExtensionName == _T("ape")))
-        {
-            if (m_Config.AcceptDragAudioFile)
-            {
-                if (ExtensionName == _T("flac"))
-                    ExtractFlacInternalCue(FileName);
-                else
-                    ExtractTakInternalCue(FileName);
-            }
-            else
-            {
-                if (DealFile())
-                {
-                    if (m_Config.AutoFixTTA) FixTTACue();
-                    if (m_Config.AutoFixCue) FixCue();
-                }
-            }
-        }
-        else
-        {
-            if (DealFile())
-            {
-                if (m_Config.AutoFixTTA) FixTTACue();
-                if (m_Config.AutoFixCue) FixCue();
-            }
-        }
-    }
-    return 0;
-}
-
 LRESULT CMainDlg::OnPopupUTF8(WORD, WORD, HWND, BOOL&)
 {
-    m_Config.OutputEncoding = O_UTF_8;
+    _Config.OutputEncoding = O_UTF_8;
     return 0;
 }
 
 LRESULT CMainDlg::OnPopupUTF8NoBom(WORD, WORD, HWND, BOOL&)
 {
-    m_Config.OutputEncoding = O_UTF_8_NOBOM;
+    _Config.OutputEncoding = O_UTF_8_NOBOM;
     return 0;
 }
 
 LRESULT CMainDlg::OnPopupUTF16LE(WORD, WORD, HWND, BOOL&)
 {
-    m_Config.OutputEncoding = O_UTF_16_LE;
+    _Config.OutputEncoding = O_UTF_16_LE;
     return 0;
 }
 
 LRESULT CMainDlg::OnPopupUTF16BE(WORD, WORD, HWND, BOOL&)
 {
-    m_Config.OutputEncoding = O_UTF_16_BE;
-    return 0;
-}
-
-LRESULT CMainDlg::OnFileSave(WORD, WORD, HWND, BOOL&)
-{
-    CFileDialog saveFile(FALSE, _T("*.txt"), NULL, OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT|OFN_PATHMUSTEXIST,
-        _T("text file(*.txt;*.cue;*.log)\0*.txt;*.cue;*.log\0txt file(*.txt)\0*.txt\0cue file(*.cue)\0*.cue\0log file(*.log)\0*.log\0All Files (*.*)\0*.*\0\0"));
-    if (saveFile.DoModal() == IDOK)
-    {
-        CWinFile file(saveFile.m_szFileName, CWinFile::modeCreate|CWinFile::modeWrite|CWinFile::shareExclusive);
-        if (!file.open())
-        {
-            MessageBox(getString(IDS_WRITEFAILED), _T("Unicue"), MB_OK);
-            return 0;
-        }
-        WTL::CString UnicodeStr;
-        getWindowText(GetDlgItem(IDC_EDIT_UNICODE), UnicodeStr);
-
-        switch (m_Config.OutputEncoding)
-        {
-        case O_UTF_8_NOBOM:
-            {
-                std::string &utf8str = CC4EncodeUTF16::convert2utf8((LPCTSTR)UnicodeStr, UnicodeStr.GetLength());
-                file.write(utf8str.c_str(), utf8str.length());
-            }
-            break;
-        case O_UTF_16_LE:
-            file.write(CC4Encode::LITTLEENDIAN_BOM, 2);
-            file.write((const char*)(LPCTSTR)UnicodeStr, UnicodeStr.GetLength()*sizeof(wchar_t));
-            break;
-        case O_UTF_16_BE:
-            file.write(CC4Encode::BIGENDIAN_BOM, 2);
-            for (int i = 0; i < UnicodeStr.GetLength(); ++i)
-            {
-                wchar_t chr = UnicodeStr.GetAt(i);
-                file.write(((char*)(&chr)) + 1, 1);
-                file.write((char*)(&chr), 1);
-            }
-            break;
-        case O_UTF_8:
-        default:
-            {
-                std::string &utf8str = CC4EncodeUTF16::convert2utf8((LPCTSTR)UnicodeStr, UnicodeStr.GetLength());
-                file.write(CC4Encode::UTF_8_BOM, 3);
-                file.write(utf8str.c_str(), utf8str.length());
-            }
-        }
-
-        file.close();
-    }
-
-    return 0;
-}
-
-LRESULT CMainDlg::OnFileOption(WORD, WORD, HWND, BOOL&)
-{
-    CSettingDlg dlg(m_Config);
-    if (dlg.DoModal() == IDOK)
-    {
-        m_Config = dlg.m_Config;
-    }
+    _Config.OutputEncoding = O_UTF_16_BE;
     return 0;
 }
 
@@ -563,38 +437,7 @@ LRESULT CMainDlg::OnDropFiles(UINT, WPARAM wParam, LPARAM, BOOL&)
         {
             TCHAR szFileName[MAX_PATH + 1] = {0};
             DragQueryFile(hDrop, 0, szFileName, MAX_PATH);
-            m_FilePathName = szFileName;
-            WTL::CString &ExtensionName = m_FilePathName.Right(m_FilePathName.GetLength() - m_FilePathName.ReverseFind('.') - 1);
-            ExtensionName.MakeLower();
-            WTL::CString &FileName = m_FilePathName.Right(m_FilePathName.GetLength() - m_FilePathName.ReverseFind('\\') - 1);
-            if ((ExtensionName == L"tak")  ||
-                (ExtensionName == L"flac") ||
-                (ExtensionName == L"ape"))
-            {
-                if (m_Config.AcceptDragAudioFile)
-                {
-                    if (ExtensionName == L"flac")
-                        ExtractFlacInternalCue(FileName);
-                    else
-                        ExtractTakInternalCue(FileName);
-                }
-                else
-                {
-                    if (DealFile())
-                    {
-                        if (m_Config.AutoFixTTA) FixTTACue();
-                        if (m_Config.AutoFixCue) FixCue();
-                    }
-                }
-            }
-            else
-            {
-                if (DealFile())
-                {
-                    if (m_Config.AutoFixTTA) FixTTACue();
-                    if (m_Config.AutoFixCue) FixCue();
-                }
-            }
+            OpenFile(szFileName);
         }
         else
             MessageBox(getString(IDS_ONLYONEFILEALLOW), _T("Unicue"), MB_OK);
@@ -652,8 +495,8 @@ LRESULT CMainDlg::OnCbnSelchangeComboSelectcode(WORD, WORD, HWND, BOOL&)
             GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(encode->wconvertText(m_String, m_StringLength).c_str());
         else
             GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(msConvert(m_String).c_str());
-        if (m_Config.AutoFixTTA) FixTTACue();
-        if (m_Config.AutoFixCue) FixCue();
+        if (_Config.AutoFixTTA) FixTTACue();
+        if (_Config.AutoFixCue) FixCue();
     }
 
     return 0;
@@ -674,7 +517,7 @@ LRESULT CMainDlg::OnBnClickedButtonDo(WORD, WORD, HWND, BOOL&)
         m_CodeStatus = getString(IDS_UNKNOWNCODE);
 
         // 检测编码
-        if (m_Config.AutoCheckCode)
+        if (_Config.AutoCheckCode)
         {
             const CC4Encode *encode = m_context->getMostPossibleEncode(LeftAnsiStr);
             if (encode)
@@ -706,46 +549,7 @@ LRESULT CMainDlg::OnBnClickedButtonDo(WORD, WORD, HWND, BOOL&)
 
 LRESULT CMainDlg::OnBnClickedButtonSave(WORD, WORD, HWND, BOOL&)
 {
-    CWinFile file(m_FilePathName, CWinFile::modeCreate|CWinFile::modeWrite|CWinFile::shareExclusive);
-    if (!file.open())
-    {
-        MessageBox(getString(IDS_WRITEFAILED), _T("Unicue"), MB_OK);
-        return 0;
-    }
-    WTL::CString UnicodeStr;
-    getWindowText(GetDlgItem(IDC_EDIT_UNICODE), UnicodeStr);
-
-    switch (m_Config.OutputEncoding)
-    {
-    case O_UTF_8_NOBOM:
-        {
-            std::string &utf8str = CC4EncodeUTF16::convert2utf8((LPCTSTR)UnicodeStr, UnicodeStr.GetLength());
-            file.write(utf8str.c_str(), utf8str.length());
-        }
-        break;
-    case O_UTF_16_LE:
-        file.write(CC4Encode::LITTLEENDIAN_BOM, 2);
-        file.write((const char*)(LPCTSTR)UnicodeStr, UnicodeStr.GetLength()*sizeof(wchar_t));
-        break;
-    case O_UTF_16_BE:
-        file.write(CC4Encode::BIGENDIAN_BOM, 2);
-        for (int i = 0; i < UnicodeStr.GetLength(); ++i)
-        {
-            wchar_t chr = UnicodeStr.GetAt(i);
-            file.write(((char*)(&chr)) + 1, 1);
-            file.write((char*)(&chr), 1);
-        }
-        break;
-    case O_UTF_8:
-    default:
-        {
-            std::string &utf8str = CC4EncodeUTF16::convert2utf8((LPCTSTR)UnicodeStr, UnicodeStr.GetLength());
-            file.write(CC4Encode::UTF_8_BOM, 3);
-            file.write(utf8str.c_str(), utf8str.length());
-        }
-    }
-
-    file.close();
+    SaveFile(m_FilePathName);
 
     return 0;
 }
@@ -755,61 +559,24 @@ LRESULT CMainDlg::OnBnClickedButtonSaveas(WORD, WORD, HWND, BOOL&)
     int position = m_FilePathName.ReverseFind('.');
     WTL::CString &FileType = m_FilePathName.Right(m_FilePathName.GetLength() - position);
     WTL::CString &FilePath = m_FilePathName.Left(position);
-    FilePath += m_Config.TemplateStr;
+    FilePath += _Config.TemplateStr;
     FilePath += FileType;
 
-    CWinFile file(FilePath, CWinFile::modeCreate|CWinFile::modeWrite|CWinFile::shareExclusive);
-    if (!file.open())
-    {
-        MessageBox(getString(IDS_WRITEFAILED), _T("Unicue"), MB_OK);
-        return 0;
-    }
-    WTL::CString UnicodeStr;
-    getWindowText(GetDlgItem(IDC_EDIT_UNICODE), UnicodeStr);
-    switch (m_Config.OutputEncoding)
-    {
-    case O_UTF_8_NOBOM:
-        {
-            std::string &utf8str = CC4EncodeUTF16::convert2utf8((LPCTSTR)UnicodeStr, UnicodeStr.GetLength());
-            file.write(utf8str.c_str(), utf8str.length());
-        }
-        break;
-    case O_UTF_16_LE:
-        file.write(CC4Encode::LITTLEENDIAN_BOM, 2);
-        file.write((const char*)(LPCTSTR)UnicodeStr, UnicodeStr.GetLength()*sizeof(wchar_t));
-        break;
-    case O_UTF_16_BE:
-        file.write(CC4Encode::BIGENDIAN_BOM, 2);
-        for (int i = 0; i < UnicodeStr.GetLength(); ++i)
-        {
-            wchar_t chr = UnicodeStr.GetAt(i);
-            file.write(((char*)(&chr)) + 1, 1);
-            file.write((char*)(&chr), 1);
-        }
-        break;
-    case O_UTF_8:
-    default:
-        {
-            std::string &utf8str = CC4EncodeUTF16::convert2utf8((LPCTSTR)UnicodeStr, UnicodeStr.GetLength());
-            file.write(CC4Encode::UTF_8_BOM, 3);
-            file.write(utf8str.c_str(), utf8str.length());
-        }
-    }
-    file.close();
+    SaveFile(FilePath);
 
     return 0;
 }
 
 LRESULT CMainDlg::OnBnClickedCheckAutocheckcode(WORD, WORD, HWND, BOOL&)
 {
-    m_Config.AutoCheckCode = !m_Config.AutoCheckCode;
+    _Config.AutoCheckCode = !_Config.AutoCheckCode;
     return 0;
 }
 
 LRESULT CMainDlg::OnBnClickedCheckAlwaysontop(WORD, WORD, HWND, BOOL&)
 {
-    m_Config.AlwaysOnTop = !m_Config.AlwaysOnTop;
-    SetDialogPos();
+    _Config.AlwaysOnTop = !_Config.AlwaysOnTop;
+    SetMainWndPos();
     return 0;
 }
 
@@ -847,8 +614,8 @@ LRESULT CMainDlg::OnBnClickedButtonTransferstring(WORD, WORD, HWND, BOOL&)
         /*
         if (DealFile())
         {
-            if (m_Config.AutoFixTTA) FixTTACue();
-            if (m_Config.AutoFixCue) FixCue();
+            if (_Config.AutoFixTTA) FixTTACue();
+            if (_Config.AutoFixCue) FixCue();
         }
         */
     }
@@ -864,7 +631,7 @@ LRESULT CMainDlg::OnBnClickedButtonSelectOutputCode(WORD, WORD, HWND, BOOL&)
     CheckMenuItem(hMenu, IDM_UTF_8_WITHOUT_BOM, MF_UNCHECKED);
     CheckMenuItem(hMenu, IDM_UTF_16_LITTLE_ENDIAN, MF_UNCHECKED);
     CheckMenuItem(hMenu, IDM_UTF_16_BIG_ENDIAN, MF_UNCHECKED);
-    switch (m_Config.OutputEncoding)
+    switch (_Config.OutputEncoding)
     {
     case O_UTF_8:
         CheckMenuItem(hMenu, IDM_UTF_8_WITH_BOM, MF_CHECKED);
@@ -1300,19 +1067,19 @@ void CMainDlg::FixCue()
     int BeginPos = cueContent.Find(_T("FILE \""));
     if (BeginPos == -1)
     {
-        if (!m_Config.CloseCuePrompt) MessageBox(getString(IDS_CORRUPTCUE));
+        if (!_Config.CloseCuePrompt) MessageBox(getString(IDS_CORRUPTCUE));
         return;
     }
     int EndPos = cueContent.Find(_T("\" WAVE"));
     if (EndPos == -1)
     {
-        if (!m_Config.CloseCuePrompt) MessageBox(getString(IDS_CORRUPTCUE));
+        if (!_Config.CloseCuePrompt) MessageBox(getString(IDS_CORRUPTCUE));
         return;
     }
     BeginPos += 6;
     if (BeginPos >= EndPos)
     {
-        if (!m_Config.CloseCuePrompt) MessageBox(getString(IDS_CORRUPTCUE));
+        if (!_Config.CloseCuePrompt) MessageBox(getString(IDS_CORRUPTCUE));
         return;
     }
 
@@ -1400,19 +1167,19 @@ void CMainDlg::FixInternalCue(WTL::CString AudioFileName)
     int BeginPos = CueString.Find(_T("FILE \""));
     if (BeginPos == -1)
     {
-        if (!m_Config.CloseCuePrompt) MessageBox(getString(IDS_CORRUPTCUE));
+        if (!_Config.CloseCuePrompt) MessageBox(getString(IDS_CORRUPTCUE));
         return;
     }
     int EndPos = CueString.Find(_T("\" WAVE"));
     if (EndPos == -1)
     {
-        if (!m_Config.CloseCuePrompt) MessageBox(getString(IDS_CORRUPTCUE));
+        if (!_Config.CloseCuePrompt) MessageBox(getString(IDS_CORRUPTCUE));
         return;
     }
     BeginPos += 6;
     if (BeginPos >= EndPos)
     {
-        if (!m_Config.CloseCuePrompt) MessageBox(getString(IDS_CORRUPTCUE));
+        if (!_Config.CloseCuePrompt) MessageBox(getString(IDS_CORRUPTCUE));
         return;
     }
 

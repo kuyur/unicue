@@ -4,7 +4,7 @@
 
 
  /* File created by MIDL compiler version 7.00.0555 */
-/* at Tue Oct 22 01:29:08 2013
+/* at Tue Nov 18 18:41:25 2014
  */
 /* Compiler settings for TravellerExt.idl:
     Oicf, W1, Zp8, env=Win32 (32b run), target_arch=X86 7.00.0555 

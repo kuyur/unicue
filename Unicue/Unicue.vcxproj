@@ -241,6 +241,7 @@
     <ClCompile Include="AboutDlg.cpp" />
     <ClCompile Include="config.cpp" />
     <ClCompile Include="MainDlg.cpp" />
+    <ClCompile Include="MainFrame.cpp" />
     <ClCompile Include="SettingDlg.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -264,6 +265,7 @@
     <ClInclude Include="config.h" />
     <ClInclude Include="MainDlg.h" />
     <ClInclude Include="colorhyperlink.h" />
+    <ClInclude Include="MainFrame.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="SettingDlg.h" />
     <ClInclude Include="stdafx.h" />

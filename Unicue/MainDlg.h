@@ -1,6 +1,6 @@
 ﻿/************************************************************************/
 /*                                                                      */
-/* Unicue 1.2                                                           */
+/* Unicue 1.3                                                           */
 /* A tool to convert file from ansi code-page to Unicode                */
 /*                                                                      */
 /* Author:  kuyur (kuyur@kuyur.info)                                    */
@@ -19,8 +19,9 @@
 #include "config.h"
 #include "colorhyperlink.h"
 
-class CMainDlg : public CDialogImpl<CMainDlg>, public CUpdateUI<CMainDlg>,
-        public CMessageFilter, public CIdleHandler, public CWinDataExchange<CMainDlg>
+class CMainDlg : public CAxDialogImpl<CMainDlg>, public CUpdateUI<CMainDlg>,
+        public CMessageFilter, public CIdleHandler, public CWinDataExchange<CMainDlg>,
+        public CDialogResize<CMainDlg>
 {
 protected:
     BOOL          m_bNeedConvert;        // m_RawString need to be converted or not
@@ -33,8 +34,6 @@ protected:
     UINT          m_UnicodeLength;       // Length of m_UnicodeString
     WTL::CString  m_FilePathName;        // File path to be converted
     WTL::CString  m_CodeStatus;          // Encoding check result
-    CConfig       m_Config;              // Config for app
-    WTL::CString  m_ConfigPath;          // File path of config
     BOOL          m_bCueFile;            // Type of file to be converted is a cue
     BOOL          m_bTransferString;     // Transfer string mode if TRUE, Transfer file mode if FALSE
     CC4Context*   m_context;             // Converting context
@@ -44,7 +43,7 @@ protected:
     void FixCue();
     void FixInternalCue(WTL::CString AudioFileName);
     void FixTTACue();
-    BOOL SetDialogPos();
+    void SetMainWndPos();
     BOOL DealFile();
     BOOL ExtractTakInternalCue(WTL::CString AudioFileName);
     BOOL ExtractFlacInternalCue(WTL::CString AudioFileName);
@@ -62,16 +61,12 @@ public:
 
     BEGIN_MSG_MAP(CMainDlg)
         CHAIN_MSG_MAP(CUpdateUI)
+        CHAIN_MSG_MAP(CDialogResize<CMainDlg>)
         MESSAGE_HANDLER(WM_INITDIALOG, OnInitDialog)
         MESSAGE_HANDLER(WM_DESTROY, OnDestroy)
         MESSAGE_HANDLER(WM_DROPFILES, OnDropFiles)
         COMMAND_ID_HANDLER(IDOK, OnOK)
         COMMAND_ID_HANDLER(IDCANCEL, OnCancel)
-        COMMAND_ID_HANDLER(IDM_ABOUT, OnAbout)
-        COMMAND_ID_HANDLER(IDM_FILE_EXIT, OnFileExit)
-        COMMAND_ID_HANDLER(IDM_FILE_OPEN, OnFileOpen)
-        COMMAND_ID_HANDLER(IDM_FILE_SAVE, OnFileSave)
-        COMMAND_ID_HANDLER(IDM_FILE_OPTION, OnFileOption)
         COMMAND_ID_HANDLER(IDM_UTF_8_WITH_BOM, OnPopupUTF8)
         COMMAND_ID_HANDLER(IDM_UTF_8_WITHOUT_BOM, OnPopupUTF8NoBom)
         COMMAND_ID_HANDLER(IDM_UTF_16_LITTLE_ENDIAN, OnPopupUTF16LE)
@@ -89,9 +84,38 @@ public:
 
     // DDX
     BEGIN_DDX_MAP(CMainDlg)
-        DDX_CHECK(IDC_CHECK_AUTOCHECKCODE, m_Config.AutoCheckCode)
-        DDX_CHECK(IDC_CHECK_ALWAYSONTOP, m_Config.AlwaysOnTop)
+        DDX_CHECK(IDC_CHECK_AUTOCHECKCODE, _Config.AutoCheckCode)
+        DDX_CHECK(IDC_CHECK_ALWAYSONTOP, _Config.AlwaysOnTop)
     END_DDX_MAP()
+
+    // resize
+    BEGIN_DLGRESIZE_MAP(CMainDlg)
+        //BEGIN_DLGRESIZE_GROUP()
+        //    DLGRESIZE_CONTROL(IDC_CHECK_AUTOCHECKCODE, DLSZ_SIZE_X)
+        //    DLGRESIZE_CONTROL(IDC_CHECK_ALWAYSONTOP, DLSZ_SIZE_X)
+        //    DLGRESIZE_CONTROL(IDC_STATIC_ENCODING, DLSZ_SIZE_X)
+        //    DLGRESIZE_CONTROL(IDC_COMBO_SELECTCODE, DLSZ_SIZE_X)
+        //    DLGRESIZE_CONTROL(IDC_BUTTON_TRANSFERSTRING, DLSZ_SIZE_X)
+        //    DLGRESIZE_CONTROL(IDC_BUTTON_SELECTSAVECODE, DLSZ_SIZE_X)
+        //    DLGRESIZE_CONTROL(IDC_BUTTON_SAVE,DLSZ_SIZE_X)
+        //    DLGRESIZE_CONTROL(IDC_BUTTON_SAVEAS, DLSZ_SIZE_X)
+        //END_DLGRESIZE_GROUP()
+
+        DLGRESIZE_CONTROL(IDC_BUTTON_DO, DLSZ_CENTER_X)
+        //DLGRESIZE_CONTROL(IDC_BUTTON_DO, DLSZ_MOVE_Y)
+
+        //BEGIN_DLGRESIZE_GROUP()
+        //    DLGRESIZE_CONTROL(IDC_EDIT_ANSI, DLSZ_MOVE_X)
+        //    DLGRESIZE_CONTROL(IDC_EDIT_UNICODE, DLSZ_MOVE_X)
+        //END_DLGRESIZE_GROUP()
+        //DLGRESIZE_CONTROL(IDC_EDIT_ANSI, DLSZ_SIZE_Y)
+        //DLGRESIZE_CONTROL(IDC_EDIT_UNICODE, DLSZ_SIZE_Y)
+
+        DLGRESIZE_CONTROL(IDC_STATIC_DETECTED, DLSZ_MOVE_Y)
+        DLGRESIZE_CONTROL(IDC_STATIC_PATH, DLSZ_MOVE_Y)
+        DLGRESIZE_CONTROL(IDC_STATIC_STAT, DLSZ_MOVE_Y)
+        DLGRESIZE_CONTROL(IDC_STATIC_FILELINK, DLSZ_MOVE_Y|DLSZ_SIZE_X|DLSZ_REPAINT)
+    END_DLGRESIZE_MAP()
 
 // Handler prototypes (uncomment arguments if needed):
 //    LRESULT MessageHandler(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
@@ -100,14 +124,9 @@ public:
 
     LRESULT OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
     LRESULT OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
-    LRESULT OnAbout(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
     LRESULT OnOK(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
     LRESULT OnCancel(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 
-    LRESULT OnFileExit(WORD, WORD wID, HWND, BOOL&);
-    LRESULT OnFileOpen(WORD, WORD, HWND, BOOL&);
-    LRESULT OnFileSave(WORD, WORD, HWND, BOOL&);
-    LRESULT OnFileOption(WORD, WORD, HWND, BOOL&);
     LRESULT OnPopupUTF8(WORD, WORD, HWND, BOOL&);
     LRESULT OnPopupUTF8NoBom(WORD, WORD, HWND, BOOL&);
     LRESULT OnPopupUTF16LE(WORD, WORD, HWND, BOOL&);
@@ -124,6 +143,8 @@ public:
     LRESULT OnClickFileLink(int, LPNMHDR, BOOL&);
 
     void CloseDialog(int nVal);
+    void OpenFile(LPCWSTR filePath);
+    void SaveFile(LPCWSTR filePath);
 };
 
 #endif // MAINDLG_H_

@@ -34,18 +34,19 @@ public:
         end     = FILE_END
     };
     enum OpenFlags {
-        modeRead       = (int)0x0001,
-        modeWrite      = (int)0x0002,
-        modeReadWrite  = (int)0x0004,
-        shareDenyWrite = (int)0x0010,
-        shareDenyRead  = (int)0x0020,
-        shareDenyNone  = (int)0x0040,
-        shareExclusive = (int)0x0080,
-        modeCreate     = (int)0x0100,
-        modeNoTruncate = (int)0x0200
+        modeRead         = (int)0x0001,
+        modeWrite        = (int)0x0002,
+        modeReadWrite    = (int)0x0004,
+        shareDenyWrite   = (int)0x0010,
+        shareDenyRead    = (int)0x0020,
+        shareDenyNone    = (int)0x0040,
+        shareExclusive   = (int)0x0080,
+        openOnly         = (int)0x0100,  // open existing file only (if file not existing, open() will return FALSE)
+        openCreateAlways = (int)0x0200,  // always create new file, all old content will be deleted
+        openAppend       = (int)0x0400   // only create new file when not existing (for appending)
     };
-    CWinFile(const std::wstring &filename, UINT openFlags = modeRead | shareDenyWrite);
-    CWinFile(LPCWSTR filename, UINT openFlags = modeRead | shareDenyWrite);
+    CWinFile(const std::wstring &filename, UINT openFlags = modeRead | shareDenyWrite | openOnly);
+    CWinFile(LPCWSTR filename, UINT openFlags = modeRead | shareDenyWrite | openOnly);
     ~CWinFile();
     BOOL open();
     UINT64 length();

@@ -223,7 +223,7 @@ LRESULT CProcessDlg::OnBnClickedDo(WORD, WORD, HWND, BOOL&)
                 WTL::CString outputTarget(*iter);
                 if (!m_config.isOverride)
                     outputTarget.Insert(outputTarget.ReverseFind(L'.'), m_config.templateString);
-                CWinFile outFile(outputTarget, CWinFile::modeCreate|CWinFile::modeWrite|CWinFile::shareExclusive);
+                CWinFile outFile(outputTarget, CWinFile::openCreateAlways|CWinFile::modeWrite|CWinFile::shareExclusive);
                 if (!outFile.open())
                 {
                     delete []buffer;
@@ -546,7 +546,7 @@ BOOL CProcessDlg::backupFile(const WTL::CString &origPath, const char* buffer, U
             DeleteFile(backupFolder);
         CreateDirectory(backupFolder, NULL);
     }
-    CWinFile outFile(backupFilePath, CWinFile::modeCreate|CWinFile::modeWrite|CWinFile::shareExclusive);
+    CWinFile outFile(backupFilePath, CWinFile::openCreateAlways|CWinFile::modeWrite|CWinFile::shareExclusive);
     if (!outFile.open())
         return FALSE;
     outFile.write(buffer, length);

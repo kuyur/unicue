@@ -10,4 +10,6 @@
     <CharmapConfPath>charmap-anisong.xml</CharmapConfPath>
     <Language>chn</Language>
     <Output>UTF_8_BOM</Output>
+    <WindowWidth>793</WindowWidth>
+    <WindowHeight>717</WindowHeight>
 </config>

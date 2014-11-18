@@ -417,7 +417,7 @@ int _tmain(int argc, TCHAR* argv[])
         //第一步：筛选有效字符
         if (wcscmp(argv[1],L"-step1")==0)
         {
-            CWinFile OpenFile(_T("SCRIPT.AFS"),CWinFile::modeRead|CWinFile::shareDenyWrite);
+            CWinFile OpenFile(_T("SCRIPT.AFS"),CWinFile::modeRead|CWinFile::openOnly|CWinFile::shareDenyWrite);
             if (!OpenFile.open())
             {
                 OpenFile.close();
@@ -435,7 +435,7 @@ int _tmain(int argc, TCHAR* argv[])
             memset((void*)akaiito_script_dealing,0,length);
             ReplaceDumpChar(akaiito_script,akaiito_script_dealing,length);
 
-            CWinFile SaveFile(_T("akaiito_script_step1.txt"),CWinFile::modeCreate|CWinFile::modeWrite|CWinFile::shareExclusive);
+            CWinFile SaveFile(_T("akaiito_script_step1.txt"),CWinFile::openCreateAlways|CWinFile::modeWrite|CWinFile::shareExclusive);
             if (!SaveFile.open())
             {
                 ::MessageBox(NULL, _T("无法写入文件！"), _T("ExtractAkaiito"), MB_OK);
@@ -481,7 +481,7 @@ int _tmain(int argc, TCHAR* argv[])
             length=DeleteSingleChar(akaiito_script_dealing,length);
 
             UINT titleLength = 107186;
-            CWinFile SaveFile1(_T("akaiito_script_step2-1.txt"),CWinFile::modeCreate|CWinFile::modeWrite|CWinFile::shareExclusive);
+            CWinFile SaveFile1(_T("akaiito_script_step2-1.txt"),CWinFile::openCreateAlways|CWinFile::modeWrite|CWinFile::shareExclusive);
             if (!SaveFile1.open())
             {
                 ::MessageBox(NULL, _T("无法写入文件！"), _T("ExtractAkaiito"), MB_OK);
@@ -496,7 +496,7 @@ int _tmain(int argc, TCHAR* argv[])
             SaveFile1.write(akaiito_script_dealing,titleLength);
             SaveFile1.close();
 
-            CWinFile SaveFile2(_T("akaiito_script_step2-2.txt"),CWinFile::modeCreate|CWinFile::modeWrite|CWinFile::shareExclusive);
+            CWinFile SaveFile2(_T("akaiito_script_step2-2.txt"),CWinFile::openCreateAlways|CWinFile::modeWrite|CWinFile::shareExclusive);
             if (!SaveFile2.open())
             {
                 ::MessageBox(NULL, _T("无法写入文件！"), _T("ExtractAkaiito"), MB_OK);
@@ -541,7 +541,7 @@ int _tmain(int argc, TCHAR* argv[])
             memset((void*)akaiito_script,0,length);
             length=ReplaceSpaceChar(akaiito_script_dealing,akaiito_script,length);
 
-            CWinFile SaveFile(_T("akaiito_script_step3-1.txt"),CWinFile::modeCreate|CWinFile::modeWrite|CWinFile::shareExclusive);
+            CWinFile SaveFile(_T("akaiito_script_step3-1.txt"),CWinFile::openCreateAlways|CWinFile::modeWrite|CWinFile::shareExclusive);
             if (!SaveFile.open())
             {
                 ::MessageBox(NULL, _T("无法写入文件！"), _T("ExtractAkaiito"), MB_OK);
@@ -586,7 +586,7 @@ int _tmain(int argc, TCHAR* argv[])
             memset((void*)akaiito_script,0,length);
             length=ReplaceSpaceChar(akaiito_script_dealing,akaiito_script,length);
 
-            CWinFile SaveFile(_T("akaiito_script_step3-2.txt"),CWinFile::modeCreate|CWinFile::modeWrite|CWinFile::shareExclusive);
+            CWinFile SaveFile(_T("akaiito_script_step3-2.txt"),CWinFile::openCreateAlways|CWinFile::modeWrite|CWinFile::shareExclusive);
             if (!SaveFile.open())
             {
                 ::MessageBox(NULL, _T("无法写入文件！"), _T("ExtractAkaiito"), MB_OK);

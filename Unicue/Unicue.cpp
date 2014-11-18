@@ -1,6 +1,6 @@
 /************************************************************************/
 /*                                                                      */
-/* Unicue 1.2                                                           */
+/* Unicue 1.3                                                           */
 /* A tool to convert file from ansi code-page to Unicode                */
 /*                                                                      */
 /* Author:  kuyur (kuyur@kuyur.info)                                    */
@@ -16,25 +16,87 @@
 
 #include "stdafx.h"
 #include "resource.h"
-#include "aboutdlg.h"
+#include "../common/utils.h"
+#include "../common/win32helper.h"
+#include "../common/winfile.h"
+#include "../common/wtlhelper.h"
+#include "config.h"
 #include "MainDlg.h"
+#include "AboutDlg.h"
+#include "SettingDlg.h"
+#include "MainFrame.h"
 
 CAppModule _Module;
+CConfig _Config; // The global instance for config
 
-int Run(LPTSTR /*lpstrCmdLine*/ = NULL, int nCmdShow = SW_SHOWDEFAULT)
+void LoadConfig(const WTL::CString &configPath) {
+    SetDefault(_Config);
+    // Load config file...
+    // Because TiXml does not support wchar_t file name,
+    // use Win32 File Api to load xml file.
+    CWinFile file(configPath, CWinFile::modeRead | CWinFile::shareDenyWrite);
+    if (!file.open())
+        SaveConfigFile(configPath, _Config);
+    else
+    {
+        UINT fileLength = file.length();
+        char *fileBuffer = new char[fileLength+1];
+        memset((void*)fileBuffer, 0, fileLength+1);
+        file.seek(0, CWinFile::begin);
+        file.read(fileBuffer, fileLength);
+        file.close();
+
+        TiXmlDocument *doc = new TiXmlDocument;
+        doc->Parse(fileBuffer, NULL, TIXML_ENCODING_UTF8);
+        if (doc->Error() || !LoadConfigFile(doc, _Config))
+        {
+            ::DeleteFile(configPath);
+            SetDefault(_Config);
+            SaveConfigFile(configPath, _Config);
+        }
+
+        delete []fileBuffer;
+        fileBuffer = NULL;
+        delete doc;
+    }
+    // set local here
+    switch (_Config.Lang)
+    {
+    case EN:
+        SetThreadLocalSettings(LANG_ENGLISH, SUBLANG_ENGLISH_US);
+        break;
+    case CHN:
+        SetThreadLocalSettings(LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED);
+        break;
+    case CHT:
+        SetThreadLocalSettings(LANG_CHINESE, SUBLANG_CHINESE_TRADITIONAL);
+        break;
+    case JPN:
+        SetThreadLocalSettings(LANG_JAPANESE, SUBLANG_JAPANESE_JAPAN);
+        break;
+    default:
+        SetThreadLocalSettings(LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED);
+    }
+}
+
+int Run(const WTL::CString &configPath, LPTSTR /*lpstrCmdLine*/ = NULL, int nCmdShow = SW_SHOWDEFAULT)
 {
     CMessageLoop theLoop;
     _Module.AddMessageLoop(&theLoop);
 
-    CMainDlg dlgMain;
+    // load config
+    LoadConfig(configPath);
 
-    if(dlgMain.Create(NULL) == NULL)
-    {
-        ATLTRACE(_T("Main dialog creation failed!\n"));
-        return 0;
-    }
+    CMainFrame wndMain;
 
-    dlgMain.ShowWindow(nCmdShow);
+    RECT rc = {0, 0, MAX(_Config.WindowWidth, MAINFRAME_MIN_WIDTH), MAX(_Config.WindowHeight, MAINFRAME_MIN_HEIGHT)};
+	if(wndMain.CreateEx(NULL, rc) == NULL)
+	{
+		ATLTRACE(_T("Main window creation failed!\n"));
+		return 0;
+	}
+
+    wndMain.ShowWindow(nCmdShow);
 
     int nRet = theLoop.Run();
 
@@ -62,7 +124,12 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR lp
     hRes = _Module.Init(NULL, hInstance);
     ATLASSERT(SUCCEEDED(hRes));
 
-    int nRet = Run(lpstrCmdLine, nCmdShow);
+    WTL::CString configPath(GetProcessFolder());
+    configPath += L"config-unicue.xml";
+
+    int nRet = Run(configPath, lpstrCmdLine, nCmdShow);
+
+    SaveConfigFile(configPath, _Config);
 
     _Module.Term();
     ::CoUninitialize();

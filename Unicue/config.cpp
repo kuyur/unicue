@@ -1,6 +1,20 @@
-﻿#include "config.h"
-#include "..\c4-lib\c4encode.h"
-#include "..\common\winfile.h"
+﻿/************************************************************************/
+/*                                                                      */
+/* Unicue 1.3                                                           */
+/* A tool to convert file from ansi code-page to Unicode                */
+/*                                                                      */
+/* Author:  kuyur (kuyur@kuyur.info)                                    */
+/* Published under GPLv3                                                */
+/* http://www.gnu.org/licenses/gpl-3.0.en.html                          */
+/*                                                                      */
+/* Project URL: http://github.com/kuyur/unicue                          */
+/*                                                                      */
+/************************************************************************/
+
+#include "config.h"
+#include "../c4-lib/c4encode.h"
+#include "../common/utils.h"
+#include "../common/winfile.h"
 
 BOOL LoadConfigFile(TiXmlDocument *xmlfile, CConfig &config)
 {
@@ -110,6 +124,18 @@ BOOL LoadConfigFile(TiXmlDocument *xmlfile, CConfig &config)
         config.OutputEncoding = O_UTF_16_BE;
     else
         config.OutputEncoding = O_UTF_8;
+
+    // WindowWidth node
+    pElem = hXmlHandle.FirstChild("WindowWidth").Element();
+    if (!pElem) return FALSE;
+    if (!pElem->GetText()) return FALSE;
+    config.WindowWidth = (LONG)strtol(pElem->GetText(), (char **)NULL, 10);
+
+    // WindowHeight node
+    pElem = hXmlHandle.FirstChild("WindowHeight").Element();
+    if (!pElem) return FALSE;
+    if (!pElem->GetText()) return FALSE;
+    config.WindowHeight = (LONG)strtol(pElem->GetText(), (char **)NULL, 10);
 
     return TRUE;
 }
@@ -230,12 +256,22 @@ BOOL SaveConfigFile(LPCTSTR configPath, const CConfig &config)
     Output->LinkEndChild(OutputValue);
     configure->LinkEndChild(Output);
 
+    TiXmlElement *WindowWidth = new TiXmlElement("WindowWidth");
+    TiXmlText *WindowWidthValue = new TiXmlText(toSTLString(_Config.WindowWidth).c_str());
+    WindowWidth->LinkEndChild(WindowWidthValue);
+    configure->LinkEndChild(WindowWidth);
+
+    TiXmlElement *WindowHeight = new TiXmlElement("WindowHeight");
+    TiXmlText *WindowHeightValue = new TiXmlText(toSTLString(_Config.WindowHeight).c_str());
+    WindowHeight->LinkEndChild(WindowHeightValue);
+    configure->LinkEndChild(WindowHeight);
+
     configdoc.LinkEndChild(dec);
     configdoc.LinkEndChild(configure);
 
     TiXmlPrinter printer;
     configdoc.Accept(&printer);
-    CWinFile file(configPath, CWinFile::modeWrite | CWinFile::modeCreate | CWinFile::shareExclusive);
+    CWinFile file(configPath, CWinFile::modeWrite | CWinFile::openCreateAlways | CWinFile::shareExclusive);
     if (file.open())
     {
         file.write(CC4Encode::UTF_8_BOM, 3);
@@ -258,4 +294,6 @@ void SetDefault(CConfig &config)
     config.MapConfName = _T("charmap-anisong.xml");
     config.OutputEncoding = O_UTF_8;
     config.TemplateStr = _T(".utf-8");
+    config.WindowWidth = 793;
+    config.WindowHeight = 717;
 }

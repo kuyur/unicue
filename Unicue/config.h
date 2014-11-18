@@ -1,6 +1,6 @@
 ﻿/************************************************************************/
 /*                                                                      */
-/* Unicue 1.2                                                           */
+/* Unicue 1.3                                                           */
 /* A tool to convert file from ansi code-page to Unicode                */
 /*                                                                      */
 /* Author:  kuyur (kuyur@kuyur.info)                                    */
@@ -50,10 +50,15 @@ typedef struct CConfig_tag
     WTL::CString MapConfName;              // 字符映射表配置文件路径
     LANG Lang;                             // Language for GUI
     OUTPUT_ENCODING OutputEncoding;        // Output encoding
+    LONG WindowWidth;                      // width of main window
+    LONG WindowHeight;                     // height of main window
 }CConfig;
 
 BOOL LoadConfigFile(TiXmlDocument *xmlfile, CConfig &config);
 BOOL SaveConfigFile(LPCTSTR configPath, const CConfig &config);
 void SetDefault(CConfig &config);
+
+// The global instance for config
+extern CConfig _Config;
 
 #endif // CONFIG_H_

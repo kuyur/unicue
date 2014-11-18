@@ -142,7 +142,7 @@ LRESULT CMainDlg::OnBnClickedRegister(WORD, WORD, HWND, BOOL&)
 
         WTL::CString target(GetProcessFolder());
         target += _T("TravellerExt.dll");
-        CWinFile outFile(target, CWinFile::modeCreate|CWinFile::modeWrite|CWinFile::shareExclusive);
+        CWinFile outFile(target, CWinFile::openCreateAlways|CWinFile::modeWrite|CWinFile::shareExclusive);
         if (!outFile.open())
         {
             delete []buffer;
