@@ -20,15 +20,15 @@
 
 BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 {
-	if(CFrameWindowImpl<CMainFrame>::PreTranslateMessage(pMsg))
-		return TRUE;
+    if(CFrameWindowImpl<CMainFrame>::PreTranslateMessage(pMsg))
+        return TRUE;
 
-	return m_dlg.PreTranslateMessage(pMsg);
+    return m_dlg.PreTranslateMessage(pMsg);
 }
 
 BOOL CMainFrame::OnIdle()
 {
-	return FALSE;
+    return FALSE;
 }
 
 LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
@@ -36,27 +36,27 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
     // center the main window on the screen
     CenterWindow();
 
-	m_hWndClient = m_dlg.Create(m_hWnd);
+    m_hWndClient = m_dlg.Create(m_hWnd);
 
-	// register object for message filtering and idle updates
-	CMessageLoop* pLoop = _Module.GetMessageLoop();
-	ATLASSERT(pLoop != NULL);
-	pLoop->AddMessageFilter(this);
-	pLoop->AddIdleHandler(this);
+    // register object for message filtering and idle updates
+    CMessageLoop* pLoop = _Module.GetMessageLoop();
+    ATLASSERT(pLoop != NULL);
+    pLoop->AddMessageFilter(this);
+    pLoop->AddIdleHandler(this);
 
-	return 0;
+    return 0;
 }
 
 LRESULT CMainFrame::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& bHandled)
 {
-	// unregister message filtering and idle updates
-	CMessageLoop* pLoop = _Module.GetMessageLoop();
-	ATLASSERT(pLoop != NULL);
-	pLoop->RemoveMessageFilter(this);
-	pLoop->RemoveIdleHandler(this);
+    // unregister message filtering and idle updates
+    CMessageLoop* pLoop = _Module.GetMessageLoop();
+    ATLASSERT(pLoop != NULL);
+    pLoop->RemoveMessageFilter(this);
+    pLoop->RemoveIdleHandler(this);
 
-	bHandled = FALSE;
-	return 1;
+    bHandled = FALSE;
+    return 1;
 }
 
 LRESULT CMainFrame::OnResized(UINT, WPARAM, LPARAM lParam, BOOL&)

@@ -20,6 +20,8 @@
 #include "config.h"
 #include "colorhyperlink.h"
 
+// The global instance for config
+extern CConfig _Config;
 class CMainDlg : public CDialogImpl<CMainDlg>, public CUpdateUI<CMainDlg>,
         public CMessageFilter, public CIdleHandler, public CWinDataExchange<CMainDlg>
 {

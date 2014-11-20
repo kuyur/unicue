@@ -236,6 +236,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\common\Logger.cpp" />
     <ClCompile Include="..\common\win32helper.cpp" />
     <ClCompile Include="..\common\winfile.cpp" />
     <ClCompile Include="AboutDlg.cpp" />
@@ -257,6 +258,7 @@
     <ClInclude Include="..\c4-lib\c4policy.h" />
     <ClInclude Include="..\c4-lib\c4segment.h" />
     <ClInclude Include="..\c4-lib\tinyxml.h" />
+    <ClInclude Include="..\common\Logger.h" />
     <ClInclude Include="..\common\win32helper.h" />
     <ClInclude Include="..\common\utils.h" />
     <ClInclude Include="..\common\winfile.h" />

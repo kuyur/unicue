@@ -257,12 +257,12 @@ BOOL SaveConfigFile(LPCTSTR configPath, const CConfig &config)
     configure->LinkEndChild(Output);
 
     TiXmlElement *WindowWidth = new TiXmlElement("WindowWidth");
-    TiXmlText *WindowWidthValue = new TiXmlText(toSTLString(_Config.WindowWidth).c_str());
+    TiXmlText *WindowWidthValue = new TiXmlText(toSTLString(config.WindowWidth).c_str());
     WindowWidth->LinkEndChild(WindowWidthValue);
     configure->LinkEndChild(WindowWidth);
 
     TiXmlElement *WindowHeight = new TiXmlElement("WindowHeight");
-    TiXmlText *WindowHeightValue = new TiXmlText(toSTLString(_Config.WindowHeight).c_str());
+    TiXmlText *WindowHeightValue = new TiXmlText(toSTLString(config.WindowHeight).c_str());
     WindowHeight->LinkEndChild(WindowHeightValue);
     configure->LinkEndChild(WindowHeight);
 

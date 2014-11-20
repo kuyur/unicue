@@ -58,7 +58,4 @@ BOOL LoadConfigFile(TiXmlDocument *xmlfile, CConfig &config);
 BOOL SaveConfigFile(LPCTSTR configPath, const CConfig &config);
 void SetDefault(CConfig &config);
 
-// The global instance for config
-extern CConfig _Config;
-
 #endif // CONFIG_H_

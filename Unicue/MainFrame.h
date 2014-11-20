@@ -19,17 +19,17 @@
 #define MAINFRAME_MIN_HEIGHT 717
 
 class CMainFrame : 
-	public CFrameWindowImpl<CMainFrame>, 
-	public CUpdateUI<CMainFrame>,
-	public CMessageFilter, public CIdleHandler
+    public CFrameWindowImpl<CMainFrame>, 
+    public CUpdateUI<CMainFrame>,
+    public CMessageFilter, public CIdleHandler
 {
 public:
     DECLARE_FRAME_WND_CLASS(NULL, IDR_MAINFRAME)
 
     CMainDlg m_dlg;
 
-	virtual BOOL PreTranslateMessage(MSG* pMsg);
-	virtual BOOL OnIdle();
+    virtual BOOL PreTranslateMessage(MSG* pMsg);
+    virtual BOOL OnIdle();
 
     BEGIN_UPDATE_UI_MAP(CMainFrame)
     END_UPDATE_UI_MAP()
@@ -48,7 +48,7 @@ public:
         CHAIN_MSG_MAP(CFrameWindowImpl<CMainFrame>)
     END_MSG_MAP()
 
-	LRESULT OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
+    LRESULT OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
     LRESULT OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& bHandled);
     LRESULT OnResized(UINT, WPARAM, LPARAM lParam, BOOL&);
     LRESULT OnGetMinMaxInfo(UINT, WPARAM, LPARAM lParam, BOOL&);
