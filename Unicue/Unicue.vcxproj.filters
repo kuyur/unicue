@@ -42,7 +42,7 @@
     <ClCompile Include="MainFrame.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\common\Logger.cpp">
+    <ClCompile Include="..\common\logger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -98,7 +98,7 @@
     <ClInclude Include="MainFrame.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\common\Logger.h">
+    <ClInclude Include="..\common\logger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

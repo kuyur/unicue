@@ -34,13 +34,20 @@ CMainDlg::CMainDlg()
 CMainDlg::~CMainDlg()
 {
     if (m_RawString)
+    {
         delete []m_RawString;
+        m_RawString = NULL;
+    }
     if (m_UnicodeString)
+    {
         delete []m_UnicodeString;
+        m_UnicodeString = NULL;
+    }
     if (m_context)
     {
         m_context->finalize();
         delete m_context;
+        m_context = NULL;
     }
 }
 
@@ -87,6 +94,8 @@ LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
 
     // Get orignal size of dialog
     GetWindowRect(&m_dlgRect);
+    // Get orignal size of dialog items
+    getDlgItemsRelativePosition();
 
     // init C4 Context and load charmaps
     m_context = new CC4Context(std::wstring(_Config.MapConfName), GetProcessFolder());
@@ -181,8 +190,6 @@ LRESULT CMainDlg::onDialogResize(UINT, WPARAM, LPARAM, BOOL&)
 {
     RECT rc;
     GetWindowRect(&rc);
-
-    getDlgItemsRelativePosition();
 
     LONG deltaX = rc.right - rc.left - (m_dlgRect.right - m_dlgRect.left);
     LONG deltaY = rc.bottom - rc.top - (m_dlgRect.bottom - m_dlgRect.top);
@@ -465,6 +472,24 @@ void CMainDlg::SaveFile(LPCWSTR filePath)
 
 LRESULT CMainDlg::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
+    if (m_RawString)
+    {
+        delete []m_RawString;
+        m_RawString = NULL;
+    }
+    if (m_UnicodeString)
+    {
+        delete []m_UnicodeString;
+        m_UnicodeString = NULL;
+    }
+    if (m_context)
+    {
+        m_context->finalize();
+        delete m_context;
+        m_context = NULL;
+    }
+    m_itemRects.clear();
+
     // unregister message filtering and idle updates
     CMessageLoop* pLoop = _Module.GetMessageLoop();
     ATLASSERT(pLoop != NULL);
@@ -526,7 +551,7 @@ LRESULT CMainDlg::OnDropFiles(UINT, WPARAM wParam, LPARAM, BOOL&)
         if (nFileCount == 1)
         {
             TCHAR szFileName[MAX_PATH + 1] = {0};
-            DragQueryFile(hDrop, 0, szFileName, MAX_PATH);
+            ::DragQueryFile(hDrop, 0, szFileName, MAX_PATH);
             OpenFile(szFileName);
         }
         else

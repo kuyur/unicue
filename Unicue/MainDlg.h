@@ -64,7 +64,7 @@ public:
     END_UPDATE_UI_MAP()
 
     BEGIN_MSG_MAP(CMainDlg)
-        CHAIN_MSG_MAP(CUpdateUI)
+        CHAIN_MSG_MAP(CUpdateUI<CMainDlg>)
         MESSAGE_HANDLER(WM_INITDIALOG, OnInitDialog)
         MESSAGE_HANDLER(WM_DESTROY, OnDestroy)
         MESSAGE_HANDLER(WM_DROPFILES, OnDropFiles)

@@ -24,6 +24,8 @@ class CMainFrame :
     public CMessageFilter, public CIdleHandler
 {
 public:
+    CMainFrame() {};
+    ~CMainFrame() {};
     DECLARE_FRAME_WND_CLASS(NULL, IDR_MAINFRAME)
 
     CMainDlg m_dlg;

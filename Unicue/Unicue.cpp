@@ -86,7 +86,7 @@ int Run(const WTL::CString &configPath, LPTSTR /*lpstrCmdLine*/ = NULL, int nCmd
 
     // load config
     LoadConfig(configPath);
-
+    
     CMainFrame wndMain;
 
     RECT rc = {0, 0, MAX(_Config.WindowWidth, MAINFRAME_MIN_WIDTH), MAX(_Config.WindowHeight, MAINFRAME_MIN_HEIGHT)};
