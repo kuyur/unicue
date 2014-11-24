@@ -154,10 +154,10 @@ void CMainDlg::getDlgItemsRelativePosition()
             RECT rc;
             ATL::CWindow item = GetDlgItem(IDs[i]);
             item.GetWindowRect(&rc);
-            rc.right = rc.right - rc.left;      // relative x
-            rc.bottom = rc.bottom - rc.top;     // relative y
-            rc.left = rc.left - m_dlgRect.left; // size x
-            rc.top = rc.top - m_dlgRect.top;    // size y
+            rc.right = rc.right - rc.left;      // size x
+            rc.bottom = rc.bottom - rc.top;     // size y
+            rc.left = rc.left - m_dlgRect.left; // relative x-position
+            rc.top = rc.top - m_dlgRect.top;    // relative y-position
             m_itemRects[IDs[i]] = rc;
         }
     }
