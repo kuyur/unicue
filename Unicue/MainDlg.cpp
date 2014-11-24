@@ -85,8 +85,8 @@ LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
     // DDX
     DoDataExchange(FALSE);
 
-    // Resize
-    DlgResize_Init(/*false, true, WS_CLIPCHILDREN*/);
+    // Get orignal size of dialog
+    GetWindowRect(&m_dlgRect);
 
     // init C4 Context and load charmaps
     m_context = new CC4Context(std::wstring(_Config.MapConfName), GetProcessFolder());
@@ -126,6 +126,96 @@ void CMainDlg::SetMainWndPos()
     // Get pointer of parent window
     CMainFrame *mainWnd = (CMainFrame*) &GetParent();
     mainWnd->SetAlwaysOnTop(_Config.AlwaysOnTop);
+}
+
+void CMainDlg::getDlgItemsRelativePosition()
+{
+    static int IDs[15] = {
+        IDC_CHECK_AUTOCHECKCODE,
+        IDC_CHECK_ALWAYSONTOP,
+        IDC_COMBO_SELECTCODE,
+        IDC_BUTTON_TRANSFERSTRING,
+        IDC_BUTTON_SELECTSAVECODE,
+        IDC_BUTTON_SAVEAS,
+        IDC_BUTTON_SAVE,
+        IDC_EDIT_ANSI,
+        IDC_BUTTON_DO,
+        IDC_EDIT_UNICODE,
+        IDC_STATIC_ENCODING,
+        IDC_STATIC_DETECTED,
+        IDC_STATIC_PATH,
+        IDC_STATIC_STAT,
+        IDC_STATIC_FILELINK
+    };
+    if (m_itemRects.empty())
+    {
+        for (int i = 0; i <= 14; ++i)
+        {
+            RECT rc;
+            ATL::CWindow item = GetDlgItem(IDs[i]);
+            item.GetWindowRect(&rc);
+            rc.right = rc.right - rc.left;      // relative x
+            rc.bottom = rc.bottom - rc.top;     // relative y
+            rc.left = rc.left - m_dlgRect.left; // size x
+            rc.top = rc.top - m_dlgRect.top;    // size y
+            m_itemRects[IDs[i]] = rc;
+        }
+    }
+}
+
+void CMainDlg::moveItem(int itemId, int deltaX, int deltaY)
+{
+    int relativeX = m_itemRects[itemId].left, relativeY = m_itemRects[itemId].top;
+    GetDlgItem(itemId).SetWindowPos(NULL, relativeX + deltaX, relativeY + deltaY, NULL, NULL, SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOSIZE);
+}
+
+void CMainDlg::resizeItem(int itemId, int deltaX, int deltaY)
+{
+    RECT rect = m_itemRects[itemId];
+    int x = rect.right + deltaX;
+    int y = rect.bottom + deltaY;
+    GetDlgItem(itemId).SetWindowPos(NULL, 0, 0, x, y, SWP_NOMOVE | SWP_NOACTIVATE | SWP_NOZORDER);
+}
+
+LRESULT CMainDlg::onDialogResize(UINT, WPARAM, LPARAM, BOOL&)
+{
+    RECT rc;
+    GetWindowRect(&rc);
+
+    getDlgItemsRelativePosition();
+
+    LONG deltaX = rc.right - rc.left - (m_dlgRect.right - m_dlgRect.left);
+    LONG deltaY = rc.bottom - rc.top - (m_dlgRect.bottom - m_dlgRect.top);
+    LONG leftDeltaX = deltaX / 2;
+    LONG rightDeltaX = deltaX - leftDeltaX;
+    LONG halfDeltaY = deltaY / 2;
+
+    // move buttons
+    moveItem(IDC_STATIC_ENCODING, leftDeltaX, 0);
+    moveItem(IDC_COMBO_SELECTCODE, leftDeltaX, 0);
+    moveItem(IDC_BUTTON_TRANSFERSTRING, leftDeltaX, 0);
+    moveItem(IDC_BUTTON_SELECTSAVECODE, deltaX, 0);
+    moveItem(IDC_BUTTON_SAVE, deltaX, 0);
+    moveItem(IDC_BUTTON_SAVEAS, deltaX, 0);
+    // move do button
+    moveItem(IDC_BUTTON_DO, leftDeltaX, halfDeltaY);
+    // move right edit
+    moveItem(IDC_EDIT_UNICODE, leftDeltaX, 0);
+    // move static text
+    moveItem(IDC_STATIC_DETECTED, 0, deltaY);
+    moveItem(IDC_STATIC_PATH, 0, deltaY);
+    moveItem(IDC_STATIC_STAT, 0, deltaY);
+    moveItem(IDC_STATIC_FILELINK, 0, deltaY);
+
+    // resize edit controls
+    resizeItem(IDC_EDIT_ANSI, leftDeltaX, deltaY);
+    resizeItem(IDC_EDIT_UNICODE, rightDeltaX, deltaY);
+    // resize filelink static
+    resizeItem(IDC_STATIC_FILELINK, deltaX, 0);
+
+    // fore repaint dialog item
+    Invalidate(true);
+    return 0;
 }
 
 BOOL CMainDlg::DealFile()

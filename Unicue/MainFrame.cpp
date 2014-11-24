@@ -63,42 +63,12 @@ LRESULT CMainFrame::OnResized(UINT, WPARAM, LPARAM lParam, BOOL&)
 {
     RECT rc;
     GetWindowRect(&rc);
-    static RECT origRc = {0};
-    if (origRc.right == 0)
-        origRc = rc;
 
     _Config.WindowWidth = rc.right - rc.left;
     _Config.WindowHeight = rc.bottom - rc.top;
 
     RECT clientRc;
     GetClientRect(&clientRc);
-
-    LONG deltaX = rc.right - rc.left - MAINFRAME_MIN_WIDTH;
-    LONG deltaY = rc.bottom - rc.top - MAINFRAME_MIN_HEIGHT;
-    LONG leftDeltaX = deltaX / 2;
-    LONG rightDeltaX = deltaX - leftDeltaX;
-
-    CEdit left = (CEdit)m_dlg.GetDlgItem(IDC_EDIT_ANSI);
-    CEdit right = (CEdit)m_dlg.GetDlgItem(IDC_EDIT_UNICODE);
-
-    static RECT origLeftRc = {0};
-    static RECT origRightRc = {0};
-    if (origLeftRc.right == 0)
-        left.GetWindowRect(&origLeftRc);
-    if (origRightRc.right == 0)
-        right.GetWindowRect(&origRightRc);
-
-    // move buttons
-    m_dlg.GetDlgItem(IDC_STATIC_ENCODING).SetWindowPos(NULL, 195 + leftDeltaX, 18, NULL, NULL, SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOSIZE);
-    m_dlg.GetDlgItem(IDC_COMBO_SELECTCODE).SetWindowPos(NULL, 272 + leftDeltaX, 11, NULL, NULL, SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOSIZE);
-    m_dlg.GetDlgItem(IDC_BUTTON_TRANSFERSTRING).SetWindowPos(NULL, 405 + leftDeltaX, 11, NULL, NULL, SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOSIZE);
-    m_dlg.GetDlgItem(IDC_BUTTON_SELECTSAVECODE).SetWindowPos(NULL, 531 + deltaX, 11, NULL, NULL, SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOSIZE);
-    m_dlg.GetDlgItem(IDC_BUTTON_SAVE).SetWindowPos(NULL, 612 + deltaX, 11, NULL, NULL, SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOSIZE);
-    m_dlg.GetDlgItem(IDC_BUTTON_SAVEAS).SetWindowPos(NULL, 692 + deltaX, 11, NULL, NULL, SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOSIZE);
-
-    // resize edit controls
-    left.SetWindowPos(NULL, 0, 0, origLeftRc.right - origLeftRc.left + leftDeltaX, origLeftRc.bottom - origLeftRc.top + deltaY, SWP_NOMOVE | SWP_NOACTIVATE | SWP_NOZORDER);
-    right.SetWindowPos(NULL, origLeftRc.right - origLeftRc.left + leftDeltaX + 46, origRightRc.top - origRc.top - 51, origRightRc.right - origRightRc.left + rightDeltaX, origRightRc.bottom - origRightRc.top + deltaY, SWP_NOACTIVATE | SWP_NOZORDER);
 
     // set size of main dialog
     m_dlg.SetWindowPos(NULL, &clientRc, SWP_NOMOVE);

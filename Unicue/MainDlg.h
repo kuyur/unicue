@@ -16,29 +16,31 @@
 #ifndef MAINDLG_H_
 #define MAINDLG_H_
 
+#include <unordered_map>
 #include "config.h"
 #include "colorhyperlink.h"
 
-class CMainDlg : public CAxDialogImpl<CMainDlg>, public CUpdateUI<CMainDlg>,
-        public CMessageFilter, public CIdleHandler, public CWinDataExchange<CMainDlg>,
-        public CDialogResize<CMainDlg>
+class CMainDlg : public CDialogImpl<CMainDlg>, public CUpdateUI<CMainDlg>,
+        public CMessageFilter, public CIdleHandler, public CWinDataExchange<CMainDlg>
 {
 protected:
-    BOOL          m_bNeedConvert;        // m_RawString need to be converted or not
-    char*         m_RawString;           // Raw string read from file, with BOM if it is existing
-    UINT          m_RawStringLength;     // Length of m_RawString
-    char*         m_String;              // String without BOM, contained in m_RawString
-    UINT          m_StringLength;        // Length of m_String, without length of BOM
-    WTL::CString  m_StringCodeType;      // Encoding type.
-    wchar_t*      m_UnicodeString;       // Unicode String to save converted result
-    UINT          m_UnicodeLength;       // Length of m_UnicodeString
-    WTL::CString  m_FilePathName;        // File path to be converted
-    WTL::CString  m_CodeStatus;          // Encoding check result
-    BOOL          m_bCueFile;            // Type of file to be converted is a cue
-    BOOL          m_bTransferString;     // Transfer string mode if TRUE, Transfer file mode if FALSE
-    CC4Context*   m_context;             // Converting context
-    CMenu         m_popupMenu;           // Popup menu
-    CColorHyperLink    m_fileLink;       // Hyperlink for file
+    BOOL            m_bNeedConvert;            // m_RawString need to be converted or not
+    char*           m_RawString;               // Raw string read from file, with BOM if it is existing
+    UINT            m_RawStringLength;         // Length of m_RawString
+    char*           m_String;                  // String without BOM, contained in m_RawString
+    UINT            m_StringLength;            // Length of m_String, without length of BOM
+    WTL::CString    m_StringCodeType;          // Encoding type.
+    wchar_t*        m_UnicodeString;           // Unicode String to save converted result
+    UINT            m_UnicodeLength;           // Length of m_UnicodeString
+    WTL::CString    m_FilePathName;            // File path to be converted
+    WTL::CString    m_CodeStatus;              // Encoding check result
+    BOOL            m_bCueFile;                // Type of file to be converted is a cue
+    BOOL            m_bTransferString;         // Transfer string mode if TRUE, Transfer file mode if FALSE
+    CC4Context*     m_context;                 // Converting context
+    CMenu           m_popupMenu;               // Popup menu
+    CColorHyperLink m_fileLink;                // Hyperlink for file
+    std::unordered_map<int, RECT> m_itemRects; // Orignal size of dialog items
+    RECT            m_dlgRect;                 // Orinal rect of dialog
 
     void FixCue();
     void FixInternalCue(WTL::CString AudioFileName);
@@ -61,10 +63,10 @@ public:
 
     BEGIN_MSG_MAP(CMainDlg)
         CHAIN_MSG_MAP(CUpdateUI)
-        CHAIN_MSG_MAP(CDialogResize<CMainDlg>)
         MESSAGE_HANDLER(WM_INITDIALOG, OnInitDialog)
         MESSAGE_HANDLER(WM_DESTROY, OnDestroy)
         MESSAGE_HANDLER(WM_DROPFILES, OnDropFiles)
+        MESSAGE_HANDLER(WM_SIZE, onDialogResize)
         COMMAND_ID_HANDLER(IDOK, OnOK)
         COMMAND_ID_HANDLER(IDCANCEL, OnCancel)
         COMMAND_ID_HANDLER(IDM_UTF_8_WITH_BOM, OnPopupUTF8)
@@ -88,35 +90,6 @@ public:
         DDX_CHECK(IDC_CHECK_ALWAYSONTOP, _Config.AlwaysOnTop)
     END_DDX_MAP()
 
-    // resize
-    BEGIN_DLGRESIZE_MAP(CMainDlg)
-        //BEGIN_DLGRESIZE_GROUP()
-        //    DLGRESIZE_CONTROL(IDC_CHECK_AUTOCHECKCODE, DLSZ_SIZE_X)
-        //    DLGRESIZE_CONTROL(IDC_CHECK_ALWAYSONTOP, DLSZ_SIZE_X)
-        //    DLGRESIZE_CONTROL(IDC_STATIC_ENCODING, DLSZ_SIZE_X)
-        //    DLGRESIZE_CONTROL(IDC_COMBO_SELECTCODE, DLSZ_SIZE_X)
-        //    DLGRESIZE_CONTROL(IDC_BUTTON_TRANSFERSTRING, DLSZ_SIZE_X)
-        //    DLGRESIZE_CONTROL(IDC_BUTTON_SELECTSAVECODE, DLSZ_SIZE_X)
-        //    DLGRESIZE_CONTROL(IDC_BUTTON_SAVE,DLSZ_SIZE_X)
-        //    DLGRESIZE_CONTROL(IDC_BUTTON_SAVEAS, DLSZ_SIZE_X)
-        //END_DLGRESIZE_GROUP()
-
-        DLGRESIZE_CONTROL(IDC_BUTTON_DO, DLSZ_CENTER_X)
-        //DLGRESIZE_CONTROL(IDC_BUTTON_DO, DLSZ_MOVE_Y)
-
-        //BEGIN_DLGRESIZE_GROUP()
-        //    DLGRESIZE_CONTROL(IDC_EDIT_ANSI, DLSZ_MOVE_X)
-        //    DLGRESIZE_CONTROL(IDC_EDIT_UNICODE, DLSZ_MOVE_X)
-        //END_DLGRESIZE_GROUP()
-        //DLGRESIZE_CONTROL(IDC_EDIT_ANSI, DLSZ_SIZE_Y)
-        //DLGRESIZE_CONTROL(IDC_EDIT_UNICODE, DLSZ_SIZE_Y)
-
-        DLGRESIZE_CONTROL(IDC_STATIC_DETECTED, DLSZ_MOVE_Y)
-        DLGRESIZE_CONTROL(IDC_STATIC_PATH, DLSZ_MOVE_Y)
-        DLGRESIZE_CONTROL(IDC_STATIC_STAT, DLSZ_MOVE_Y)
-        DLGRESIZE_CONTROL(IDC_STATIC_FILELINK, DLSZ_MOVE_Y|DLSZ_SIZE_X|DLSZ_REPAINT)
-    END_DLGRESIZE_MAP()
-
 // Handler prototypes (uncomment arguments if needed):
 //    LRESULT MessageHandler(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 //    LRESULT CommandHandler(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
@@ -132,6 +105,7 @@ public:
     LRESULT OnPopupUTF16LE(WORD, WORD, HWND, BOOL&);
     LRESULT OnPopupUTF16BE(WORD, WORD, HWND, BOOL&);
     LRESULT OnDropFiles(UINT, WPARAM, LPARAM, BOOL&);
+    LRESULT onDialogResize(UINT, WPARAM, LPARAM, BOOL&);
     LRESULT OnCbnSelchangeComboSelectcode(WORD, WORD, HWND, BOOL&);
     LRESULT OnBnClickedButtonDo(WORD, WORD, HWND, BOOL&);
     LRESULT OnBnClickedButtonSave(WORD, WORD, HWND, BOOL&);
@@ -145,6 +119,11 @@ public:
     void CloseDialog(int nVal);
     void OpenFile(LPCWSTR filePath);
     void SaveFile(LPCWSTR filePath);
+
+private:
+    void getDlgItemsRelativePosition();
+    void moveItem(int itemId, int deltaX, int deltaY);
+    void resizeItem(int itemId, int deltaX, int deltaY);
 };
 
 #endif // MAINDLG_H_
