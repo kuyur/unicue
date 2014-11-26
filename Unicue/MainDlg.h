@@ -66,7 +66,6 @@ public:
     BEGIN_MSG_MAP(CMainDlg)
         CHAIN_MSG_MAP(CUpdateUI<CMainDlg>)
         MESSAGE_HANDLER(WM_INITDIALOG, OnInitDialog)
-        MESSAGE_HANDLER(WM_DESTROY, OnDestroy)
         MESSAGE_HANDLER(WM_DROPFILES, OnDropFiles)
         MESSAGE_HANDLER(WM_SIZE, onDialogResize)
         COMMAND_ID_HANDLER(IDOK, OnOK)
@@ -118,7 +117,7 @@ public:
     LRESULT OnBnClickedButtonSelectOutputCode(WORD, WORD, HWND, BOOL&);
     LRESULT OnClickFileLink(int, LPNMHDR, BOOL&);
 
-    void CloseDialog(int nVal);
+    void CloseDialog();
     void OpenFile(LPCWSTR filePath);
     void SaveFile(LPCWSTR filePath);
 

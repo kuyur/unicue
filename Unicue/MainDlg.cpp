@@ -470,52 +470,22 @@ void CMainDlg::SaveFile(LPCWSTR filePath)
     file.close();
 }
 
-LRESULT CMainDlg::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
-{
-    if (m_RawString)
-    {
-        delete []m_RawString;
-        m_RawString = NULL;
-    }
-    if (m_UnicodeString)
-    {
-        delete []m_UnicodeString;
-        m_UnicodeString = NULL;
-    }
-    if (m_context)
-    {
-        m_context->finalize();
-        delete m_context;
-        m_context = NULL;
-    }
-    m_itemRects.clear();
-
-    // unregister message filtering and idle updates
-    CMessageLoop* pLoop = _Module.GetMessageLoop();
-    ATLASSERT(pLoop != NULL);
-    pLoop->RemoveMessageFilter(this);
-    pLoop->RemoveIdleHandler(this);
-
-    return 0;
-}
-
 LRESULT CMainDlg::OnOK(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-    // TODO: Add validation code 
-    CloseDialog(wID);
+    CloseDialog();
     return 0;
 }
 
 LRESULT CMainDlg::OnCancel(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-    CloseDialog(wID);
+    CloseDialog();
     return 0;
 }
 
-void CMainDlg::CloseDialog(int nVal)
+void CMainDlg::CloseDialog()
 {
-    DestroyWindow();
-    ::PostQuitMessage(nVal);
+    CWindow* parent = &GetParent();
+    parent->PostMessage(WM_CLOSE);
 }
 
 LRESULT CMainDlg::OnPopupUTF8(WORD, WORD, HWND, BOOL&)

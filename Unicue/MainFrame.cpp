@@ -97,7 +97,7 @@ LRESULT CMainFrame::OnAbout(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/
 
 LRESULT CMainFrame::OnFileExit(WORD, WORD wID, HWND, BOOL&)
 {
-    m_dlg.CloseDialog(wID);
+    PostMessage(WM_CLOSE);
     return 0;
 }
 
