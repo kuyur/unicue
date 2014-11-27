@@ -53,6 +53,20 @@ CMainDlg::~CMainDlg()
 
 BOOL CMainDlg::PreTranslateMessage(MSG* pMsg)
 {
+    if (pMsg->message == WM_KEYDOWN && pMsg->wParam == 'A' && (GetKeyState(VK_CONTROL) & 0x8000))
+    {
+        if (pMsg->hwnd == GetDlgItem(IDC_EDIT_ANSI).m_hWnd)
+        {
+            ((CEdit)GetDlgItem(IDC_EDIT_ANSI)).SetSel(0, -1, true);
+            return TRUE;
+        }
+        else if (pMsg->hwnd == GetDlgItem(IDC_EDIT_UNICODE).m_hWnd)
+        {
+            ((CEdit)GetDlgItem(IDC_EDIT_UNICODE)).SetSel(0, -1, true);
+            return TRUE;
+        }
+    }
+
     return CWindow::IsDialogMessage(pMsg);
 }
 
