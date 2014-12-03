@@ -23,8 +23,15 @@ class CMainFrame :
     public CUpdateUI<CMainFrame>,
     public CMessageFilter, public CIdleHandler
 {
+private:
+    int m_minWidth;
+    int m_minHeight;
+
 public:
-    CMainFrame() {};
+    CMainFrame() {
+        m_minWidth = MAINFRAME_MIN_WIDTH;
+        m_minHeight = MAINFRAME_MIN_HEIGHT;
+    };
     ~CMainFrame() {};
     DECLARE_FRAME_WND_CLASS(NULL, IDR_MAINFRAME)
 

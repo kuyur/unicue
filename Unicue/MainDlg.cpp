@@ -106,6 +106,9 @@ LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
     // DDX
     DoDataExchange(FALSE);
 
+    // accept dropped files
+    DragAcceptFiles(TRUE);
+
     // Get orignal size of dialog
     GetWindowRect(&m_dlgRect);
     // Get orignal size of dialog items

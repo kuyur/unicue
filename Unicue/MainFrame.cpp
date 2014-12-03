@@ -17,6 +17,7 @@
 #include "aboutdlg.h"
 #include "SettingDlg.h"
 #include "MainFrame.h"
+#include "../common/utils.h"
 
 BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 {
@@ -37,6 +38,25 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
     CenterWindow();
 
     m_hWndClient = m_dlg.Create(m_hWnd);
+
+    // get required size of dialog
+    RECT dlgRect;
+    m_dlg.GetWindowRect(&dlgRect);
+    // get size of current client rect for dialog
+    RECT clientRect;
+    GetClientRect(&clientRect);
+    // get size of main frame
+    RECT mainRect;
+    GetWindowRect(&mainRect);
+    m_minWidth = mainRect.right - mainRect.left + (dlgRect.right - dlgRect.left) - (clientRect.right - clientRect.left);
+    m_minHeight = mainRect.bottom - mainRect.top + (dlgRect.bottom - dlgRect.top) - (clientRect.bottom - clientRect.top);
+    // resize main frame
+    if ((m_minWidth > mainRect.right - mainRect.left) || (m_minHeight > mainRect.bottom - mainRect.top))
+    {
+        int x = MAX(m_minHeight, mainRect.right - mainRect.left);
+        int y = MAX(m_minHeight, mainRect.bottom - mainRect.top);
+        SetWindowPos(NULL, 0, 0, x, y, SWP_NOMOVE | SWP_NOACTIVATE);
+    }
 
     // register object for message filtering and idle updates
     CMessageLoop* pLoop = _Module.GetMessageLoop();
@@ -77,13 +97,12 @@ LRESULT CMainFrame::OnResized(UINT, WPARAM, LPARAM lParam, BOOL&)
 
 LRESULT CMainFrame::OnGetMinMaxInfo(UINT, WPARAM, LPARAM lParam, BOOL&)
 {
-
     // load size structure with lParam values
     LPMINMAXINFO lpMMI = (LPMINMAXINFO)lParam;
 
     // change the values in the size structure to desired values
-    lpMMI->ptMinTrackSize.x = MAINFRAME_MIN_WIDTH;  // min width
-    lpMMI->ptMinTrackSize.y = MAINFRAME_MIN_HEIGHT; // min height
+    lpMMI->ptMinTrackSize.x = m_minWidth;  // min width
+    lpMMI->ptMinTrackSize.y = m_minHeight; // min height
 
     return 0;
 }
