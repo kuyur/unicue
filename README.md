@@ -25,7 +25,7 @@ Tool to convert Simplified Chinese text into Traditional Chinese text or convert
 A little program to extract readable paragraph from script file of Akaiito, which is a PS2 Game published in 2004.
 
 ###Traveller Ext
-A system extension to register Unicue Traveller entry at context menu.
+A system extension to register Unicue Traveller entry into context menu.
 
 ##Documentation
 1. [Change log](docs/en/changelog.md)
