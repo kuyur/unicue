@@ -5,7 +5,7 @@ UniCue
 Its name is composed by **Uni** and **cue**. **Uni** is short for Unicode when **cue** means cuesheet.  
 **Unicue** is also the name of main program.
 
-All programs are not using System CodePages of Windows platform but customized charmaps to cover the unofficial extended code points, such as simplified Chinese characters/Japanese KANJI characters defined in UAO 2.50.  
+All programs are not using System CodePages of Windows platform but using customized charmaps to cover the unofficial extended code points, such as simplified Chinese characters/Japanese KANJI characters defined in UAO 2.50.  
 The detail of customized charmaps is introduced in [aboutcharmap.md](docs/en/aboutcharmap.md)
 
 Currently UniCue contains 4 programs and one extension dll.
