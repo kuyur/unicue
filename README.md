@@ -1,33 +1,69 @@
-Unicue
+UniCue
 ======
 
-Tools for character encodings converting.
+**UniCue** is an open source project which contains various tools for character encodings converting.
+Its name is composed by **Uni** and **cue**. **Uni** is short for Unicode when **cue** means cuesheet.
+**Unicue** is also the name of main program.
 
-##How to build
+All programs are not using System CodePages of Windows platform but customized charmaps to cover the unofficial extended code points, such as simplified Chinese characters/Japanese KANJI characters defined in UAO 2.50.
+The detail of customized charmaps is introduced in [aboutcharmap.md](docs/en/aboutcharmap.md)
 
-The solution file(Unicue.sln) is for Visual C++ 2010.  
-Make sure you have added [WTL](http://sourceforge.net/projects/wtl/files/WTL%208.1/)'s header files into including folder of VC++, or 
-you should add path of WTL's header files into project.
+Currently UniCue contains 4 programs and one extension dll.
 
-#####If your are using Visual C++ 2010 Express, you would need a copy of *ATL*.
+###Unicue
+Tool to convert a single text file from ANSI encoding to Unicode form (UTF-8 or UTF-16).
+ANSI encoding actually is not a single encoding, but a set of encodings defined by various countries as national standard to support non-ASCII characters of local languages. The word of **ANSI** is not accurate. It is used by [Microsoft](http://support.microsoft.com/kb/138813/en-us) first. ANSI is abbreviation of **A**merican **N**ational **S**tandards **I**nstitute. The right name should be Regional Variable-width encoding (RVW encoding).
 
-You can get an old version of ATL from [Windows Driver Kit 7.1](http://www.microsoft.com/en-us/download/details.aspx?id=11800).  
-After installing of Windows Driver Kit, you might find header files of ATL in such folder:
+###Unicue Traveller
+Tool to convert bunch of text files at a time.
 
-    D:\WinDDK\7600.16385.1\inc\atl71
+###Chinese Converter
+Tool to convert Simplified Chinese text into Traditional Chinese text or convert back.
 
-You might find lib files of ATL in such folder:
+###ExtractAkaiito
+A little program to extract readable paragraph from script file of Akaiito, which is a PS2 Game published in 2004.
 
-    D:\WinDDK\7600.16385.1\lib\ATL\i386
+###Traveller Ext
+A system extension to register Unicue Traveller entry at context menu.
 
-Now, go to property page of project to add path of ATL:
+##Documentation
+1. [Change log](docs/en/changelog.md)
+2. [How to build](docs/en/howtobuild.md)
+3. [About charmaps](docs/en/aboutcharmap.md)
+4. [About registry entry of Unicue](docs/en/registry.md)
 
-    Configuration Properties -> VC++ Directories -> Include Directories
-    Configuration Properties -> VC++ Directories -> Library Directories
+***
 
-But the version of ATL in WDK is too old to run the compiled exe in Windows7. It is recommended to get a copy as same as that in VC2010 Professional.
-You may find it at [Visual Studio Ultimate trial version](http://download.microsoft.com/download/2/4/7/24733615-AA11-42E9-8883-E28CDCA88ED5/X16-42552VS2010UltimTrial1.iso).
+Unicue 中文版说明
+===========================
 
-If you are using other latest VC Express, you may get ATL library from [Visual Studio Professional 90-day trial](http://www.microsoft.com/visualstudio/eng/downloads).
+**UniCue** 是包含一系列的文字编码转换工具的开源项目。同时**Unicue**也是其中最主要的转换工具的名字。UniCue着重于将各种编码转换到Unicode。
 
-Good luck!
+名称来由：**Uni**代表Unicode，**Cue**代表cuesheet。 
+
+所有的程序都不采用Windows系统的代码页，而是内建自定义码表。这使得UniCue的工具可以转换非官方定义但是又经常被使用的用户扩展字符，比如UAO2.50中定义的简体汉字和日文汉字。
+有关码表的详细说明，请参阅[aboutcharmap.md](docs/en/aboutcharmap.md)。
+
+目前UniCue包含四个程序。
+
+###Unicue
+用于转换单个文本编码的工具。输入编码是ANSI，输出编码是UTF-16或者UTF-8.
+注：ANSI编码实际上不是一种编码，而是各个国家/地区为了支持本地非ASCII字符而制定的编码标准的集合。ANSI编码是[微软](http://support.microsoft.com/kb/138813/en-us)的说法，尽管这个叫法非常古怪。ANSI是美国国家标准协会(**A**merican **N**ational **S**tandards **I**nstitute）)的缩写。准确的叫法应该是区域性的可变长字符编码(Regional Variable-width encoding或者RVW encoding)。
+
+###Unicue Traveller
+用于批量转换文本文件编码的工具。
+
+###Chinese Converter
+简繁繁简转换工具。
+
+###ExtractAkaiito
+提取PS2游戏红线(アカイイト)脚本的小工具。
+
+###Traveller Ext
+将Traveller注册到右键菜单的系统扩展。
+
+##文档
+1. [版本升级日志](docs/chs/changelog.md)
+2. [编译要点](docs/chs/howtobuild.md)
+3. [Charmap说明](docs/chs/aboutcharmap.md)
+4. [有关Unicue的注册表项](docs/chs/registry.md)

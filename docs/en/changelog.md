@@ -1,0 +1,82 @@
+Unicue Traveller
+1.2 beta4 功能特性：
+
+    基于WTL，无需安装任何运行库
+    完整的Unicode支持
+    修复Unicode补不完计划造成的丢字问题
+    转换结果保存为utf-8编码的文本
+    自动检测文本编码
+    自动修正cue中的File行音频文件名
+    自动修正cue中的File行旧式“The True Audio”标签为“WAVE”
+    批量修改文本文件
+        任意的文件夹和文件组合的右键菜单
+        文件夹的空白菜单 
+    可指定文件类型
+    两种保存方式
+        覆盖（备份可选）
+        另存为（可指定命名模板） 
+
+Unicue
+Unicue 1.3更新：
+
+    可调整界面大小
+    记忆最后使用的界面大小
+    修正Linux平台下通过Wine运行时菜单不能正常显示的问题
+    支持Ctrl+A快捷键 
+
+Unicue 1.2更新：
+
+    允许选择输出编码(UTF-8/UTF-8无BOM/UTF-16LE/UTF-16BE)
+    增强CUE文件的自动修正功能
+    修正Win7以上版本在某种情况下注册到右键菜单却没有生效的Bug
+    修正GBK映射表中欧元符号没有正确转换的Bug
+    使用WTL取代MFC，静态编译解决库依赖问题（传说不需要任何第三方dll）
+    更换新名字 (ANSI2Unicode -> Unicue)
+    多语言界面 （简中，繁中，英，日）
+        感谢小海对繁体中文界面提出的修改建议/Thanks for 小海's suggestions about Traditional Chinese GUI
+        感谢lemphek对英文界面提出的修改建议/Thanks for lemphek's suggestions about English GUI 
+    增加西里尔字母支持(CP1251)，涵括斯拉夫语族包括俄语，塞尔维亚语，保加利亚语等一大堆乱七八糟的语言
+    增加拉丁文字母支持(CP1252)
+    Linux平台下通过Wine（1.4.1）能稳定运行（菜单不能正常显示） 
+
+ANSI2Unicode 1.1 更新：
+
+    移除自身的转换函数
+    使用c4-lib通用字符转换环境
+    支持用户添加自定义字符映射表并设定转换规则
+    修正图标 
+
+ANSI2Unicode 1.0.3 功能特性：
+
+    完整的Unicode支持，不必为文档路径中的特殊字符担心
+    修复Unicode补不完计划造成的丢字问题
+    --内建基于UAO 2.50的Big5→Unicode字符映射表
+    --Big5→Unicode单向转换，解决没有安装Unicode补完计划的win平台上显示Big5文档时的字符（日文假名/日文汉字/简体汉字）丢失问题
+    转换结果保存为utf-8编码的文本
+    自动检测文本编码
+    支持文件拖放操作及命令行打开文档
+    自动修正cue中的File行音频文件扩展名
+    自动修正cue中的File行旧式“The True Audio”标签为“WAVE”
+    不改变默认打开程序的txt/log/cue右键菜单关联
+    提取tak/flac/ape的内嵌cue，并自动修正cue中的音频文件名
+    转换字符串功能
+    转换字符串模式下，支持拖放乱码文件名进行转换 
+
+Chinese Converter
+Chinese Converter 1.2 更新：
+
+    支持Unicode LE/BE以及UTF-8格式的文本读取和写入
+    停止使用MFC，转用WTL并静态编译（传说无需任何第三方dll）
+    更换图标
+    Linux平台下通过Wine（1.4.1）能稳定运行 
+
+Chinese Converter 1.0 功能特性：
+
+    简繁繁简转换
+    仅支持Unicode（LE）输入和Unicode（LE）保存转换结果
+    采用维基简繁繁简一对一映射表，如有问题找维基
+    不支持词组转换 
+
+ExtractAkaiito
+
+    PS2游戏アカイイト游戏脚本提取 
