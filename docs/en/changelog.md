@@ -17,8 +17,8 @@ Unicue
 > * 使用WTL取代MFC，静态编译解决库依赖问题（传说不需要任何第三方dll）
 > * 更换新名字 (ANSI2Unicode -> Unicue)
 > * 多语言界面 （简中，繁中，英，日）  
->   　　感谢小海对繁体中文界面提出的修改建议/Thanks for 小海's suggestions about Traditional Chinese GUI  
->   　　感谢lemphek对英文界面提出的修改建议/Thanks for lemphek's suggestions about English GUI
+>   　　1. 感谢小海对繁体中文界面提出的修改建议/Thanks for 小海's suggestions about Traditional Chinese GUI  
+>   　　2. 感谢lemphek对英文界面提出的修改建议/Thanks for lemphek's suggestions about English GUI
 > * 增加西里尔字母支持(CP1251)，涵括斯拉夫语族包括俄语，塞尔维亚语，保加利亚语等一大堆乱七八糟的语言
 > * 增加拉丁文字母支持(CP1252)
 > * Linux平台下通过Wine（1.4.1）能稳定运行（菜单不能正常显示） 
@@ -60,12 +60,12 @@ Unicue Traveller
 > * 自动修正cue中的File行音频文件名
 > * 自动修正cue中的File行旧式“The True Audio”标签为“WAVE”
 > * 批量修改文本文件  
->   　　任意的文件夹和文件组合的右键菜单  
->   　　文件夹的空白菜单
+>   　　1. 任意的文件夹和文件组合的右键菜单  
+>   　　2. 文件夹的空白菜单
 > * 可指定文件类型
 > * 两种保存方式  
->   　　覆盖（备份可选）  
->   　　另存为（可指定命名模板）
+>   　　1. 覆盖（备份可选）  
+>   　　2. 另存为（可指定命名模板）
 
 Chinese Converter
 =================
