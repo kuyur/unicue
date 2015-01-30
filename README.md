@@ -29,7 +29,7 @@ A system extension to register Unicue Traveller entry into context menu.
 
 ##Feedback and Bug Report
 If you find any bug or require some new feature, please report it at [Issues board](https://github.com/kuyur/unicue/issues).  
-If you find any text file can not be converted by Unicue, please send it to mail:unicue{at}kuyur.info (please replace **{at}** with **@**).
+If you find any text file can not be converted by Unicue, please send it to mail:unicue{at}kuyur.info (please replace **{at}** with **@**, and put **[Report Unknown Encoding]** at the head of mail title).
 
 ##Documentation
 1. [Change log](docs/en/changelog.md)
