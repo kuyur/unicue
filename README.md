@@ -13,7 +13,7 @@ Currently UniCue contains 4 programs and one extension dll.
 ###Unicue
 Tool to convert a single text file from ANSI encoding to Unicode form (UTF-8 or UTF-16).
 
-ANSI encoding actually is not a single encoding, but a set of encodings defined by various countries as national standard to support non-ASCII characters of local languages. The word of **ANSI** is not accurate， because it is abbreviation of **A**merican **N**ational **S**tandards **I**nstitute. ANSI encoding is used by [Microsoft](http://support.microsoft.com/kb/138813/en-us) first. The right name should be Regional Variable-width encoding (RVW encoding) or pre-Unicode encoding.
+ANSI encoding actually is not a single encoding, but a set of encodings defined by various countries as national standard to support non-ASCII characters of local languages. The word of **ANSI** is not accurate, because it is abbreviation of **A**merican **N**ational **S**tandards **I**nstitute. ANSI encoding is used by [Microsoft](http://support.microsoft.com/kb/138813/en-us) first. The right name should be Regional Variable-width encoding (RVW encoding) or pre-Unicode encoding.
 
 ###Unicue Traveller
 Tool to convert bunch of text files at a time.
