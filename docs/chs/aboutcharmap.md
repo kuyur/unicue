@@ -5,7 +5,7 @@
 采用[Unicode-at-on (UAO) 2.50版本](http://moztw.org/docs/big5/table/uao250-b2u.txt)。  
 码表空间为0x00～0x7F以及0x8140～0xFEFE，Big5字符在文本以及内存中以先高位后低位方式存放。  
 映射表物理文件b2u-little-endian.map为按Big5顺序存放的Unicode字符，范围为0x8140～0xFFFF，不含ASCII部分。  
-和Windows平台CP950的差异：收录了简体汉字，日文假名以及日文汉字。  
+和Windows平台CP950的差异：收录了简体汉字，日文假名以及日文汉字。
 
 ###GBK to Unicode
 采用[Mozilla的版本](http://mxr.mozilla.org/firefox/source/intl/uconv/ucvcn/cp936map.h)。  
