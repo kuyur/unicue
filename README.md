@@ -37,6 +37,22 @@ If you find any text file can not be converted by Unicue, please send it to mail
 3. [About charmaps](docs/en/aboutcharmap.md)
 4. [About registry entry of Unicue](docs/en/registry.md)
 
+##Link of technology docs (in Chinese)
+1. [How to output a UTF-8 encoding text file by tinyXml](http://kuyur.info/blog/archives/462)
+2. [An algorithm to convert encodings with O(n) time complexity](http://kuyur.info/blog/archives/578)
+3. [How to convert UTF-8 to UTF-16 and validate UTF-8 encoding](http://kuyur.info/blog/archives/633)
+4. [An algorithm of auto detection for GBK, Shift-JIS and BIG5 encodings](http://kuyur.info/blog/archives/635)
+5. [Analyze file structure of Akaiito's script file and extract script](http://kuyur.info/blog/archives/793)
+6. [How to read and write UTF-8 node by tinyXml](http://kuyur.info/blog/archives/848)
+7. [How to extract internal cuesheet of tak](http://kuyur.info/blog/archives/858)
+8. [How to extract internal cuesheet of flac](http://kuyur.info/blog/archives/862)
+9. [A solution to load customize charmaps dynamic: Common Code Converting Context (c4-lib)](http://kuyur.info/blog/archives/2250)
+10. [Next generation of c4-lib](http://kuyur.info/blog/archives/3154)
+
+##Link
+1. [c4-lib](https://code.google.com/p/c4-lib/)
+2. [next-c4 lib](https://github.com/kuyur/next-c4)
+
 ***
 
 Unicue 中文版说明
@@ -77,3 +93,19 @@ Unicue 中文版说明
 2. [编译要点](docs/chs/howtobuild.md)
 3. [字符映射表说明](docs/chs/aboutcharmap.md)
 4. [有关Unicue的注册表项](docs/chs/registry.md)
+
+##技术文档链接
+1. [tinyXml输出utf-8文档](http://kuyur.info/blog/archives/462)
+2. [一个线性时间复杂度的字符编码转换算法](http://kuyur.info/blog/archives/578)
+3. [UTF-8到Unicode的转换以及UTF-8编码的检测](http://kuyur.info/blog/archives/633)
+4. [GBK、Shift-JIS、BIG5编码检测算法](http://kuyur.info/blog/archives/635)
+5. [アカイイト 游戏脚本文件分析及脚本提取](http://kuyur.info/blog/archives/793)
+6. [tinyXml处理UTF-8编码详解——写入和读取](http://kuyur.info/blog/archives/848)
+7. [tak的内嵌cue提取](http://kuyur.info/blog/archives/858)
+8. [flac的内嵌cue提取](http://kuyur.info/blog/archives/862)
+9. [动态加载字符映射表的字符转换环境方案(c4-lib)](http://kuyur.info/blog/archives/2250)
+10. [新一代通用字符转换环境(next-c4 lib)](http://kuyur.info/blog/archives/3154)
+
+##相关链接
+1. [c4-lib](https://code.google.com/p/c4-lib/)
+2. [next-c4 lib](https://github.com/kuyur/next-c4)
