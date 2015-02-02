@@ -34,6 +34,12 @@ BOOL CMainFrame::OnIdle()
 
 LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
+    // set icons
+    HICON hIcon = AtlLoadIconImage(IDR_MAINFRAME_BIG, LR_DEFAULTCOLOR, ::GetSystemMetrics(SM_CXICON), ::GetSystemMetrics(SM_CYICON));
+    SetIcon(hIcon, TRUE);
+    HICON hIconSmall = AtlLoadIconImage(IDR_MAINFRAME_LITTLE, LR_DEFAULTCOLOR, ::GetSystemMetrics(SM_CXSMICON), ::GetSystemMetrics(SM_CYSMICON));
+    SetIcon(hIconSmall, FALSE);
+
     // center the main window on the screen
     CenterWindow();
 
@@ -154,13 +160,21 @@ LRESULT CMainFrame::OnFileOption(WORD, WORD, HWND, BOOL&)
     return 0;
 }
 
-BOOL CMainFrame::SetAlwaysOnTop(BOOL alwaysOnTop)
+LRESULT CMainFrame::OnAlwaysOnTop(UINT, WPARAM wParam, LPARAM lParam, BOOL&)
 {
     RECT rc;
     GetWindowRect(&rc);
 
-    if (alwaysOnTop)
+    if (wParam == 0x01)
         return SetWindowPos(HWND_TOPMOST, &rc, SWP_NOMOVE|SWP_NOSIZE);
     else
         return SetWindowPos(HWND_NOTOPMOST, &rc, SWP_NOMOVE|SWP_NOSIZE);
+
+    return 0;
+}
+
+LRESULT CMainFrame::OnEnableOpenFile(UINT, WPARAM wParam, LPARAM lParam, BOOL&)
+{
+    UIEnable(IDM_FILE_OPEN, wParam == 0x1);
+    return 0;
 }

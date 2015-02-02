@@ -60,7 +60,6 @@ public:
     virtual BOOL OnIdle();
 
     BEGIN_UPDATE_UI_MAP(CMainDlg)
-        UPDATE_ELEMENT(IDM_FILE_OPEN, UPDUI_MENUPOPUP)
     END_UPDATE_UI_MAP()
 
     BEGIN_MSG_MAP(CMainDlg)

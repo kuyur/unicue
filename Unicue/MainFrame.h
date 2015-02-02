@@ -41,20 +41,23 @@ public:
     virtual BOOL OnIdle();
 
     BEGIN_UPDATE_UI_MAP(CMainFrame)
+        UPDATE_ELEMENT(IDM_FILE_OPEN, UPDUI_MENUPOPUP)
     END_UPDATE_UI_MAP()
 
     BEGIN_MSG_MAP(CMainFrame)
+        CHAIN_MSG_MAP(CUpdateUI<CMainFrame>)
+        CHAIN_MSG_MAP(CFrameWindowImpl<CMainFrame>)
         MESSAGE_HANDLER(WM_CREATE, OnCreate)
         MESSAGE_HANDLER(WM_DESTROY, OnDestroy)
         MESSAGE_HANDLER(WM_GETMINMAXINFO, OnGetMinMaxInfo)
         MESSAGE_HANDLER(WM_SIZE, OnResized)
+        MESSAGE_HANDLER(WM_USER_ALWAYSONTOP, OnAlwaysOnTop)
+        MESSAGE_HANDLER(WM_USER_ENABLEOPENFILE, OnEnableOpenFile)
         COMMAND_ID_HANDLER(IDM_ABOUT, OnAbout)
         COMMAND_ID_HANDLER(IDM_FILE_EXIT, OnFileExit)
         COMMAND_ID_HANDLER(IDM_FILE_OPEN, OnFileOpen)
         COMMAND_ID_HANDLER(IDM_FILE_SAVE, OnFileSave)
         COMMAND_ID_HANDLER(IDM_FILE_OPTION, OnFileOption)
-        CHAIN_MSG_MAP(CUpdateUI<CMainFrame>)
-        CHAIN_MSG_MAP(CFrameWindowImpl<CMainFrame>)
     END_MSG_MAP()
 
     LRESULT OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
@@ -67,7 +70,8 @@ public:
     LRESULT OnFileOption(WORD, WORD, HWND, BOOL&);
     LRESULT OnAbout(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 
-    BOOL SetAlwaysOnTop(BOOL alwaysOnTop);
+    LRESULT OnAlwaysOnTop(UINT, WPARAM wParam, LPARAM lParam, BOOL&);
+    LRESULT OnEnableOpenFile(UINT, WPARAM, LPARAM lParam, BOOL&);
 };
 
 #endif // MAINFRAME_H_

@@ -90,11 +90,11 @@ int Run(const WTL::CString &configPath, LPTSTR /*lpstrCmdLine*/ = NULL, int nCmd
     CMainFrame wndMain;
 
     RECT rc = {0, 0, MAX(_Config.WindowWidth, MAINFRAME_MIN_WIDTH), MAX(_Config.WindowHeight, MAINFRAME_MIN_HEIGHT)};
-	if(wndMain.CreateEx(NULL, rc) == NULL)
-	{
-		ATLTRACE(_T("Main window creation failed!\n"));
-		return 0;
-	}
+    if(wndMain.CreateEx(NULL, rc) == NULL)
+    {
+        ATLTRACE(_T("Main window creation failed!\n"));
+        return 0;
+    }
 
     wndMain.ShowWindow(nCmdShow);
 

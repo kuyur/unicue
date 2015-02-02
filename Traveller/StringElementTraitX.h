@@ -26,8 +26,8 @@
 class CStringElementTraitX : public CElementTraitsBase<WTL::CString>
 {
 public:
-	typedef const WTL::CString& INARGTYPE;
-	typedef WTL::CString& OUTARGTYPE;
+    typedef const WTL::CString& INARGTYPE;
+    typedef WTL::CString& OUTARGTYPE;
 
     static ULONG Hash(_In_ INARGTYPE str)
     {

@@ -19,7 +19,6 @@
 #include "..\common\wtlhelper.h"
 #include "resource.h"
 #include "MainDlg.h"
-#include "MainFrame.h"
 
 CMainDlg::CMainDlg()
     :m_bNeedConvert(TRUE), m_RawStringLength(0), m_StringLength(0), m_UnicodeLength(0),
@@ -79,11 +78,6 @@ LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
 {
     // popup menu
     m_popupMenu.LoadMenu(IDR_MENU_POPUP);
-    // set icons
-    HICON hIcon = AtlLoadIconImage(IDR_MAINFRAME_BIG, LR_DEFAULTCOLOR, ::GetSystemMetrics(SM_CXICON), ::GetSystemMetrics(SM_CYICON));
-    SetIcon(hIcon, TRUE);
-    HICON hIconSmall = AtlLoadIconImage(IDR_MAINFRAME_LITTLE, LR_DEFAULTCOLOR, ::GetSystemMetrics(SM_CXSMICON), ::GetSystemMetrics(SM_CYSMICON));
-    SetIcon(hIconSmall, FALSE);
     // file hyperlink
     m_fileLink.SubclassWindow(GetDlgItem(IDC_STATIC_FILELINK));
     DWORD linkStyle = m_fileLink.GetHyperLinkExtendedStyle() | HLINK_NOTIFYBUTTON | HLINK_COMMANDBUTTON | HLINK_UNDERLINEHOVER | HLINK_NOTOOLTIP;
@@ -150,8 +144,7 @@ LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
 void CMainDlg::SetMainWndPos()
 {
     // Get pointer of parent window
-    CMainFrame *mainWnd = (CMainFrame*) &GetParent();
-    mainWnd->SetAlwaysOnTop(_Config.AlwaysOnTop);
+    GetParent().PostMessage(WM_USER_ALWAYSONTOP, _Config.AlwaysOnTop ? 0x01 : 0x00);
 }
 
 void CMainDlg::getDlgItemsRelativePosition()
@@ -501,8 +494,7 @@ LRESULT CMainDlg::OnCancel(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOO
 
 void CMainDlg::CloseDialog()
 {
-    CWindow* parent = &GetParent();
-    parent->PostMessage(WM_CLOSE);
+    GetParent().PostMessage(WM_CLOSE);
 }
 
 LRESULT CMainDlg::OnPopupUTF8(WORD, WORD, HWND, BOOL&)
@@ -696,7 +688,7 @@ LRESULT CMainDlg::OnBnClickedButtonTransferstring(WORD, WORD, HWND, BOOL&)
         m_fileLink.SetHyperLink(_T(""));
         m_fileLink.Invalidate();
         GetDlgItem(IDC_STATIC_PATH).ShowWindow(SW_HIDE);
-        UIEnable(IDM_FILE_OPEN, FALSE);
+        GetParent().PostMessage(WM_USER_ENABLEOPENFILE, 0x00);
     }
     else
     {
@@ -708,7 +700,7 @@ LRESULT CMainDlg::OnBnClickedButtonTransferstring(WORD, WORD, HWND, BOOL&)
         GetDlgItem(IDC_STATIC_STAT).SetWindowText(_T(""));
         GetDlgItem(IDC_STATIC_PATH).ShowWindow(SW_SHOW);
         // 恢复
-        UIEnable(IDM_FILE_OPEN, TRUE);
+        GetParent().PostMessage(WM_USER_ENABLEOPENFILE, 0x01);
         GetDlgItem(IDC_EDIT_ANSI).SetWindowText(_T(""));
         GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(_T(""));
         m_FilePathName = _T("");
