@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<config>
+    <template-string>.convert</template-string>
+    <charmap-config-path>charmap-chinese.xml</charmap-config-path>
+    <language>chn</language>
+    <current-choice>0</current-choice>
+    <output-encoding>UTF_8_BOM</output-encoding>
+    <window-width>784</window-width>
+    <window-height>678</window-height>
+</config>
