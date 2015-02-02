@@ -84,11 +84,12 @@ LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
     std::list<std::wstring> &encodeList = m_context->getEncodesNameList();
     std::list<std::wstring>::iterator iter;
     int count = 0;
-    for (iter = encodeList.begin(); iter != encodeList.end(); iter++, count++)
+    for (iter = encodeList.begin(); iter != encodeList.end(); iter++)
     {
         if (iter->compare(L"UTF-16") == 0) continue;
         if (iter->compare(L"UTF-8") == 0) continue;
         theCombo.InsertString(-1, iter->c_str());
+        count++;
     }
     if (count > 0)
     {
