@@ -4,14 +4,19 @@
 //
 
 #define IDD_ABOUTBOX                    100
-#define IDD_CHINESECONVERTER_DIALOG     101
 #define IDR_MAINFRAME                   128
+#define IDD_MAIN_DIALOG                 203
 #define IDC_EDIT_RIGHT                  1001
 #define IDC_EDIT_LEFT                   1002
 #define IDC_COMBO_SELECTCODE            1003
-#define IDC_BUTTON_SAVEAS               1004
-#define IDC_BUTTON_ABOUT                1005
+#define IDC_BUTTON_SAVE                 1004
+#define IDC_BUTTON_SAVEAS               1005
 #define IDC_COMBO_SAVECODE              1006
+#define IDC_STATIC_SAVECODE             1007
+#define IDM_FILE_OPEN                   32774
+#define IDM_FILE_SAVE                   32775
+#define IDM_FILE_EXIT                   32777
+#define IDM_ABOUT                       32778
 #define IDS_ABOUTBOX                    40001
 
 // Next default values for new objects

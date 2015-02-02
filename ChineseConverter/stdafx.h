@@ -52,10 +52,13 @@
 extern CAppModule _Module;
 
 #include <atlwin.h>
-#include <atlmisc.h>
 #include <atlframe.h>
 #include <atlctrls.h>
 #include <atldlgs.h>
+#include <atlimage.h>
+#include <atlmisc.h>
+#include <atlddx.h>
+#include <atlctrlx.h>
 
 #if defined _M_IX86
   #pragma comment(linker, "/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='x86' publicKeyToken='6595b64144ccf1df' language='*'\"")
@@ -72,4 +75,5 @@ extern CAppModule _Module;
 #define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>
 #include <crtdbg.h>
+#define new new(_NORMAL_BLOCK, __FILE__, __LINE__)
 #endif

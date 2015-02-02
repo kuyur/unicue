@@ -221,7 +221,9 @@
     <ClCompile Include="..\common\win32helper.cpp" />
     <ClCompile Include="..\common\winfile.cpp" />
     <ClCompile Include="ChineseConverter.cpp" />
+    <ClCompile Include="config.cpp" />
     <ClCompile Include="MainDlg.cpp" />
+    <ClCompile Include="MainFrame.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -241,7 +243,9 @@
     <ClInclude Include="..\common\winfile.h" />
     <ClInclude Include="..\common\wtlhelper.h" />
     <ClInclude Include="AboutDlg.h" />
+    <ClInclude Include="config.h" />
     <ClInclude Include="MainDlg.h" />
+    <ClInclude Include="MainFrame.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>

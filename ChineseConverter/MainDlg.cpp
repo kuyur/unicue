@@ -1,8 +1,8 @@
 ﻿/************************************************************************/
 /*                                                                      */
-/* ChineseConverter 1.2                                                 */
-/* A two-way transforming tool for Simplified Chinese and Traditional   */
-/* Chinese. It is a part of Unicue Project.                             */
+/* ChineseConverter 1.3                                                 */
+/* A tool to convert Simplified Chinese into Traditional Chinese and    */
+/* convert back. It is a part of Unicue Project.                        */
 /*                                                                      */
 /* Author:  kuyur (kuyur@kuyur.info)                                    */
 /* Published under GPLv3                                                */
@@ -13,33 +13,36 @@
 /************************************************************************/
 
 #include "stdafx.h"
-#include "resource.h"
-#include "aboutdlg.h"
-#include "MainDlg.h"
 #include "..\common\winfile.h"
 #include "..\common\win32helper.h"
 #include "..\common\wtlhelper.h"
 #include "..\common\utils.h"
+#include "resource.h"
+#include "MainDlg.h"
 
 CMainDlg::CMainDlg()
     :m_String(0), m_UnicodeString(0), m_FilePathName(L""),
-    m_StringLength(0), m_UnicodeLength(0)
+    m_StringLength(0), m_UnicodeLength(0), m_context(NULL)
 {
-    m_context = new CC4Context(L"charmap-chinese.xml", GetProcessFolder());
-    if (!m_context->init())
-        MessageBox(_T("Failed to load charmaps!"), _T("简繁转换"), MB_OK);
 }
 
 CMainDlg::~CMainDlg()
 {
     if (m_String)
+    {
         delete []m_String;
+        m_String = NULL;
+    }
     if (m_UnicodeString)
+    {
         delete []m_UnicodeString;
+        m_UnicodeString = NULL;
+    }
     if (m_context)
     {
         m_context->finalize();
         delete m_context;
+        m_context = NULL;
     }
 }
 
@@ -55,15 +58,6 @@ BOOL CMainDlg::OnIdle()
 
 LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
-    // center the dialog on the screen
-    CenterWindow();
-
-    // set icons
-    HICON hIcon = AtlLoadIconImage(IDR_MAINFRAME, LR_DEFAULTCOLOR, ::GetSystemMetrics(SM_CXICON), ::GetSystemMetrics(SM_CYICON));
-    SetIcon(hIcon, TRUE);
-    HICON hIconSmall = AtlLoadIconImage(IDR_MAINFRAME, LR_DEFAULTCOLOR, ::GetSystemMetrics(SM_CXSMICON), ::GetSystemMetrics(SM_CYSMICON));
-    SetIcon(hIconSmall, FALSE);
-
     // register object for message filtering and idle updates
     CMessageLoop* pLoop = _Module.GetMessageLoop();
     ATLASSERT(pLoop != NULL);
@@ -72,63 +66,129 @@ LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
 
     UIAddChildWindowContainer(m_hWnd);
 
+    // DDX
+    DoDataExchange(FALSE);
+
+    // Get orignal size of dialog
+    GetWindowRect(&m_dlgRect);
+    // Get orignal size of dialog items
+    getDlgItemsRelativePosition();
+
+    // init C4 Context and load charmaps
+    m_context = new CC4Context(std::wstring(_Config.MapConfName), GetProcessFolder());
+    if (!m_context->init())
+        MessageBox(L"载入字符映射表失败！", _T("简繁转换"), MB_OK);
+
     // add encode items
     CComboBox &theCombo = (CComboBox)GetDlgItem(IDC_COMBO_SELECTCODE);
     std::list<std::wstring> &encodeList = m_context->getEncodesNameList();
     std::list<std::wstring>::iterator iter;
-    for (iter = encodeList.begin(); iter != encodeList.end(); iter++)
+    int count = 0;
+    for (iter = encodeList.begin(); iter != encodeList.end(); iter++, count++)
     {
         if (iter->compare(L"UTF-16") == 0) continue;
         if (iter->compare(L"UTF-8") == 0) continue;
         theCombo.InsertString(-1, iter->c_str());
     }
-    theCombo.SetCurSel(0);
+    if (count > 0)
+    {
+        _Config.CurrentChoice = MAX(MIN(_Config.CurrentChoice, count - 1), 0);
+        theCombo.SetCurSel(_Config.CurrentChoice);
+    }
 
     // add encoding items for saving
     CComboBox &savingCombo = (CComboBox)GetDlgItem(IDC_COMBO_SAVECODE);
     savingCombo.InsertString(-1, _T("UTF-8"));
+    savingCombo.InsertString(-1, _T("UTF-8 (NO BOM)"));
     savingCombo.InsertString(-1, _T("Unicode (LE)"));
     savingCombo.InsertString(-1, _T("Unicode (BE)"));
-    savingCombo.SetCurSel(0);
+    savingCombo.SetCurSel(_Config.OutputEncoding);
 
-    return TRUE;
+    return 1;
 }
 
-LRESULT CMainDlg::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
+void CMainDlg::getDlgItemsRelativePosition()
 {
-    // unregister message filtering and idle updates
-    CMessageLoop* pLoop = _Module.GetMessageLoop();
-    ATLASSERT(pLoop != NULL);
-    pLoop->RemoveMessageFilter(this);
-    pLoop->RemoveIdleHandler(this);
-
-    return 0;
+    static int IDs[7] = {
+        IDC_EDIT_RIGHT,
+        IDC_EDIT_LEFT,
+        IDC_COMBO_SELECTCODE,
+        IDC_STATIC_SAVECODE,
+        IDC_COMBO_SAVECODE,
+        IDC_BUTTON_SAVE,
+        IDC_BUTTON_SAVEAS
+    };
+    if (m_itemRects.empty())
+    {
+        for (int i = 0; i <= 6; ++i)
+        {
+            RECT rc;
+            ATL::CWindow item = GetDlgItem(IDs[i]);
+            item.GetWindowRect(&rc);
+            rc.right = rc.right - rc.left;      // size x
+            rc.bottom = rc.bottom - rc.top;     // size y
+            rc.left = rc.left - m_dlgRect.left; // relative x-position
+            rc.top = rc.top - m_dlgRect.top;    // relative y-position
+            m_itemRects[IDs[i]] = rc;
+        }
+    }
 }
 
-LRESULT CMainDlg::OnAppAbout(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+void CMainDlg::moveItem(int itemId, int deltaX, int deltaY)
 {
-    CAboutDlg dlg;
-    dlg.DoModal();
+    int relativeX = m_itemRects[itemId].left, relativeY = m_itemRects[itemId].top;
+    GetDlgItem(itemId).SetWindowPos(NULL, relativeX + deltaX, relativeY + deltaY, NULL, NULL, SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOSIZE);
+}
+
+void CMainDlg::resizeItem(int itemId, int deltaX, int deltaY)
+{
+    RECT rect = m_itemRects[itemId];
+    int x = rect.right + deltaX;
+    int y = rect.bottom + deltaY;
+    GetDlgItem(itemId).SetWindowPos(NULL, 0, 0, x, y, SWP_NOMOVE | SWP_NOACTIVATE | SWP_NOZORDER);
+}
+
+LRESULT CMainDlg::onDialogResize(UINT, WPARAM, LPARAM, BOOL&)
+{
+    RECT rc;
+    GetWindowRect(&rc);
+
+    LONG deltaX = rc.right - rc.left - (m_dlgRect.right - m_dlgRect.left);
+    LONG deltaY = rc.bottom - rc.top - (m_dlgRect.bottom - m_dlgRect.top);
+    LONG leftDeltaX = deltaX / 2;
+    LONG rightDeltaX = deltaX - leftDeltaX;
+    LONG halfDeltaY = deltaY / 2;
+
+    // move buttons
+    moveItem(IDC_BUTTON_SAVE, deltaX, 0);
+    moveItem(IDC_BUTTON_SAVEAS, deltaX, 0);
+    // move right edit
+    moveItem(IDC_EDIT_RIGHT, leftDeltaX, 0);
+    // move static text
+    moveItem(IDC_STATIC_SAVECODE, leftDeltaX, 0);
+    moveItem(IDC_COMBO_SAVECODE, leftDeltaX, 0);
+
+    // resize combobox
+    resizeItem(IDC_COMBO_SELECTCODE, leftDeltaX, 0);
+    // resize edit controls
+    resizeItem(IDC_EDIT_LEFT, leftDeltaX, deltaY);
+    resizeItem(IDC_EDIT_RIGHT, rightDeltaX, deltaY);
+
+    // fore repaint dialog item
+    Invalidate(true);
     return 0;
 }
 
 LRESULT CMainDlg::OnOK(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-    // TODO: Add validation code 
-    CloseDialog(wID);
+    GetParent().PostMessage(WM_CLOSE);
     return 0;
 }
 
 LRESULT CMainDlg::OnCancel(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-    CloseDialog(wID);
+    GetParent().PostMessage(WM_CLOSE);
     return 0;
-}
-
-void CMainDlg::CloseDialog(int nVal)
-{
-    DestroyWindow();
-    ::PostQuitMessage(nVal);
 }
 
 void CMainDlg::clean()
@@ -149,32 +209,86 @@ void CMainDlg::clean()
     RightEdit.SetWindowText(_T(""));
 }
 
+BOOL CMainDlg::OpenFile(LPCWSTR filePath)
+{
+    m_FilePathName = filePath;
+    return DealFile();
+}
+
+BOOL CMainDlg::SaveFile(LPCWSTR filePath) {
+    if (!m_UnicodeString)
+    {
+        MessageBox(_T("转换内容为空！"), _T("简繁转换"), MB_OK);
+        return false;
+    }
+
+    CWinFile file(filePath, CWinFile::openCreateAlways | CWinFile::modeWrite | CWinFile::shareExclusive);
+    if (!file.open())
+    {
+        MessageBox(_T("无法写入文件！"), _T("简繁转换"), MB_OK);
+        return false;
+    }
+
+    switch (_Config.OutputEncoding)
+    {
+    case O_UTF_8_NOBOM:
+        {
+            std::string &utfstr = CC4EncodeUTF16::convert2utf8(m_UnicodeString, m_UnicodeLength);
+            file.write(utfstr.c_str(), utfstr.length());
+        }
+        break;
+    case O_UTF_16_LE:
+        file.write(CC4Encode::LITTLEENDIAN_BOM, 2);
+        file.write((char*)m_UnicodeString, m_UnicodeLength*sizeof(wchar_t));
+        break;
+    case O_UTF_16_BE:
+        file.write(CC4Encode::BIGENDIAN_BOM, 2);
+        for (UINT i = 0; i < m_UnicodeLength; i++)
+        {
+            wchar_t *offset = m_UnicodeString+i;
+            file.write(((char*)offset)+1, 1);
+            file.write((char*)offset, 1);
+        }
+        break;
+    case O_UTF_8:
+    default:
+        {
+            file.write(CC4Encode::UTF_8_BOM, 3);
+            std::string &utfstr = CC4EncodeUTF16::convert2utf8(m_UnicodeString, m_UnicodeLength);
+            file.write(utfstr.c_str(), utfstr.length());
+        }
+        break;
+    }
+    file.close();
+    return true;
+}
+
 BOOL CMainDlg::DealFile()
 {
     if (m_FilePathName.IsEmpty())
         return FALSE;
 
-    CWinFile OpenFile(m_FilePathName, CWinFile::modeRead|CWinFile::shareDenyWrite);
-    if (!OpenFile.open())
+    CWinFile file(m_FilePathName, CWinFile::modeRead|CWinFile::shareDenyWrite);
+    if (!file.open())
     {
-        OpenFile.close();
+        file.close();
         clean();
         MessageBox(_T("打开失败！"), _T("简繁转换"), MB_OK);
         return FALSE;
     }
 
-    UINT fileLength = OpenFile.length();
+    UINT fileLength = file.length();
     unsigned char bom[3] = {0};
     if (fileLength >= 3)
-        OpenFile.read((char *)bom, 3);
+        file.read((char *)bom, 3);
     else if (fileLength >= 2)
-        OpenFile.read((char *)bom, 2);
+        file.read((char *)bom, 2);
 
     if ((bom[0] == 0xFF) && (bom[1] == 0xFE)) // Unicode LE
     {
         if ((fileLength&1) != 0)
         {
-            OpenFile.close();
+            file.close();
             clean();
             MessageBox(_T("文件已损坏，编码检测结果为Unicode(LE)"), _T("简繁转换"), MB_OK);
             return FALSE;
@@ -187,16 +301,16 @@ BOOL CMainDlg::DealFile()
         }
         m_StringLength = (fileLength>>1) - 1;
         m_String = new wchar_t[m_StringLength+1];
-        OpenFile.seek(2, CWinFile::begin);
-        OpenFile.read((char*)m_String,m_StringLength*sizeof(wchar_t));
-        OpenFile.close();
+        file.seek(2, CWinFile::begin);
+        file.read((char*)m_String,m_StringLength*sizeof(wchar_t));
+        file.close();
         m_String[m_StringLength]=0x0000;
     }
     else if ((bom[0] == 0xFE) && (bom[1] == 0xFF)) // Unicode BE
     {
         if ((fileLength&1) != 0)
         {
-            OpenFile.close();
+            file.close();
             clean();
             MessageBox(_T("文件已损坏，编码检测结果为Unicode(BE)"), _T("简繁转换"), MB_OK);
             return FALSE;
@@ -209,20 +323,20 @@ BOOL CMainDlg::DealFile()
         }
         m_StringLength = (fileLength>>1) - 1;
         m_String = new wchar_t[m_StringLength+1];
-        OpenFile.seek(2, CWinFile::begin);
-        OpenFile.read((char*)m_String, m_StringLength*sizeof(wchar_t));
-        OpenFile.close();
+        file.seek(2, CWinFile::begin);
+        file.read((char*)m_String, m_StringLength*sizeof(wchar_t));
+        file.close();
         m_String[m_StringLength] = 0;
         // 调整高低位顺序
         convertBEtoLE(m_String, m_StringLength);
     }
     else if ((bom[0] == 0xEF) && (bom[1] == 0xBB) && (bom[2] == 0xBF)) // UTF-8
     {
-        OpenFile.seek(3, CWinFile::begin);
+        file.seek(3, CWinFile::begin);
         UINT bufferLength = fileLength - 3;
         char *buffer = new char[bufferLength+1];
-        OpenFile.read(buffer, bufferLength);
-        OpenFile.close();
+        file.read(buffer, bufferLength);
+        file.close();
         buffer[bufferLength] = '\0';
 
         m_StringLength = CC4EncodeUTF8::calcUnicodeStringLength(buffer, bufferLength);
@@ -246,7 +360,7 @@ BOOL CMainDlg::DealFile()
     }
     else
     {
-        OpenFile.close();
+        file.close();
         clean();
         MessageBox(_T("错误的文件格式。仅支持UTF-8(With BOM)/Unicode(LE)/Unicode(BE)"), _T("简繁转换"), MB_OK);
         return FALSE;
@@ -289,8 +403,7 @@ LRESULT CMainDlg::OnDropFiles(UINT, WPARAM wParam, LPARAM, BOOL&)
     {
         TCHAR szFileName[MAX_PATH+1];
         ::DragQueryFile(hDrop, 0, szFileName, MAX_PATH);
-        m_FilePathName=CString(szFileName);
-        DealFile();
+        OpenFile(szFileName);
     }
     else
     {
@@ -301,69 +414,35 @@ LRESULT CMainDlg::OnDropFiles(UINT, WPARAM wParam, LPARAM, BOOL&)
     return 0;
 }
 
+LRESULT CMainDlg::OnBnClickedButtonSave(WORD, WORD, HWND, BOOL&)
+{
+    SaveFile(m_FilePathName);
+    return 0;
+}
+
 LRESULT CMainDlg::OnBnClickedButtonSaveas(WORD, WORD, HWND, BOOL&)
 {
-    if (!m_UnicodeString)
-    {
-        MessageBox(_T("转换内容为空！"), _T("简繁转换"), MB_OK);
-        return 0;
-    }
     WTL::CString FilePath,FileType;
-    int position=m_FilePathName.ReverseFind('.');
-    FilePath=m_FilePathName.Left(position);
-    FileType=m_FilePathName.Right(m_FilePathName.GetLength()-position);
-    FilePath+=_T(".convert");
-    FilePath+=FileType;
+    int position = m_FilePathName.ReverseFind('.');
+    FilePath = m_FilePathName.Left(position);
+    FileType = m_FilePathName.Right(m_FilePathName.GetLength()-position);
+    FilePath += _Config.TemplateStr;
+    FilePath += FileType;
 
-    CWinFile SaveFile(FilePath,CWinFile::openCreateAlways|CWinFile::modeWrite|CWinFile::shareExclusive);
-    if (!SaveFile.open())
-    {
-        MessageBox(_T("无法写入文件！"), _T("简繁转换"), MB_OK);
-        return 0;
-    }
-
-    // get saving encoding
-    CComboBox &savingCombo = (CComboBox)GetDlgItem(IDC_COMBO_SAVECODE);
-    WTL::CString encoding;
-    getLBText(savingCombo, savingCombo.GetCurSel(), encoding);
-    if (encoding == _T("UTF-8"))
-    {
-        SaveFile.write(CC4Encode::UTF_8_BOM, 3);
-        std::string &utfstr = CC4EncodeUTF16::convert2utf8(m_UnicodeString, m_UnicodeLength);
-        SaveFile.write(utfstr.c_str(), utfstr.length());
-    }
-    else if (encoding == _T("Unicode (LE)"))
-    {
-        SaveFile.write(CC4Encode::LITTLEENDIAN_BOM, 2);
-        SaveFile.write((char*)m_UnicodeString, m_UnicodeLength*sizeof(wchar_t));
-    }
-    else if (encoding == _T("Unicode (BE)"))
-    {
-        SaveFile.write(CC4Encode::BIGENDIAN_BOM, 2);
-        for (UINT i = 0; i < m_UnicodeLength; i++)
-        {
-            /*
-            unsigned char chars[2];
-            memcpy(chars,(void*)(m_UnicodeString+i),2);
-            wchar_t theChr = chars[0] * 256 + chars[1];
-            SaveFile.write((char*)&theChr, 2);
-            */
-            wchar_t *offset = m_UnicodeString+i;
-            SaveFile.write(((char*)offset)+1, 1);
-            SaveFile.write((char*)offset, 1);
-        }
-    }
-    SaveFile.close();
+    SaveFile(FilePath);
 
     return 0;
 }
 
 LRESULT CMainDlg::OnCbnSelchangeComboSelectcode(WORD, WORD, HWND, BOOL&)
 {
+    CComboBox &theCombo  =(CComboBox)GetDlgItem(IDC_COMBO_SELECTCODE);
+    _Config.CurrentChoice = theCombo.GetCurSel();
+
     if (!m_String)
         return 0;
+
     CEdit &RightEdit=(CEdit)GetDlgItem(IDC_EDIT_RIGHT);
-    CComboBox &theCombo  =(CComboBox)GetDlgItem(IDC_COMBO_SELECTCODE);
     WTL::CString encodeName;
     getWindowText(theCombo, encodeName);
     const CC4Encode *encode = m_context->getEncode((LPCTSTR)encodeName);
@@ -385,5 +464,25 @@ LRESULT CMainDlg::OnCbnSelchangeComboSelectcode(WORD, WORD, HWND, BOOL&)
     {
         RightEdit.SetWindowText(_T(""));
     }
+    return 0;
+}
+
+LRESULT CMainDlg::OnCbnSelchangeComboSavecode(WORD, WORD, HWND, BOOL&)
+{
+    CComboBox &savingCombo = (CComboBox)GetDlgItem(IDC_COMBO_SAVECODE);
+    // get saving encoding
+    WTL::CString encoding;
+    getLBText(savingCombo, savingCombo.GetCurSel(), encoding);
+    if (encoding == _T("UTF-8"))
+        _Config.OutputEncoding = O_UTF_8;
+    else if (encoding == _T("UTF-8 (NO BOM)"))
+        _Config.OutputEncoding = O_UTF_8_NOBOM;
+    else if (encoding == _T("Unicode (LE)"))
+        _Config.OutputEncoding = O_UTF_16_LE;
+    else if (encoding == _T("Unicode (BE)"))
+        _Config.OutputEncoding = O_UTF_16_BE;
+    else
+        _Config.OutputEncoding = O_UTF_8;
+
     return 0;
 }
