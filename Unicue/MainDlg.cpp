@@ -123,6 +123,19 @@ LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
     theCombo.SetCurSel(0);
 
     // when called from command line
+    if (NULL != _CommandLine && !_CommandLine->hasToken(L"-s") && !_CommandLine->hasToken(L"--silent"))
+    {
+        const wchar_t* filePath = NULL;
+        if (_CommandLine->hasToken(L"-i"))
+            filePath = _CommandLine->getParamValue(L"-i");
+        else if (_CommandLine->hasToken(L"--input"))
+            filePath = _CommandLine->getParamValue(L"--input");
+        else
+            filePath = _CommandLine->getTokenAt(0);
+        if (NULL != filePath)
+            OpenFile(filePath);
+    }
+    /*
     LPWSTR *szArglist;
     int nArgs;
     szArglist = CommandLineToArgvW(GetCommandLineW(), &nArgs);
@@ -137,6 +150,7 @@ LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
         OpenFile(filePath);
     }
     LocalFree(szArglist);
+    */
 
     return TRUE;
 }
@@ -1231,7 +1245,7 @@ void CMainDlg::FixCue()
     // also guess from cue file name
     WTL::CString audioFilePathImplicit(m_FilePathName);
     WTL::CString &audioFileNameImplicit = m_FilePathName.Right(m_FilePathName.GetLength() - m_FilePathName.ReverseFind(L'\\') - 1);
-    //For first time, length is 4 (.cue)
+    // For first time, length is 4 (.cue)
     extensionLength = 4;
     RemoveFromEnd(audioFileNameImplicit, extensionLength);
 

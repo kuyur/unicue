@@ -113,4 +113,9 @@ inline std::string toSTLString(const T& t)
   return ss.str();
 }
 
+inline bool beginWith(const wchar_t* prefix, const wchar_t* str)
+{
+    return wcsncmp(prefix, str, wcslen(prefix)) == 0;
+}
+
 #endif // UTILS_H_

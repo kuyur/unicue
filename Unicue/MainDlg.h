@@ -17,11 +17,13 @@
 #define MAINDLG_H_
 
 #include <unordered_map>
+#include "../common/cmdline.h"
 #include "config.h"
 #include "colorhyperlink.h"
 
 // The global instance for config
 extern CConfig _Config;
+extern CommandLine *_CommandLine;
 class CMainDlg : public CDialogImpl<CMainDlg>, public CUpdateUI<CMainDlg>,
         public CMessageFilter, public CIdleHandler, public CWinDataExchange<CMainDlg>
 {

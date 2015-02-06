@@ -296,4 +296,7 @@ void SetDefault(CConfig &config)
     config.TemplateStr = _T(".utf-8");
     config.WindowWidth = 793;
     config.WindowHeight = 717;
+    config.SilentModeForceConvert = FALSE;
+    config.SilentModeOverwrite = FALSE;
+    config.SilentModeBackup = FALSE;
 }

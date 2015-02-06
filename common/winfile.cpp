@@ -18,6 +18,35 @@
 
 #include "winfile.h"
 
+bool CWinFile::CopyFile(LPCWSTR srcfile, LPCWSTR destfile)
+{
+    CWinFile inFile(srcfile, CWinFile::modeRead|CWinFile::shareDenyWrite);
+    if (!inFile.open())
+        return false;
+
+    UINT length = inFile.length();
+    char *buffer = new char[length];
+    inFile.read(buffer, length);
+    inFile.close();
+
+    CWinFile outFile(destfile, CWinFile::openCreateAlways|CWinFile::modeWrite|CWinFile::shareExclusive);
+    if (!outFile.open())
+    {
+        delete []buffer;
+        return false;
+    }
+
+    outFile.write(buffer, length);
+    outFile.close();
+    delete []buffer;
+    return true;
+}
+
+bool CWinFile::CopyFile(const std::wstring &srcfile, const std::wstring &destfile)
+{
+    return CWinFile::CopyFile(srcfile.c_str(), destfile.c_str());
+}
+
 CWinFile::CWinFile(const std::wstring &filename, UINT openFlags)
     : m_hFile(INVALID_HANDLE_VALUE), m_nFlags(openFlags)
 {

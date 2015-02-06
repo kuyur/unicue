@@ -52,6 +52,9 @@ typedef struct CConfig_tag
     OUTPUT_ENCODING OutputEncoding;        // Output encoding
     LONG WindowWidth;                      // width of main window
     LONG WindowHeight;                     // height of main window
+    BOOL SilentModeForceConvert;          // force convert, although no matched encoding is found
+    BOOL SilentModeOverwrite;             // Overwrite file or not
+    BOOL SilentModeBackup;                // Backup original file or not. Only available when SilentMode_Overwrite is true.
 }CConfig;
 
 BOOL LoadConfigFile(TiXmlDocument *xmlfile, CConfig &config);

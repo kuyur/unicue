@@ -28,6 +28,10 @@
 class CWinFile
 {
 public:
+    static bool CopyFile(LPCWSTR srcfile, LPCWSTR destfile);
+    static bool CopyFile(const std::wstring &srcfile, const std::wstring &destfile);
+
+public:
     enum SeekPosition {
         begin   = FILE_BEGIN,
         current = FILE_CURRENT,
