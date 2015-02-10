@@ -141,6 +141,8 @@ LRESULT CMainDlg::OnBnClickedRegister(WORD, WORD, HWND, BOOL&)
             errorMessage += target;
             errorMessage += L"!";
             MessageBox(errorMessage);
+
+            return 0;
         }
         
         /*
