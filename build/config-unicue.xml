@@ -12,4 +12,7 @@
     <Output>UTF_8_BOM</Output>
     <WindowWidth>793</WindowWidth>
     <WindowHeight>717</WindowHeight>
+    <SilentModeForceConvert>false</SilentModeForceConvert>
+    <SilentModeOverwrite>false</SilentModeOverwrite>
+    <SilentModeBackup>false</SilentModeBackup>
 </config>

@@ -31,7 +31,8 @@ CAppModule _Module;
 CConfig _Config; // the global instance for config
 CommandLine *_CommandLine = NULL; // the global instance for command line.
 
-void LoadConfig(const WTL::CString &configPath) {
+void LoadConfig(const WTL::CString &configPath)
+{
     SetDefault(_Config);
     // Load config file...
     // Because TiXml does not support wchar_t file name,

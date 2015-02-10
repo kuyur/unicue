@@ -137,6 +137,21 @@ BOOL LoadConfigFile(TiXmlDocument *xmlfile, CConfig &config)
     if (!pElem->GetText()) return FALSE;
     config.WindowHeight = (LONG)strtol(pElem->GetText(), (char **)NULL, 10);
 
+    // SilentModeForceConvert node
+    pElem = hXmlHandle.FirstChild("SilentModeForceConvert").Element();
+    if (pElem && pElem->GetText())
+        config.SilentModeForceConvert = _stricmp(pElem->GetText(), "true") == 0;
+
+    // SilentModeOverwrite node
+    pElem = hXmlHandle.FirstChild("SilentModeOverwrite").Element();
+    if (pElem && pElem->GetText())
+        config.SilentModeOverwrite = _stricmp(pElem->GetText(), "true") == 0;
+
+    // SilentModeBackup node
+    pElem = hXmlHandle.FirstChild("SilentModeBackup").Element();
+    if (pElem && pElem->GetText())
+        config.SilentModeBackup = _stricmp(pElem->GetText(), "true") == 0;
+
     return TRUE;
 }
 
@@ -265,6 +280,21 @@ BOOL SaveConfigFile(LPCTSTR configPath, const CConfig &config)
     TiXmlText *WindowHeightValue = new TiXmlText(toSTLString(config.WindowHeight).c_str());
     WindowHeight->LinkEndChild(WindowHeightValue);
     configure->LinkEndChild(WindowHeight);
+
+    TiXmlElement *SilentModeForceConvert = new TiXmlElement("SilentModeForceConvert");
+    TiXmlText *SilentModeForceConvertValue = new TiXmlText(config.SilentModeForceConvert ? "true" : "false");
+    SilentModeForceConvert->LinkEndChild(SilentModeForceConvertValue);
+    configure->LinkEndChild(SilentModeForceConvert);
+
+    TiXmlElement *SilentModeOverwrite = new TiXmlElement("SilentModeOverwrite");
+    TiXmlText *SilentModeOverwriteValue = new TiXmlText(config.SilentModeOverwrite ? "true" : "false");
+    SilentModeOverwrite->LinkEndChild(SilentModeOverwriteValue);
+    configure->LinkEndChild(SilentModeOverwrite);
+
+    TiXmlElement *SilentModeBackup = new TiXmlElement("SilentModeBackup");
+    TiXmlText *SilentModeBackupValue = new TiXmlText(config.SilentModeBackup ? "true" : "false");
+    SilentModeBackup->LinkEndChild(SilentModeBackupValue);
+    configure->LinkEndChild(SilentModeBackup);
 
     configdoc.LinkEndChild(dec);
     configdoc.LinkEndChild(configure);
