@@ -12,7 +12,7 @@ If it is not provided,
   * `SilentModeOverwrite` is set as true, will use input file path as output file path.
   * `SilentModeOverwrite` is set as false, will use template defined inside config file to fabricate the  output file path.
 
-`--inencoding`: encoding for input file. Only used under Slient Mode. Only used when the file has no BOM. See charmap-anisong.xml (the default charmap config file in config-unicue.xml) for detail. Valid name is inside <name></name> tag, for example, `Shift-JIS`. (Notice it is case-sensitive). If it is not provided, unicue will find the most possible encoding automatically.
+`--inencoding`: encoding for input file. Only used under Slient Mode. Only used when the file has no BOM. See `charmap-anisong.xml` (the default charmap config file in `config-unicue.xml`) for detail. Valid name is inside `<name></name>` tag, for example, `Shift-JIS`. (Notice it is case-sensitive). If it is not provided, unicue will find the most possible encoding automatically.
 
 `--outencoding`: encoding for output file. Only used under Slient Mode. Valid name is `utf-8`, `utf-8-nobom`, `utf-16` (short for `utf-16-le`), `utf-16-le` and `utf-16-be`. If it is not provided, will use the setting inside config file.
 
