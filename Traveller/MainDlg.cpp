@@ -129,30 +129,19 @@ LRESULT CMainDlg::OnBnClickedRegister(WORD, WORD, HWND, BOOL&)
             dllPath += _T("TravellerExt64.dll");
         else
             dllPath += _T("TravellerExt32.dll");
-        CWinFile inFile(dllPath, CWinFile::modeRead|CWinFile::shareDenyWrite);
-        if (!inFile.open())
-        {
-            MessageBox(dllPath + " not found!");
-            return 0;
-        }
-        UINT length = inFile.length();
-        char *buffer = new char[length];
-        inFile.read(buffer, length);
-        inFile.close();
 
         WTL::CString target(GetProcessFolder());
         target += _T("TravellerExt.dll");
-        CWinFile outFile(target, CWinFile::openCreateAlways|CWinFile::modeWrite|CWinFile::shareExclusive);
-        if (!outFile.open())
+        bool success = CWinFile::CopyFile(dllPath, target);
+        if (!success)
         {
-            delete []buffer;
-            MessageBox(_T("Can not write to TravellerExt.dll!"));
-            return 0;
+            WTL::CString errorMessage(L"Failed to copy ");
+            errorMessage += dllPath;
+            errorMessage += L" to ";
+            errorMessage += target;
+            errorMessage += L"!";
+            MessageBox(errorMessage);
         }
-        outFile.write(buffer, length);
-        outFile.close();
-        delete []buffer;
-        buffer = NULL;
         
         /*
         if (IsWow64())
