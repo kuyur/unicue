@@ -14,8 +14,8 @@
 #pragma once
 
 // utils.h
-#ifndef UTILS_H_
-#define UTILS_H_
+#ifndef UNICUE_UTILS_H_
+#define UNICUE_UTILS_H_
 
 #define MIN(a,b) (((a)<(b))?(a):(b))
 #define MAX(a,b) (((a)>(b))?(a):(b))
@@ -118,4 +118,4 @@ inline bool beginWith(const wchar_t* prefix, const wchar_t* str)
     return wcsncmp(prefix, str, wcslen(prefix)) == 0;
 }
 
-#endif // UTILS_H_
+#endif // UNICUE_UTILS_H_

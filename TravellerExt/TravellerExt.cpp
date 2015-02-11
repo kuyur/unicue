@@ -64,9 +64,9 @@ STDAPI DllRegisterServer(void)
         return hr;
 
     static TCHAR pszGUID[] = _T("{66276779-39DB-40A5-8F32-BB36A2B8F698}");
-    AddRegKey(HKEY_CLASSES_ROOT, _T("*\\shellex\\ContextMenuHandlers\\0TravellerMenu"), _T(""), pszGUID);
-    AddRegKey(HKEY_CLASSES_ROOT, _T("Directory\\shellex\\ContextMenuHandlers\\0TravellerMenu"), _T(""), pszGUID);
-    AddRegKey(HKEY_CLASSES_ROOT, _T("Folder\\shellex\\ContextMenuHandlers\\0TravellerMenu"), _T(""), pszGUID);
+    Unicue::AddRegKey(HKEY_CLASSES_ROOT, _T("*\\shellex\\ContextMenuHandlers\\0TravellerMenu"), _T(""), pszGUID);
+    Unicue::AddRegKey(HKEY_CLASSES_ROOT, _T("Directory\\shellex\\ContextMenuHandlers\\0TravellerMenu"), _T(""), pszGUID);
+    Unicue::AddRegKey(HKEY_CLASSES_ROOT, _T("Folder\\shellex\\ContextMenuHandlers\\0TravellerMenu"), _T(""), pszGUID);
 
     return hr;
 }

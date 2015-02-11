@@ -14,6 +14,7 @@
 #include "win32helper.h"
 #include <tchar.h>
 
+namespace Unicue {
 std::wstring msConvert(const char *src)
 {
     if (!src) return std::wstring();
@@ -105,3 +106,4 @@ BOOL AddRegKey(HKEY hKey, LPCWSTR lpSubItem, LPCWSTR lpKey, LPCWSTR lpValue, DWO
     RegCloseKey(hAddKey);
     return TRUE;
 }
+};

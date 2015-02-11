@@ -23,6 +23,7 @@
 #include "..\common\win32helper.h"
 #include "..\common\wtlhelper.h"
 #include "..\common\utils.h"
+#include "..\common\unicuehelper.h"
 
 static const WCHAR TRAVELLER_BACKUP[] = L"\\ut-orig";
 
@@ -62,7 +63,7 @@ void SetConvertedCueStatus(CFileInfo &fileInfo, BOOL isUtf8IgnoredByConfig)
 CProcessDlg::CProcessDlg(void)
     : m_configPath(L""), m_files(), m_fileInfoMap(), m_context(NULL), m_cueFolders(NULL), m_cueFoldersCount(0)
 {
-    m_configPath += GetProcessFolder();
+    m_configPath += Unicue::GetProcessFolder();
     m_configPath += L"config-traveller.xml";
 }
 
@@ -143,7 +144,7 @@ LRESULT CProcessDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPa
     list.InsertColumn(3, _T("文件状态"), LVCFMT_LEFT, 150);
 
     // load charmaps
-    m_context = new CC4Context(std::wstring(m_config.charmapConfig), GetProcessFolder());
+    m_context = new CC4Context(std::wstring(m_config.charmapConfig), Unicue::GetProcessFolder());
     if (!m_context->init())
         MessageBox(L"载入字符映射表失败！", _T("Unicue Traveller"), MB_OK);
 
@@ -315,7 +316,7 @@ LRESULT CProcessDlg::OnListDBClicked(int idCtrl, LPNMHDR pnmh, BOOL& /*bHandled*
         if (index > m_files.size() - 1)
             return 0;
         WTL::CString unicuePath(L"\"");
-        unicuePath += GetProcessFolder();
+        unicuePath += Unicue::GetProcessFolder();
         unicuePath += L"Unicue.exe\"";
         WTL::CString cuePath(L"\"");
         cuePath += m_files[index];
@@ -558,100 +559,8 @@ void CProcessDlg::processCueContent(WTL::CString &cueContent, const WTL::CString
 {
     if (m_config.isAutoFixCueError)
     {
-        fixTTAOutdatedTag(cueContent);
-        fixAudioExtension(cueContent, cueFilePath);
+        Unicue::FixTTAOutdatedTag(cueContent);
+        Unicue::FixAudioFilePath(cueFilePath, cueContent);
     }
 }
 
-void CProcessDlg::fixAudioExtension(WTL::CString &cueContent, const WTL::CString &cueFilePath)
-{
-    int BeginPos = cueContent.Find(L"FILE \"");
-    if (BeginPos == -1) return;
-    int EndPos = cueContent.Find(L"\" WAVE");
-    if (EndPos == -1) return;
-    BeginPos += 6;
-    if (BeginPos >= EndPos) return;
-
-    WTL::CString &audioFileName = cueContent.Mid(BeginPos, EndPos - BeginPos); // origin audio file name
-    WTL::CString &audioFilePath = cueFilePath.Left(cueFilePath.ReverseFind(L'\\'));
-    audioFilePath += L"\\";
-    audioFilePath += audioFileName;
-
-    if (PathFileExists(audioFilePath)) return; // no need to fix
-
-    // 替换扩展名查找
-    int pos = audioFileName.ReverseFind(L'.');
-    int extensionLength = 0;
-    WTL::CString audioFileNameFound(L"");
-    if (-1 != pos)
-    {
-        extensionLength += audioFileName.GetLength() - pos; // contain .
-        audioFileNameFound += audioFileName.Left(pos);
-    }
-    else
-        audioFileNameFound += audioFileName;
-
-    const static wchar_t* FORMAT[12] =
-    {
-        L".ape",
-        L".flac",
-        L".tta",
-        L".tak",
-        L".wv",
-        L".m4a",
-        L".wma",
-        L".wav",
-        L".mac",
-        L".fla",
-        L".wave",
-        L".mp3"
-    };
-
-    for (int i = 0; i < 12; ++i)
-    {
-        RemoveFromEnd(audioFilePath, extensionLength);
-        const wchar_t *format = FORMAT[i];
-        audioFilePath += format;
-        if (PathFileExists(audioFilePath))
-        {
-            audioFileNameFound += format;
-            cueContent.Replace(audioFileName, audioFileNameFound);
-            return;
-        }
-        extensionLength = wcslen(format);
-    }
-
-    // also guess from cue file name
-    WTL::CString audioFilePathImplicit(cueFilePath);
-    WTL::CString &audioFileNameImplicit = cueFilePath.Right(cueFilePath.GetLength() - cueFilePath.ReverseFind(L'\\') - 1);
-    //For first time, length is 4 (.cue)
-    extensionLength = 4;
-    RemoveFromEnd(audioFileNameImplicit, extensionLength);
-
-    for (int i = 0; i < 12; ++i)
-    {
-        RemoveFromEnd(audioFilePathImplicit, extensionLength);
-        const wchar_t *format = FORMAT[i];
-        audioFilePathImplicit += format;
-        if (PathFileExists(audioFilePathImplicit))
-        {
-            audioFileNameImplicit += format;
-            cueContent.Replace(audioFileName, audioFileNameImplicit);
-            return;
-        }
-        extensionLength = wcslen(format);
-    }
-
-    // no audio file found
-    return;
-}
-
-void CProcessDlg::fixTTAOutdatedTag(WTL::CString &cueContent)
-{
-    WTL::CString lowerStr(cueContent);
-    lowerStr.MakeLower();
-
-    int pos = lowerStr.Find(L"the true audio");
-    if (pos <= 0) return;
-    cueContent.Replace(cueContent.Mid(pos, 14), L"WAVE");
-}

@@ -75,7 +75,7 @@ LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
     getDlgItemsRelativePosition();
 
     // init C4 Context and load charmaps
-    m_context = new CC4Context(std::wstring(_Config.MapConfName), GetProcessFolder());
+    m_context = new CC4Context(std::wstring(_Config.MapConfName), Unicue::GetProcessFolder());
     if (!m_context->init())
         MessageBox(L"载入字符映射表失败！", _T("简繁转换"), MB_OK);
 
@@ -377,7 +377,7 @@ BOOL CMainDlg::DealFile()
     LeftEdit.SetWindowText(m_String);
     CComboBox &theCombo = (CComboBox)GetDlgItem(IDC_COMBO_SELECTCODE);
     WTL::CString encodeName;
-    getWindowText(theCombo, encodeName);
+    Unicue::GetWindowText(theCombo, encodeName);
     const CC4Encode *encode = m_context->getEncode((LPCTSTR)encodeName);
     if (encode)
     {
@@ -445,7 +445,7 @@ LRESULT CMainDlg::OnCbnSelchangeComboSelectcode(WORD, WORD, HWND, BOOL&)
 
     CEdit &RightEdit=(CEdit)GetDlgItem(IDC_EDIT_RIGHT);
     WTL::CString encodeName;
-    getWindowText(theCombo, encodeName);
+    Unicue::GetWindowText(theCombo, encodeName);
     const CC4Encode *encode = m_context->getEncode((LPCTSTR)encodeName);
     if (encode)
     {
@@ -473,7 +473,7 @@ LRESULT CMainDlg::OnCbnSelchangeComboSavecode(WORD, WORD, HWND, BOOL&)
     CComboBox &savingCombo = (CComboBox)GetDlgItem(IDC_COMBO_SAVECODE);
     // get saving encoding
     WTL::CString encoding;
-    getLBText(savingCombo, savingCombo.GetCurSel(), encoding);
+    Unicue::GetLBText(savingCombo, savingCombo.GetCurSel(), encoding);
     if (encoding == _T("UTF-8"))
         _Config.OutputEncoding = O_UTF_8;
     else if (encoding == _T("UTF-8 (NO BOM)"))

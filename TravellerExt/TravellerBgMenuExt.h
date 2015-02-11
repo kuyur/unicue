@@ -51,7 +51,7 @@ public:
         if (!hm)
             return E_FAIL;
         m_travellerPath += _T("\"");
-        m_travellerPath += GetProcessFolder(hm);
+        m_travellerPath += Unicue::GetProcessFolder(hm);
         m_travellerPath += _T("Traveller.exe\"");
 
         return S_OK;

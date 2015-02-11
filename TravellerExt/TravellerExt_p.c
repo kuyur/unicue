@@ -4,11 +4,11 @@
 
 
  /* File created by MIDL compiler version 7.00.0555 */
-/* at Tue Nov 18 18:41:25 2014
+/* at Wed Feb 11 08:10:08 2015
  */
 /* Compiler settings for TravellerExt.idl:
     Oicf, W1, Zp8, env=Win32 (32b run), target_arch=X86 7.00.0555 
-    protocol : dce , ms_ext, c_ext
+    protocol : dce , ms_ext, c_ext, robust
     error checks: allocation ref bounds_check enum stub_data 
     VC __declspec() decoration level: 
          __declspec(uuid()), __declspec(selectany), __declspec(novtable)
@@ -37,7 +37,7 @@
 
 /* verify that the <rpcproxy.h> version is high enough to compile this file*/
 #ifndef __REDQ_RPCPROXY_H_VERSION__
-#define __REQUIRED_RPCPROXY_H_VERSION__ 440
+#define __REQUIRED_RPCPROXY_H_VERSION__ 475
 #endif
 
 
@@ -102,9 +102,9 @@ extern const MIDL_STUBLESS_PROXY_INFO ITravellerBgMenuExt_ProxyInfo;
 #error  Invalid build platform for this stub.
 #endif
 
-#if !(TARGET_IS_NT40_OR_LATER)
-#error You need Windows NT 4.0 or later to run this stub because it uses these features:
-#error   -Oif or -Oicf.
+#if !(TARGET_IS_NT50_OR_LATER)
+#error You need Windows 2000 or later to run this stub because it uses these features:
+#error   /robust command line switch.
 #error However, your C/C++ compilation flags indicate you intend to run this app on earlier systems.
 #error This app will fail with the RPC_X_WRONG_STUB_VERSION error.
 #endif
@@ -281,7 +281,7 @@ static const MIDL_STUB_DESC Object_StubDesc =
     0,
     TravellerExt__MIDL_TypeFormatString.Format,
     1, /* -error bounds_check flag */
-    0x20000, /* Ndr library version */
+    0x50002, /* Ndr library version */
     0,
     0x700022b, /* MIDL Version 7.0.555 */
     0,

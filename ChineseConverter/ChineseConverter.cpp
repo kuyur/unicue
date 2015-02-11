@@ -59,19 +59,19 @@ void LoadConfig(const WTL::CString &configPath) {
     switch (_Config.Lang)
     {
     case EN:
-        SetThreadLocalSettings(LANG_ENGLISH, SUBLANG_ENGLISH_US);
+        Unicue::SetThreadLocalSettings(LANG_ENGLISH, SUBLANG_ENGLISH_US);
         break;
     case CHN:
-        SetThreadLocalSettings(LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED);
+        Unicue::SetThreadLocalSettings(LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED);
         break;
     case CHT:
-        SetThreadLocalSettings(LANG_CHINESE, SUBLANG_CHINESE_TRADITIONAL);
+        Unicue::SetThreadLocalSettings(LANG_CHINESE, SUBLANG_CHINESE_TRADITIONAL);
         break;
     case JPN:
-        SetThreadLocalSettings(LANG_JAPANESE, SUBLANG_JAPANESE_JAPAN);
+        Unicue::SetThreadLocalSettings(LANG_JAPANESE, SUBLANG_JAPANESE_JAPAN);
         break;
     default:
-        SetThreadLocalSettings(LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED);
+        Unicue::SetThreadLocalSettings(LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED);
     }
 }
 
@@ -120,7 +120,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR lp
     hRes = _Module.Init(NULL, hInstance);
     ATLASSERT(SUCCEEDED(hRes));
 
-    WTL::CString configPath(GetProcessFolder());
+    WTL::CString configPath(Unicue::GetProcessFolder());
     configPath += L"config-chnconverter.xml";
 
     int nRet = Run(configPath, lpstrCmdLine, nCmdShow);

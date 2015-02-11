@@ -23,7 +23,7 @@
 CMainDlg::CMainDlg()
     : m_configPath(L"")
 {
-    m_configPath += GetProcessFolder();
+    m_configPath += Unicue::GetProcessFolder();
     m_configPath += L"config-traveller.xml";
 }
 
@@ -124,13 +124,13 @@ LRESULT CMainDlg::OnBnClickedRegister(WORD, WORD, HWND, BOOL&)
     // copy dll file
     if (GetFileAttributes(_T("TravellerExt.dll")) == INVALID_FILE_ATTRIBUTES)
     {
-        WTL::CString dllPath(GetProcessFolder());
-        if (IsWow64())
+        WTL::CString dllPath(Unicue::GetProcessFolder());
+        if (Unicue::IsWow64())
             dllPath += _T("TravellerExt64.dll");
         else
             dllPath += _T("TravellerExt32.dll");
 
-        WTL::CString target(GetProcessFolder());
+        WTL::CString target(Unicue::GetProcessFolder());
         target += _T("TravellerExt.dll");
         bool success = CWinFile::CopyFile(dllPath, target);
         if (!success)
@@ -147,9 +147,9 @@ LRESULT CMainDlg::OnBnClickedRegister(WORD, WORD, HWND, BOOL&)
         
         /*
         if (IsWow64())
-            ShellExecute(NULL, _T("open"), _T("cmd"), _T("/c copy /Y TravellerExt64.dll TravellerExt.dll"), GetProcessFolder(), SW_HIDE);
+            ShellExecute(NULL, _T("open"), _T("cmd"), _T("/c copy /Y TravellerExt64.dll TravellerExt.dll"), Unicue::GetProcessFolder(), SW_HIDE);
         else
-            ShellExecute(NULL, _T("open"), _T("cmd"), _T("/c copy /Y TravellerExt32.dll TravellerExt.dll"), GetProcessFolder(), SW_HIDE);
+            ShellExecute(NULL, _T("open"), _T("cmd"), _T("/c copy /Y TravellerExt32.dll TravellerExt.dll"), Unicue::GetProcessFolder(), SW_HIDE);
         */
     }
 
@@ -158,7 +158,7 @@ LRESULT CMainDlg::OnBnClickedRegister(WORD, WORD, HWND, BOOL&)
     _tcscat_s(path, _T("\\RegSvr32.exe"));
 
     WTL::CString dll(L"\"");
-    dll += GetProcessFolder();
+    dll += Unicue::GetProcessFolder();
     dll += _T("TravellerExt.dll\"");
 
     ShellExecute(NULL, _T("open"), path, dll, NULL, SW_HIDE);
@@ -173,7 +173,7 @@ LRESULT CMainDlg::OnBnClickedUnregister(WORD, WORD, HWND, BOOL&)
     _tcscat_s(path, _T("\\RegSvr32.exe"));
 
     WTL::CString dll(L"/u \"");
-    dll += GetProcessFolder();
+    dll += Unicue::GetProcessFolder();
     dll += _T("TravellerExt.dll\"");
 
     ShellExecute(NULL, _T("open"), path, dll, NULL, SW_HIDE);

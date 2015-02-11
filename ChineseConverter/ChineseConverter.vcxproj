@@ -220,6 +220,7 @@
   <ItemGroup>
     <ClCompile Include="..\common\win32helper.cpp" />
     <ClCompile Include="..\common\winfile.cpp" />
+    <ClCompile Include="..\common\wtlhelper.cpp" />
     <ClCompile Include="ChineseConverter.cpp" />
     <ClCompile Include="config.cpp" />
     <ClCompile Include="MainDlg.cpp" />

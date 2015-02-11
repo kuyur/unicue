@@ -66,8 +66,6 @@ private:
     void getFileInfo(const WTL::CString &filePath, CFileInfo &fileInfo);
     BOOL backupFile(const WTL::CString &origPath, const char* buffer, UINT length);
     void processCueContent(WTL::CString &cueContent, const WTL::CString &cueFilePath);
-    void fixAudioExtension(WTL::CString &cueContent, const WTL::CString &cueFilePath);
-    void fixTTAOutdatedTag(WTL::CString &cueContent);
 public:
     enum { IDD = IDD_PROCESSDLG };
     CProcessDlg(void);

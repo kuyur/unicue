@@ -39,7 +39,7 @@ UINT ReplaceDumpChar(const char* src, char* dst, UINT length)
     if (length==0)
         return 0;
 
-    WTL::CString mapPath(GetProcessFolder());
+    WTL::CString mapPath(Unicue::GetProcessFolder());
     mapPath += _T("jis2u-little-endian.map");
 
     //加载映射表

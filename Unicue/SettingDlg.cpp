@@ -106,26 +106,26 @@ WTL::CString CSettingDlg::FindRegKey(LPCTSTR extension)
 LRESULT CSettingDlg::OnBnClickedSettingRegisterbutton(WORD, WORD, HWND, BOOL&)
 {
     WTL::CString PathValue("\"");
-    PathValue += GetProcessPath();
+    PathValue += Unicue::GetProcessPath();
     PathValue += _T("\" \"%1\"");
 
-    AddRegKey(HKEY_CLASSES_ROOT,_T(".uni"),_T(""),_T("UniCue.UNI"));                                    // [HKEY_CLASSES_ROOT\.uni], @="UniCue.UNI"
-    AddRegKey(HKEY_CLASSES_ROOT,_T("UniCue.UNI"),_T(""),getString(IDS_UNICUEFILETYPE));                 // [HKEY_CLASSES_ROOT\UniCue.UNI], @="UniCue 文件"
-    AddRegKey(HKEY_CLASSES_ROOT,_T("UniCue.UNI\\shell"),_T(""),_T("Open"));                             // [HKEY_CLASSES_ROOT\UniCue.UNI\shell], @="Open"
-    AddRegKey(HKEY_CLASSES_ROOT,_T("UniCue.UNI\\shell\\Open"),_T(""),getString(IDS_OPENBYUNICUE));      // [HKEY_CLASSES_ROOT\UniCue.UNI\shell\Open], @="使用 UniCue 打开"
-    AddRegKey(HKEY_CLASSES_ROOT,_T("UniCue.UNI\\shell\\Open\\command"),_T(""),(LPCTSTR)PathValue);      // [HKEY_CLASSES_ROOT\UniCue.UNI\shell\Open\command], @="\"AppPathName\" \"%1\""
-    AddRegKey(HKEY_CLASSES_ROOT,_T("UniCue.UNI\\shell\\unicue"),_T(""),getString(IDS_CONVERTBYUNICUE)); // [HKEY_CLASSES_ROOT\UniCue.UNI\shell\unicue], @="使用 UniCue 转换编码"
-    AddRegKey(HKEY_CLASSES_ROOT,_T("UniCue.UNI\\shell\\unicue\\command"),_T(""),(LPCTSTR)PathValue);    // [HKEY_CLASSES_ROOT\UniCue.UNI\shell\unicue\command], @="\"AppPathName\" \"%1\""
-    AddRegKey(HKEY_CLASSES_ROOT,_T("UniCue.CUE"),_T(""),getString(IDS_UNICUEFILETYPE));                 // [HKEY_CLASSES_ROOT\UniCue.CUE], @="UniCue 文件"
-    AddRegKey(HKEY_CLASSES_ROOT,_T("UniCue.CUE\\shell"),_T(""),_T("Open"));                             // [HKEY_CLASSES_ROOT\UniCue.CUE\shell], @="Open"
-    AddRegKey(HKEY_CLASSES_ROOT,_T("UniCue.CUE\\shell\\Open"),_T(""),getString(IDS_OPENBYUNICUE));      // [HKEY_CLASSES_ROOT\UniCue.CUE\shell\Open], @="使用 UniCue 打开"
-    AddRegKey(HKEY_CLASSES_ROOT,_T("UniCue.CUE\\shell\\Open\\command"),_T(""),(LPCTSTR)PathValue);      // [HKEY_CLASSES_ROOT\UniCue.CUE\shell\Open\command], @="\"AppPathName\" \"%1\""
-    AddRegKey(HKEY_CLASSES_ROOT,_T("UniCue.CUE\\shell\\unicue"),_T(""),getString(IDS_CONVERTBYUNICUE)); // [HKEY_CLASSES_ROOT\UniCue.CUE\shell\unicue], @="使用 UniCue 转换编码"
-    AddRegKey(HKEY_CLASSES_ROOT,_T("UniCue.CUE\\shell\\unicue\\command"),_T(""),(LPCTSTR)PathValue);    // [HKEY_CLASSES_ROOT\UniCue.CUE\shell\unicue\command], @="\"AppPathName\" \"%1\""
+    Unicue::AddRegKey(HKEY_CLASSES_ROOT,_T(".uni"),_T(""),_T("UniCue.UNI"));                                            // [HKEY_CLASSES_ROOT\.uni], @="UniCue.UNI"
+    Unicue::AddRegKey(HKEY_CLASSES_ROOT,_T("UniCue.UNI"),_T(""),Unicue::GetString(IDS_UNICUEFILETYPE));                 // [HKEY_CLASSES_ROOT\UniCue.UNI], @="UniCue 文件"
+    Unicue::AddRegKey(HKEY_CLASSES_ROOT,_T("UniCue.UNI\\shell"),_T(""),_T("Open"));                                     // [HKEY_CLASSES_ROOT\UniCue.UNI\shell], @="Open"
+    Unicue::AddRegKey(HKEY_CLASSES_ROOT,_T("UniCue.UNI\\shell\\Open"),_T(""),Unicue::GetString(IDS_OPENBYUNICUE));      // [HKEY_CLASSES_ROOT\UniCue.UNI\shell\Open], @="使用 UniCue 打开"
+    Unicue::AddRegKey(HKEY_CLASSES_ROOT,_T("UniCue.UNI\\shell\\Open\\command"),_T(""),(LPCTSTR)PathValue);              // [HKEY_CLASSES_ROOT\UniCue.UNI\shell\Open\command], @="\"AppPathName\" \"%1\""
+    Unicue::AddRegKey(HKEY_CLASSES_ROOT,_T("UniCue.UNI\\shell\\unicue"),_T(""),Unicue::GetString(IDS_CONVERTBYUNICUE)); // [HKEY_CLASSES_ROOT\UniCue.UNI\shell\unicue], @="使用 UniCue 转换编码"
+    Unicue::AddRegKey(HKEY_CLASSES_ROOT,_T("UniCue.UNI\\shell\\unicue\\command"),_T(""),(LPCTSTR)PathValue);            // [HKEY_CLASSES_ROOT\UniCue.UNI\shell\unicue\command], @="\"AppPathName\" \"%1\""
+    Unicue::AddRegKey(HKEY_CLASSES_ROOT,_T("UniCue.CUE"),_T(""),Unicue::GetString(IDS_UNICUEFILETYPE));                 // [HKEY_CLASSES_ROOT\UniCue.CUE], @="UniCue 文件"
+    Unicue::AddRegKey(HKEY_CLASSES_ROOT,_T("UniCue.CUE\\shell"),_T(""),_T("Open"));                                     // [HKEY_CLASSES_ROOT\UniCue.CUE\shell], @="Open"
+    Unicue::AddRegKey(HKEY_CLASSES_ROOT,_T("UniCue.CUE\\shell\\Open"),_T(""),Unicue::GetString(IDS_OPENBYUNICUE));      // [HKEY_CLASSES_ROOT\UniCue.CUE\shell\Open], @="使用 UniCue 打开"
+    Unicue::AddRegKey(HKEY_CLASSES_ROOT,_T("UniCue.CUE\\shell\\Open\\command"),_T(""),(LPCTSTR)PathValue);              // [HKEY_CLASSES_ROOT\UniCue.CUE\shell\Open\command], @="\"AppPathName\" \"%1\""
+    Unicue::AddRegKey(HKEY_CLASSES_ROOT,_T("UniCue.CUE\\shell\\unicue"),_T(""),Unicue::GetString(IDS_CONVERTBYUNICUE)); // [HKEY_CLASSES_ROOT\UniCue.CUE\shell\unicue], @="使用 UniCue 转换编码"
+    Unicue::AddRegKey(HKEY_CLASSES_ROOT,_T("UniCue.CUE\\shell\\unicue\\command"),_T(""),(LPCTSTR)PathValue);            // [HKEY_CLASSES_ROOT\UniCue.CUE\shell\unicue\command], @="\"AppPathName\" \"%1\""
 
     // 注册到txtfile类型 (log/没有改变默认注册信息的txt)
-    AddRegKey(HKEY_CLASSES_ROOT,_T("txtfile\\shell\\unicue"),_T(""),getString(IDS_CONVERTBYUNICUE));    // [HKEY_CLASSES_ROOT\txtfile\shell\unicue], @="使用 UniCue 转换编码"
-    AddRegKey(HKEY_CLASSES_ROOT,_T("txtfile\\shell\\unicue\\command"),_T(""),(LPCTSTR)PathValue);       // [HKEY_CLASSES_ROOT\txtfile\shell\unicue\command], @="\"AppPathName\" \"%1\""
+    Unicue::AddRegKey(HKEY_CLASSES_ROOT,_T("txtfile\\shell\\unicue"),_T(""),Unicue::GetString(IDS_CONVERTBYUNICUE));    // [HKEY_CLASSES_ROOT\txtfile\shell\unicue], @="使用 UniCue 转换编码"
+    Unicue::AddRegKey(HKEY_CLASSES_ROOT,_T("txtfile\\shell\\unicue\\command"),_T(""),(LPCTSTR)PathValue);               // [HKEY_CLASSES_ROOT\txtfile\shell\unicue\command], @="\"AppPathName\" \"%1\""
 
     // 查找txt文件的真正注册类型, 假定txt已经关联到Notepad++_file
     WTL::CString &txtKey = FindRegKey(L".txt");
@@ -135,14 +135,14 @@ LRESULT CSettingDlg::OnBnClickedSettingRegisterbutton(WORD, WORD, HWND, BOOL&)
         {
             WTL::CString txtKeyPath(txtKey);
             txtKeyPath += _T("\\shell\\unicue");
-            AddRegKey(HKEY_CLASSES_ROOT, (LPCTSTR)txtKeyPath, _T(""), getString(IDS_CONVERTBYUNICUE));  // [HKEY_CLASSES_ROOT\Notepad++_file\shell\unicue], @="使用 UniCue 转换编码"
+            Unicue::AddRegKey(HKEY_CLASSES_ROOT, (LPCTSTR)txtKeyPath, _T(""), Unicue::GetString(IDS_CONVERTBYUNICUE));  // [HKEY_CLASSES_ROOT\Notepad++_file\shell\unicue], @="使用 UniCue 转换编码"
             txtKeyPath += _T("\\command");
-            AddRegKey(HKEY_CLASSES_ROOT, (LPCTSTR)txtKeyPath, _T(""), (LPCTSTR)PathValue);              // [HKEY_CLASSES_ROOT\Notepad++_file\shell\unicue\command], @="\"AppPathName\" \"%1\""
+            Unicue::AddRegKey(HKEY_CLASSES_ROOT, (LPCTSTR)txtKeyPath, _T(""), (LPCTSTR)PathValue);              // [HKEY_CLASSES_ROOT\Notepad++_file\shell\unicue\command], @="\"AppPathName\" \"%1\""
         }
     }
     else
     {
-        AddRegKey(HKEY_CLASSES_ROOT,_T(".txt"),_T(""),_T("UniCue.UNI"));                                // [HKEY_CLASSES_ROOT\.txt], @="UniCue.UNI"
+        Unicue::AddRegKey(HKEY_CLASSES_ROOT,_T(".txt"),_T(""),_T("UniCue.UNI"));                                // [HKEY_CLASSES_ROOT\.txt], @="UniCue.UNI"
     }
 
     // 查找cue文件的注册类型, 假定cue已经关联到foobar2000.CUE
@@ -153,32 +153,32 @@ LRESULT CSettingDlg::OnBnClickedSettingRegisterbutton(WORD, WORD, HWND, BOOL&)
         temp.MakeLower();
         if (temp == L"unicue.uni") /* 历史遗存 */
         {
-            AddRegKey(HKEY_CLASSES_ROOT, _T(".cue"), _T(""), _T("UniCue.CUE"));
+            Unicue::AddRegKey(HKEY_CLASSES_ROOT, _T(".cue"), _T(""), _T("UniCue.CUE"));
         }
         else if (temp != L"unicue.cue")
         {
             WTL::CString cueKeyPath(cueKey);
             cueKeyPath += _T("\\shell\\unicue");
-            AddRegKey(HKEY_CLASSES_ROOT, (LPCTSTR)cueKeyPath, _T(""), getString(IDS_CONVERTBYUNICUE));  // [HKEY_CLASSES_ROOT\foobar2000.CUE\shell\unicue], @="使用 UniCue 转换编码"
+            Unicue::AddRegKey(HKEY_CLASSES_ROOT, (LPCTSTR)cueKeyPath, _T(""), Unicue::GetString(IDS_CONVERTBYUNICUE));  // [HKEY_CLASSES_ROOT\foobar2000.CUE\shell\unicue], @="使用 UniCue 转换编码"
             cueKeyPath += _T("\\command");
-            AddRegKey(HKEY_CLASSES_ROOT, (LPCTSTR)cueKeyPath, _T(""), (LPCTSTR)PathValue);              // [HKEY_CLASSES_ROOT\foobar2000.CUE\shell\unicue\command], @="\"AppPathName\" \"%1\""
+            Unicue::AddRegKey(HKEY_CLASSES_ROOT, (LPCTSTR)cueKeyPath, _T(""), (LPCTSTR)PathValue);              // [HKEY_CLASSES_ROOT\foobar2000.CUE\shell\unicue\command], @="\"AppPathName\" \"%1\""
         }
     }
     else
     {
-        AddRegKey(HKEY_CLASSES_ROOT, _T(".cue"), _T(""), _T("UniCue.CUE"));                             // [HKEY_CLASSES_ROOT\.cue], @="UniCue.CUE"
+        Unicue::AddRegKey(HKEY_CLASSES_ROOT, _T(".cue"), _T(""), _T("UniCue.CUE"));                             // [HKEY_CLASSES_ROOT\.cue], @="UniCue.CUE"
     }
 
-    AddRegKey(HKEY_CLASSES_ROOT,_T("Applications\\Unicue.exe\\shell\\open\\command"),_T(""),(LPCTSTR)PathValue); // [HKEY_CLASSES_ROOT\Applications\Unicue.exe\shell\open\command], @="\"AppPathName\" \"%1\""
+    Unicue::AddRegKey(HKEY_CLASSES_ROOT,_T("Applications\\Unicue.exe\\shell\\open\\command"),_T(""),(LPCTSTR)PathValue); // [HKEY_CLASSES_ROOT\Applications\Unicue.exe\shell\open\command], @="\"AppPathName\" \"%1\""
 
     // icon
-    WTL::CString uniIco(GetProcessFolder());
-    WTL::CString cueIco(GetProcessFolder());
+    WTL::CString uniIco(Unicue::GetProcessFolder());
+    WTL::CString cueIco(Unicue::GetProcessFolder());
     uniIco += _T("icons\\uni.ico");
     cueIco += _T("icons\\cue.ico");
 
-    AddRegKey(HKEY_CLASSES_ROOT,_T("UniCue.UNI\\DefaultIcon"),_T(""),(LPCTSTR)uniIco);                  // [HKEY_CLASSES_ROOT\UniCue.UNI\DefaultIcon], @="AppFolder\\icons\\uni.ico"
-    AddRegKey(HKEY_CLASSES_ROOT,_T("UniCue.CUE\\DefaultIcon"),_T(""),(LPCTSTR)cueIco);                  // [HKEY_CLASSES_ROOT\UniCue.CUE\DefaultIcon], @="AppFolder\\icons\\cue.ico"
+    Unicue::AddRegKey(HKEY_CLASSES_ROOT,_T("UniCue.UNI\\DefaultIcon"),_T(""),(LPCTSTR)uniIco);                  // [HKEY_CLASSES_ROOT\UniCue.UNI\DefaultIcon], @="AppFolder\\icons\\uni.ico"
+    Unicue::AddRegKey(HKEY_CLASSES_ROOT,_T("UniCue.CUE\\DefaultIcon"),_T(""),(LPCTSTR)cueIco);                  // [HKEY_CLASSES_ROOT\UniCue.CUE\DefaultIcon], @="AppFolder\\icons\\cue.ico"
 
     // 刷新shell的图标缓存
     SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, 0, 0);
@@ -222,7 +222,7 @@ LRESULT CSettingDlg::OnBnClickedSettingUnregisterbutton(WORD, WORD, HWND, BOOL&)
     lower.MakeLower();
     if (lower == L"unicue.uni")
     {
-        AddRegKey(HKEY_CLASSES_ROOT,_T(".txt"),_T(""),_T("txtfile"));
+        Unicue::AddRegKey(HKEY_CLASSES_ROOT,_T(".txt"),_T(""),_T("txtfile"));
     }
     else
     {
@@ -262,10 +262,10 @@ LRESULT CSettingDlg::OnBnClickedTxtutf8Button(WORD, WORD, HWND, BOOL&)
     if (RegOpenKeyEx(HKEY_CLASSES_ROOT,_T(".txt\\ShellNew"),0L,KEY_ALL_ACCESS,&hKey)==ERROR_SUCCESS)
         RegDeleteValue(hKey,_T("NullFile"));
 
-    WTL::CString PathValue(GetProcessFolder());
+    WTL::CString PathValue(Unicue::GetProcessFolder());
     PathValue += _T("null.uni");
     /* [HKEY_CLASSES_ROOT\.txt\ShellNew], "FileName"="AppFolder\\null.uni" */
-    AddRegKey(HKEY_CLASSES_ROOT,_T(".txt\\ShellNew"),_T("FileName"),(LPCTSTR)PathValue);
+    Unicue::AddRegKey(HKEY_CLASSES_ROOT,_T(".txt\\ShellNew"),_T("FileName"),(LPCTSTR)PathValue);
 
     return 0;
 }
@@ -276,7 +276,7 @@ LRESULT CSettingDlg::OnBnClickedTxtoldstyleButton(WORD, WORD, HWND, BOOL&)
     if (RegOpenKeyEx(HKEY_CLASSES_ROOT,_T(".txt\\ShellNew"),0L,KEY_ALL_ACCESS,&hKey)==ERROR_SUCCESS)
         RegDeleteValue(hKey,_T("FileName"));
 
-    AddRegKey(HKEY_CLASSES_ROOT,_T(".txt\\ShellNew"),_T("NullFile"),_T(""));
+    Unicue::AddRegKey(HKEY_CLASSES_ROOT,_T(".txt\\ShellNew"),_T("NullFile"),_T(""));
 
     return 0;
 }

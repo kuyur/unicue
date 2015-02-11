@@ -82,7 +82,7 @@ public:
         if (!hm)
             return E_FAIL;
         m_travellerPath += _T("\"");
-        m_travellerPath += GetProcessFolder(hm);
+        m_travellerPath += Unicue::GetProcessFolder(hm);
         m_travellerPath += _T("Traveller.exe\"");
 
         m_hBitmap = NULL;/*LoadBitmap(_hInstance, MAKEINTRESOURCE(IDB_MENU));*/

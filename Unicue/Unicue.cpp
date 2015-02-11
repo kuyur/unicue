@@ -21,6 +21,7 @@
 #include "../common/winfile.h"
 #include "../common/wtlhelper.h"
 #include "../common/cmdline.h"
+#include "../common/unicuehelper.h"
 #include "config.h"
 #include "MainDlg.h"
 #include "AboutDlg.h"
@@ -66,32 +67,40 @@ void LoadConfig(const WTL::CString &configPath)
     switch (_Config.Lang)
     {
     case EN:
-        SetThreadLocalSettings(LANG_ENGLISH, SUBLANG_ENGLISH_US);
+        Unicue::SetThreadLocalSettings(LANG_ENGLISH, SUBLANG_ENGLISH_US);
         break;
     case CHN:
-        SetThreadLocalSettings(LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED);
+        Unicue::SetThreadLocalSettings(LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED);
         break;
     case CHT:
-        SetThreadLocalSettings(LANG_CHINESE, SUBLANG_CHINESE_TRADITIONAL);
+        Unicue::SetThreadLocalSettings(LANG_CHINESE, SUBLANG_CHINESE_TRADITIONAL);
         break;
     case JPN:
-        SetThreadLocalSettings(LANG_JAPANESE, SUBLANG_JAPANESE_JAPAN);
+        Unicue::SetThreadLocalSettings(LANG_JAPANESE, SUBLANG_JAPANESE_JAPAN);
         break;
     default:
-        SetThreadLocalSettings(LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED);
+        Unicue::SetThreadLocalSettings(LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED);
     }
 }
 
-bool SaveFile(const WTL::CString &outputFilePath, const wchar_t* unicodeString, int length, bool reallyOverwrite)
+bool SaveFile(const WTL::CString &outputFilePath, const wchar_t* unicodeString, int length, bool reallyOverwrite, bool fixCue)
 {
     CWinFile file(outputFilePath, CWinFile::openCreateAlways|CWinFile::modeWrite|CWinFile::shareExclusive);
     if (!file.open())
     {
-        WTL::CString &errorMessage = getString(IDS_READFAILED);
+        WTL::CString &errorMessage = Unicue::GetString(IDS_READFAILED);
         errorMessage += L" path=";
         errorMessage += outputFilePath;
         MessageBox(NULL, errorMessage, _T("Unicue"), MB_OK);
         return false;
+    }
+
+    WTL::CString fixed_string(L"");
+    if (fixCue)
+    {
+        fixed_string += unicodeString;
+        if (_Config.AutoFixTTA) Unicue::FixTTAOutdatedTag(fixed_string);
+        if (_Config.AutoFixCue) Unicue::FixAudioFilePath(outputFilePath, fixed_string);
     }
 
     OUTPUT_ENCODING outputEncoding = _Config.OutputEncoding;
@@ -121,23 +130,26 @@ bool SaveFile(const WTL::CString &outputFilePath, const wchar_t* unicodeString, 
         CWinFile::CopyFile(outputFilePath, backupFilePath);
     }
 
+    const wchar_t* target = fixed_string.IsEmpty() ? unicodeString : fixed_string;
+    int target_length = fixed_string.IsEmpty() ? length : fixed_string.GetLength();
+
     switch (outputEncoding)
     {
     case O_UTF_8_NOBOM:
         {
-            std::string &utf8str = CC4EncodeUTF16::convert2utf8(unicodeString, length);
+            std::string &utf8str = CC4EncodeUTF16::convert2utf8(target, target_length);
             file.write(utf8str.c_str(), utf8str.length());
         }
         break;
     case O_UTF_16_LE:
         file.write(CC4Encode::LITTLEENDIAN_BOM, 2);
-        file.write((const char*)unicodeString, length * sizeof(wchar_t));
+        file.write((const char*)target, target_length * sizeof(wchar_t));
         break;
     case O_UTF_16_BE:
         file.write(CC4Encode::BIGENDIAN_BOM, 2);
-        for (int i = 0; i < length; ++i)
+        for (int i = 0; i < target_length; ++i)
         {
-            const wchar_t *chr = unicodeString + i;
+            const wchar_t *chr = target + i;
             file.write(((char*)(chr)) + 1, 1);
             file.write((char*)(chr), 1);
         }
@@ -145,7 +157,7 @@ bool SaveFile(const WTL::CString &outputFilePath, const wchar_t* unicodeString, 
     case O_UTF_8:
     default:
         {
-            std::string &utf8str = CC4EncodeUTF16::convert2utf8(unicodeString, length);
+            std::string &utf8str = CC4EncodeUTF16::convert2utf8(target, target_length);
             file.write(CC4Encode::UTF_8_BOM, 3);
             file.write(utf8str.c_str(), utf8str.length());
         }
@@ -162,8 +174,57 @@ int RunSilent(const WTL::CString &inputFilePath)
     if (NULL != _CommandLine)
     {
         WTL::CString errorMessage(L"");
+        // init C4 Context and load charmaps
+        CC4Context* c4context = new CC4Context(std::wstring(_Config.MapConfName), Unicue::GetProcessFolder());
+        if (!c4context->init())
+        {
+            errorMessage += Unicue::GetString(IDS_FAILEDTOLOAD);
+            errorMessage += c4context->getLastErrorMessage();
+            MessageBoxW(NULL, errorMessage, L"Unicue", MB_OK);
+            delete c4context;
+            return 1;
+        }
+
+        bool extract_internal_cue = false;
+        WTL::CString incue_content(L"");
+        WTL::CString &extension_name = inputFilePath.Right(inputFilePath.GetLength() - inputFilePath.ReverseFind('.') - 1);
+        extension_name.MakeLower();
+        if ((extension_name.Compare(L"tak") == 0 ) ||
+            (extension_name.Compare(L"flac") == 0) ||
+            (extension_name.Compare(L"ape") == 0))
+        {
+            if (_Config.AcceptDragAudioFile)
+            {
+                extract_internal_cue = true;
+                int cue_rawcontent_length = 0;
+                bool result = false;
+                if (extension_name == _T("flac"))
+                    result = Unicue::ExtractFlacInternalCue(inputFilePath, incue_content, cue_rawcontent_length);
+                else
+                    result = Unicue::ExtractTakInternalCue(inputFilePath, incue_content, cue_rawcontent_length);
+                if (result)
+                {
+                    Unicue::FixInternalCue(inputFilePath, incue_content);
+                }
+                else
+                {
+                    errorMessage += Unicue::GetString(IDS_OPENFAILED);
+                    errorMessage += L" path=";
+                    errorMessage += inputFilePath;
+                    MessageBoxW(NULL, errorMessage, L"Unicue", MB_OK);
+                    delete c4context;
+                    return 1;
+                }
+            }
+        }
+
         WTL::CString outputFilePath(L"");
-        if (_CommandLine->hasToken(L"-o"))
+        if (extract_internal_cue)
+        {
+            outputFilePath += inputFilePath;
+            outputFilePath += L".cue";
+        }
+        else if (_CommandLine->hasToken(L"-o"))
             outputFilePath = _CommandLine->getParamValue(L"-o");
         else if (_CommandLine->hasToken(L"--output"))
             outputFilePath = _CommandLine->getParamValue(L"--output");
@@ -185,22 +246,19 @@ int RunSilent(const WTL::CString &inputFilePath)
             }
         }
 
-        // init C4 Context and load charmaps
-        CC4Context* c4context = new CC4Context(std::wstring(_Config.MapConfName), GetProcessFolder());
-        if (!c4context->init())
+        if (extract_internal_cue)
         {
-            errorMessage += getString(IDS_FAILEDTOLOAD);
-            errorMessage += c4context->getLastErrorMessage();
-            MessageBoxW(NULL, errorMessage, L"Unicue", MB_OK);
+            SaveFile(outputFilePath, incue_content, incue_content.GetLength(), false, false);
             delete c4context;
-            return 1;
+            return 0;
         }
 
+        WTL::CString &output_extension_name = outputFilePath.Right(outputFilePath.GetLength() - outputFilePath.ReverseFind('.') - 1);
         // read input file
         CWinFile openFile(inputFilePath, CWinFile::modeRead | CWinFile::openOnly | CWinFile::shareDenyWrite);
         if (!openFile.open())
         {
-            errorMessage += getString(IDS_READFAILED);
+            errorMessage += Unicue::GetString(IDS_READFAILED);
             errorMessage += L" path=";
             errorMessage += inputFilePath;
             MessageBoxW(NULL, errorMessage, L"Unicue", MB_OK);
@@ -214,7 +272,7 @@ int RunSilent(const WTL::CString &inputFilePath)
         if (openFile.read(rawString, length) == (DWORD)-1)
         {
             openFile.close();
-            errorMessage += getString(IDS_CORRUPTFILE);
+            errorMessage += Unicue::GetString(IDS_CORRUPTFILE);
             errorMessage += L" path=";
             errorMessage += inputFilePath;
             MessageBoxW(NULL, errorMessage, L"Unicue", MB_OK);
@@ -230,7 +288,7 @@ int RunSilent(const WTL::CString &inputFilePath)
         {
             if ((length & 1) != 0)
             {
-                errorMessage += getString(IDS_CORRUPTFILE);
+                errorMessage += Unicue::GetString(IDS_CORRUPTFILE);
                 errorMessage += L" path=";
                 errorMessage += inputFilePath;
                 MessageBoxW(NULL, errorMessage, L"Unicue", MB_OK);
@@ -250,7 +308,7 @@ int RunSilent(const WTL::CString &inputFilePath)
                 convertBEtoLE(unicodeString, unicodeLength);
 
             // save file
-            SaveFile(outputFilePath, unicodeString, unicodeLength, reallyOverwrite);
+            SaveFile(outputFilePath, unicodeString, unicodeLength, reallyOverwrite, extension_name == L"cue");
             delete []rawString;
             delete []unicodeString;
             delete c4context;
@@ -263,7 +321,7 @@ int RunSilent(const WTL::CString &inputFilePath)
             // UTF-8(with BOM)
             std::wstring &unicodeString = CC4EncodeUTF8::convert2unicode(rawString + 3, length -3);
             // save file
-            SaveFile(outputFilePath, unicodeString.c_str(), unicodeString.length(), reallyOverwrite);
+            SaveFile(outputFilePath, unicodeString.c_str(), unicodeString.length(), reallyOverwrite, extension_name == L"cue");
             delete []rawString;
             delete c4context;
             return 0;
@@ -285,13 +343,13 @@ int RunSilent(const WTL::CString &inputFilePath)
             {
                 std::wstring &unicodeString = encode->wconvertText(rawString, length);
                 // save file
-                SaveFile(outputFilePath, unicodeString.c_str(), unicodeString.length(), reallyOverwrite);
+                SaveFile(outputFilePath, unicodeString.c_str(), unicodeString.length(), reallyOverwrite, extension_name == L"cue");
             }
             else if (_Config.SilentModeForceConvert)
             {
-                std::wstring &unicodeString = msConvert(rawString);
+                std::wstring &unicodeString = Unicue::msConvert(rawString);
                 // save file
-                SaveFile(outputFilePath, unicodeString.c_str(), unicodeString.length(), reallyOverwrite);
+                SaveFile(outputFilePath, unicodeString.c_str(), unicodeString.length(), reallyOverwrite, extension_name == L"cue");
             }
 
             delete []rawString;
@@ -350,7 +408,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR lp
         configFileName = _CommandLine->getParamValue(L"-c");
     else if (_CommandLine->hasToken(L"--config"))
         configFileName = _CommandLine->getParamValue(L"--config");
-    WTL::CString configPath(GetProcessFolder());
+    WTL::CString configPath(Unicue::GetProcessFolder());
     if (NULL != configFileName)
         configPath += configFileName;
     else

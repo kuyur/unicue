@@ -237,8 +237,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\common\cmdline.cpp" />
+    <ClCompile Include="..\common\unicuehelper.cpp" />
     <ClCompile Include="..\common\win32helper.cpp" />
     <ClCompile Include="..\common\winfile.cpp" />
+    <ClCompile Include="..\common\wtlhelper.cpp" />
     <ClCompile Include="AboutDlg.cpp" />
     <ClCompile Include="config.cpp" />
     <ClCompile Include="MainDlg.cpp" />
@@ -259,6 +261,7 @@
     <ClInclude Include="..\c4-lib\c4segment.h" />
     <ClInclude Include="..\c4-lib\tinyxml.h" />
     <ClInclude Include="..\common\cmdline.h" />
+    <ClInclude Include="..\common\unicuehelper.h" />
     <ClInclude Include="..\common\win32helper.h" />
     <ClInclude Include="..\common\utils.h" />
     <ClInclude Include="..\common\winfile.h" />
