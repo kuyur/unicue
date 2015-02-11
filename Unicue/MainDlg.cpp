@@ -862,13 +862,14 @@ void CMainDlg::FixCue()
     WTL::CString cueContent(L"");
     Unicue::GetWindowText(GetDlgItem(IDC_EDIT_UNICODE), cueContent);
     Unicue::FixTTAOutdatedTag(cueContent);
-    if (Unicue::FixAudioFilePath(m_FilePathName, cueContent))
+    bool cue_file_has_error = false;
+    if (Unicue::FixAudioFilePath(m_FilePathName, cueContent, cue_file_has_error))
     {
         GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(cueContent);
     }
-    else 
+    else
     {
-        if (!_Config.CloseCuePrompt) MessageBox(Unicue::GetString(IDS_CORRUPTCUE));
+        if (cue_file_has_error && !_Config.CloseCuePrompt) MessageBox(Unicue::GetString(IDS_CORRUPTCUE));
     }
 }
 
@@ -876,13 +877,14 @@ void CMainDlg::FixInternalCue(WTL::CString AudioFileName)
 {
     WTL::CString CueString;
     Unicue::GetWindowText(GetDlgItem(IDC_EDIT_UNICODE), CueString);
-    if (Unicue::FixInternalCue(AudioFileName, CueString))
+    bool cue_file_has_error = false;
+    if (Unicue::FixInternalCue(AudioFileName, CueString, cue_file_has_error))
     {
         GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(CueString);
     }
     else
     {
-        if (!_Config.CloseCuePrompt) MessageBox(Unicue::GetString(IDS_CORRUPTCUE));
+        if (cue_file_has_error && !_Config.CloseCuePrompt) MessageBox(Unicue::GetString(IDS_CORRUPTCUE));
     }
 }
 

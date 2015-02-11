@@ -100,7 +100,8 @@ bool SaveFile(const WTL::CString &outputFilePath, const wchar_t* unicodeString, 
     {
         fixed_string += unicodeString;
         if (_Config.AutoFixTTA) Unicue::FixTTAOutdatedTag(fixed_string);
-        if (_Config.AutoFixCue) Unicue::FixAudioFilePath(outputFilePath, fixed_string);
+        bool cue_file_has_error = false;
+        if (_Config.AutoFixCue) Unicue::FixAudioFilePath(outputFilePath, fixed_string, cue_file_has_error);
     }
 
     OUTPUT_ENCODING outputEncoding = _Config.OutputEncoding;
@@ -204,7 +205,8 @@ int RunSilent(const WTL::CString &inputFilePath)
                     result = Unicue::ExtractTakInternalCue(inputFilePath, incue_content, cue_rawcontent_length);
                 if (result)
                 {
-                    Unicue::FixInternalCue(inputFilePath, incue_content);
+                    bool cue_file_has_error = false;
+                    Unicue::FixInternalCue(inputFilePath, incue_content, cue_file_has_error);
                 }
                 else
                 {

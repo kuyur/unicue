@@ -560,7 +560,8 @@ void CProcessDlg::processCueContent(WTL::CString &cueContent, const WTL::CString
     if (m_config.isAutoFixCueError)
     {
         Unicue::FixTTAOutdatedTag(cueContent);
-        Unicue::FixAudioFilePath(cueFilePath, cueContent);
+        bool cue_file_has_error = false;
+        Unicue::FixAudioFilePath(cueFilePath, cueContent, cue_file_has_error);
     }
 }
 

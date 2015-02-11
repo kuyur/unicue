@@ -22,9 +22,9 @@
 namespace Unicue {
 bool FixTTAOutdatedTag(WTL::CString &cue_string);
 bool FixTTAOutdatedTag(const WTL::CString &cue_string, WTL::CString &fixed_string);
-bool FixAudioFilePath(const WTL::CString &cue_file_path, WTL::CString &cue_string);
-bool FixAudioFilePath(const WTL::CString &cue_file_path, const WTL::CString &cue_string, WTL::CString &fixed_string);
-bool FixInternalCue(const WTL::CString &audio_file_path, WTL::CString &cue_string);
+bool FixAudioFilePath(const WTL::CString &cue_file_path, WTL::CString &cue_string, bool &cue_file_error);
+bool FixAudioFilePath(const WTL::CString &cue_file_path, const WTL::CString &cue_string, WTL::CString &fixed_string, bool &cue_file_error);
+bool FixInternalCue(const WTL::CString &audio_file_path, WTL::CString &cue_string, bool &cue_file_error);
 bool ExtractTakInternalCue(const WTL::CString &audio_file_path, WTL::CString &cue_string, int &cue_rawstring_length);
 bool ExtractFlacInternalCue(const WTL::CString &audio_file_path, WTL::CString &cue_string, int &cue_rawstring_length);
 };
