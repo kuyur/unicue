@@ -47,6 +47,9 @@ public:
         DDX_CHECK(IDC_SETTING_REPLACECHECK, m_Config.AutoFixTTA)
         DDX_CHECK(IDC_SETTING_INCUECHECK, m_Config.AcceptDragAudioFile)
         DDX_CHECK(IDC_SETTING_CLOSEPROMPTCHECK, m_Config.CloseCuePrompt)
+        DDX_CHECK(IDC_SETTING_S_OVERWRITECHECK, m_Config.SilentModeOverwrite)
+        DDX_CHECK(IDC_SETTING_S_BACKUPCHECK, m_Config.SilentModeBackup)
+        DDX_CHECK(IDC_SETTING_S_FORCECONVERTCHECK, m_Config.SilentModeForceConvert)
         DDX_TEXT(IDC_EDIT_MAPCONF, m_Config.MapConfName)
         DDX_COMBO_INDEX(IDC_SETTING_LANGCOMBO, m_nLangIndex);
     END_DDX_MAP()
