@@ -85,6 +85,21 @@ void LoadConfig(const WTL::CString &configPath)
 
 bool SaveFile(const WTL::CString &outputFilePath, const wchar_t* unicodeString, int length, bool reallyOverwrite, bool fixCue)
 {
+    // backup first
+    if (reallyOverwrite && _Config.SilentModeBackup)
+    {
+        WTL::CString backupFilePath(outputFilePath);
+        backupFilePath += L".bak";
+        if (!CWinFile::CopyFile(outputFilePath, backupFilePath))
+        {
+            WTL::CString &errorMessage = Unicue::GetString(IDS_BACKUPFAILED);
+            errorMessage += L" path=";
+            errorMessage += outputFilePath;
+            MessageBox(NULL, errorMessage, _T("Unicue"), MB_OK);
+            return false;
+        }
+    }
+
     CWinFile file(outputFilePath, CWinFile::openCreateAlways|CWinFile::modeWrite|CWinFile::shareExclusive);
     if (!file.open())
     {
@@ -121,14 +136,6 @@ bool SaveFile(const WTL::CString &outputFilePath, const wchar_t* unicodeString, 
             else if (wcscmp(code, L"utf-16-be") == 0)
                 outputEncoding = O_UTF_16_BE;
         }
-    }
-
-    // backup
-    if (reallyOverwrite && _Config.SilentModeBackup)
-    {
-        WTL::CString backupFilePath(outputFilePath);
-        backupFilePath += L".bak";
-        CWinFile::CopyFile(outputFilePath, backupFilePath);
     }
 
     const wchar_t* target = fixed_string.IsEmpty() ? unicodeString : fixed_string;
