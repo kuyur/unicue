@@ -83,7 +83,7 @@ void LoadConfig(const WTL::CString &configPath)
     }
 }
 
-bool SaveFile(const WTL::CString &outputFilePath, const wchar_t* unicodeString, int length, bool reallyOverwrite, bool fixCue)
+bool SaveFile(const WTL::CString &outputFilePath, const wchar_t* unicodeString, int length, OUTPUT_ENCODING output_encoding, bool reallyOverwrite, bool fixCue)
 {
     // backup first
     if (reallyOverwrite && _Config.SilentModeBackup)
@@ -119,29 +119,10 @@ bool SaveFile(const WTL::CString &outputFilePath, const wchar_t* unicodeString, 
         if (_Config.AutoFixCue) Unicue::FixAudioFilePath(outputFilePath, fixed_string, cue_file_has_error);
     }
 
-    OUTPUT_ENCODING outputEncoding = _Config.OutputEncoding;
-    if (_CommandLine->hasToken(L"--outencoding"))
-    {
-        const wchar_t* code = _CommandLine->getParamValue(L"--outencoding");
-        if (NULL != code)
-        {
-            if (wcscmp(code, L"utf-8") == 0)
-                outputEncoding = O_UTF_8;
-            else if (wcscmp(code, L"utf-8-nobom") == 0)
-                outputEncoding = O_UTF_8_NOBOM;
-            else if (wcscmp(code, L"utf-16") == 0)
-                outputEncoding = O_UTF_16_LE;
-            else if (wcscmp(code, L"utf-16-le") == 0)
-                outputEncoding = O_UTF_16_LE;
-            else if (wcscmp(code, L"utf-16-be") == 0)
-                outputEncoding = O_UTF_16_BE;
-        }
-    }
-
     const wchar_t* target = fixed_string.IsEmpty() ? unicodeString : fixed_string;
     int target_length = fixed_string.IsEmpty() ? length : fixed_string.GetLength();
 
-    switch (outputEncoding)
+    switch (output_encoding)
     {
     case O_UTF_8_NOBOM:
         {
@@ -255,9 +236,29 @@ int RunSilent(const WTL::CString &inputFilePath)
             }
         }
 
+        // output encoding
+        OUTPUT_ENCODING output_encoding = _Config.OutputEncoding;
+        if (_CommandLine->hasToken(L"--outencoding"))
+        {
+            const wchar_t* code = _CommandLine->getParamValue(L"--outencoding");
+            if (NULL != code)
+            {
+                if (wcscmp(code, L"utf-8") == 0)
+                    output_encoding = O_UTF_8;
+                else if (wcscmp(code, L"utf-8-nobom") == 0)
+                    output_encoding = O_UTF_8_NOBOM;
+                else if (wcscmp(code, L"utf-16") == 0)
+                    output_encoding = O_UTF_16_LE;
+                else if (wcscmp(code, L"utf-16-le") == 0)
+                    output_encoding = O_UTF_16_LE;
+                else if (wcscmp(code, L"utf-16-be") == 0)
+                    output_encoding = O_UTF_16_BE;
+            }
+        }
+
         if (extract_internal_cue)
         {
-            SaveFile(outputFilePath, incue_content, incue_content.GetLength(), false, false);
+            SaveFile(outputFilePath, incue_content, incue_content.GetLength(), output_encoding, false, false);
             delete c4context;
             return 0;
         }
@@ -295,6 +296,14 @@ int RunSilent(const WTL::CString &inputFilePath)
         if (((unsigned char)rawString[0] == 0xFF) && ((unsigned char)rawString[1] == 0xFE) ||
             ((unsigned char)rawString[0] == 0xFE) && ((unsigned char)rawString[1] == 0xFF))
         {
+            if (((unsigned char)rawString[0] == 0xFF && output_encoding == O_UTF_16_LE) ||
+                ((unsigned char)rawString[0] == 0xFE && output_encoding == O_UTF_16_BE))
+            {
+                // no need to convert
+                delete []rawString;
+                delete c4context;
+                return 0;
+            }
             if ((length & 1) != 0)
             {
                 errorMessage += Unicue::GetString(IDS_CORRUPTFILE);
@@ -317,7 +326,7 @@ int RunSilent(const WTL::CString &inputFilePath)
                 convertBEtoLE(unicodeString, unicodeLength);
 
             // save file
-            SaveFile(outputFilePath, unicodeString, unicodeLength, reallyOverwrite, extension_name == L"cue");
+            SaveFile(outputFilePath, unicodeString, unicodeLength, output_encoding, reallyOverwrite, extension_name == L"cue");
             delete []rawString;
             delete []unicodeString;
             delete c4context;
@@ -327,10 +336,17 @@ int RunSilent(const WTL::CString &inputFilePath)
                  ((unsigned char)rawString[1] == 0xBB) &&
                  ((unsigned char)rawString[2] == 0xBF))
         {
+            if (output_encoding == O_UTF_8)
+            {
+                // no need to convert
+                delete []rawString;
+                delete c4context;
+                return 0;
+            }
             // UTF-8(with BOM)
             std::wstring &unicodeString = CC4EncodeUTF8::convert2unicode(rawString + 3, length -3);
             // save file
-            SaveFile(outputFilePath, unicodeString.c_str(), unicodeString.length(), reallyOverwrite, extension_name == L"cue");
+            SaveFile(outputFilePath, unicodeString.c_str(), unicodeString.length(), output_encoding, reallyOverwrite, extension_name == L"cue");
             delete []rawString;
             delete c4context;
             return 0;
@@ -348,17 +364,24 @@ int RunSilent(const WTL::CString &inputFilePath)
             {
                 encode = c4context->getMostPossibleEncode(rawString);
             }
+            if (encode == (const CC4Encode*)CC4EncodeUTF8::getInstance() && output_encoding == O_UTF_8_NOBOM)
+            {
+                // no need to convert
+                delete []rawString;
+                delete c4context;
+                return 0;
+            }
             if (NULL != encode)
             {
                 std::wstring &unicodeString = encode->wconvertText(rawString, length);
                 // save file
-                SaveFile(outputFilePath, unicodeString.c_str(), unicodeString.length(), reallyOverwrite, extension_name == L"cue");
+                SaveFile(outputFilePath, unicodeString.c_str(), unicodeString.length(), output_encoding, reallyOverwrite, extension_name == L"cue");
             }
             else if (_Config.SilentModeForceConvert)
             {
                 std::wstring &unicodeString = Unicue::msConvert(rawString);
                 // save file
-                SaveFile(outputFilePath, unicodeString.c_str(), unicodeString.length(), reallyOverwrite, extension_name == L"cue");
+                SaveFile(outputFilePath, unicodeString.c_str(), unicodeString.length(), output_encoding, reallyOverwrite, extension_name == L"cue");
             }
 
             delete []rawString;
