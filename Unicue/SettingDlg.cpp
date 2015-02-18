@@ -278,7 +278,7 @@ LRESULT CSettingDlg::OnBnClickedSettingUnregisterbutton(WORD, WORD, HWND, BOOL&)
         cueKeyPath = cueKeyPath.Left(cueKeyPath.GetLength() - 8);
         RegDeleteKey(HKEY_CLASSES_ROOT, cueKeyPath);
         // remove one clicking convert registry
-        WTL::CString cue_one_click_path(txtKey);
+        WTL::CString cue_one_click_path(cueKey);
         cue_one_click_path += L"\\shell\\unicueoneclick\\command";
         RegDeleteKey(HKEY_CLASSES_ROOT, cue_one_click_path);
         cue_one_click_path = cue_one_click_path.Left(cue_one_click_path.GetLength() - 8);
