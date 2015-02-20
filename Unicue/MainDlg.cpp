@@ -744,7 +744,7 @@ LRESULT CMainDlg::OnClickFileLink(int, LPNMHDR, BOOL&)
     return 0;  
 }
 
-BOOL CMainDlg::ExtractTakInternalCue(WTL::CString AudioFileName)
+BOOL CMainDlg::ExtractTakInternalCue(const WTL::CString& AudioFileName)
 {
 
     m_CodeStatus = _T("UTF-8 (Internal Cue File)");
@@ -801,7 +801,7 @@ BOOL CMainDlg::ExtractTakInternalCue(WTL::CString AudioFileName)
 
 // flac文件结构
 // http://flac.sourceforge.net/format.html
-BOOL CMainDlg::ExtractFlacInternalCue(WTL::CString AudioFileName)
+BOOL CMainDlg::ExtractFlacInternalCue(const WTL::CString& AudioFileName)
 {
     m_CodeStatus=_T("UTF-8 (Internal Cue File)");
     m_bNeedConvert=FALSE;
@@ -873,7 +873,7 @@ void CMainDlg::FixCue()
     }
 }
 
-void CMainDlg::FixInternalCue(WTL::CString AudioFileName)
+void CMainDlg::FixInternalCue(const WTL::CString& AudioFileName)
 {
     WTL::CString CueString;
     Unicue::GetWindowText(GetDlgItem(IDC_EDIT_UNICODE), CueString);

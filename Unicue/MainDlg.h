@@ -47,12 +47,12 @@ protected:
     RECT            m_dlgRect;                 // Orinal rect of dialog
 
     void FixCue();
-    void FixInternalCue(WTL::CString AudioFileName);
+    void FixInternalCue(const WTL::CString& AudioFileName);
     void FixTTACue();
     void SetMainWndPos();
     BOOL DealFile();
-    BOOL ExtractTakInternalCue(WTL::CString AudioFileName);
-    BOOL ExtractFlacInternalCue(WTL::CString AudioFileName);
+    BOOL ExtractTakInternalCue(const WTL::CString& AudioFileName);
+    BOOL ExtractFlacInternalCue(const WTL::CString& AudioFileName);
 
 public:
     enum { IDD = IDD_MAINDLG };
