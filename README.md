@@ -27,6 +27,10 @@ A little program to extract readable paragraph from script file of Akaiito, whic
 ###Traveller Ext
 A system extension to register Unicue Traveller entry into context menu.
 
+##Download
+Click the link below to download the latest binary.  
+[Unicue 1.3beta6](http://kuyur.github.io/unicue/Unicue_1.3beta6.zip)
+
 ##Feedback and Bug Report
 If you find any bug or require some new feature, please report it at [Issues board](https://github.com/kuyur/unicue/issues).  
 If you find any text file can not be converted by Unicue, please send it to mail:unicue{at}kuyur.info (please replace **{at}** with **@**, and put **[Report Unknown Encoding]** at the head of mail title).
@@ -83,6 +87,10 @@ Unicue 中文版说明
 
 ###Traveller Ext
 将Traveller注册到右键菜单的系统扩展。
+
+##下载
+点击下面的链接下载最新的程序:  
+[Unicue 1.3beta6](http://kuyur.github.io/unicue/Unicue_1.3beta6.zip)
 
 ##反馈以及Bug报告
 如发现任何bug或者有新的特性需求，请前往[Issues board](https://github.com/kuyur/unicue/issues)报告。  
