@@ -62,12 +62,12 @@ If you find any text file can not be converted by Unicue, please send it to mail
 Unicue 中文版说明
 ===========================
 
-**UniCue** 是包含一系列的文字编码转换工具的开源项目。同时**Unicue**也是其中最主要的转换工具的名字。UniCue着重于将各种编码转换到Unicode。
+**UniCue** 是包含一系列文字编码转换工具的开源项目。同时**Unicue**也是其中最主要的转换工具的名字。UniCue着重于将各种编码转换到Unicode。
 
 名称来由：**Uni**代表Unicode，**Cue**代表cuesheet。 
 
 所有的程序都不采用Windows系统的代码页，而是内建自定义字符映射表。这使得UniCue的工具可以转换非官方定义但是又经常被使用的用户扩展字符，比如UAO2.50中定义的简体汉字和日文汉字。  
-有关码表的详细说明，请参阅[字符映射表说明](docs/en/aboutcharmap.md)。
+有关码表的详细说明，请参阅[字符映射表说明](docs/chs/aboutcharmap.md)。
 
 目前UniCue包含四个程序。
 
