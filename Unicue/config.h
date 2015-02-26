@@ -46,15 +46,15 @@ typedef struct CConfig_tag
     BOOL AutoCheckCode;                    // 是否自动检查编码
     BOOL AlwaysOnTop;                      // 是否总在最前
     BOOL CloseCuePrompt;                   // 是否关闭cue文件有错误的提示
-    //BOOL RegNewUniFile;                    // 注册新建uni文件
     WTL::CString MapConfName;              // 字符映射表配置文件路径
     LANG Lang;                             // Language for GUI
     OUTPUT_ENCODING OutputEncoding;        // Output encoding
     LONG WindowWidth;                      // width of main window
     LONG WindowHeight;                     // height of main window
-    BOOL SilentModeForceConvert;          // force convert, although no matched encoding is found
-    BOOL SilentModeOverwrite;             // Overwrite file or not
-    BOOL SilentModeBackup;                // Backup original file or not. Only available when SilentMode_Overwrite is true.
+    BOOL WindowMaximized;                  // Is window maximized when it is closed
+    BOOL SilentModeForceConvert;           // force convert, although no matched encoding is found
+    BOOL SilentModeOverwrite;              // Overwrite file or not
+    BOOL SilentModeBackup;                 // Backup original file or not. Only available when SilentMode_Overwrite is true.
 }CConfig;
 
 BOOL LoadConfigFile(TiXmlDocument *xmlfile, CConfig &config);

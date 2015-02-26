@@ -450,6 +450,9 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR lp
     // load config
     LoadConfig(configPath);
 
+    if (_Config.WindowMaximized)
+        nCmdShow = SW_SHOWMAXIMIZED;
+
     WTL::CString inputFilePath(L"");
     if (_CommandLine->hasToken(L"-i"))
         inputFilePath += _CommandLine->getParamValue(L"-i");

@@ -125,17 +125,20 @@ BOOL LoadConfigFile(TiXmlDocument *xmlfile, CConfig &config)
     else
         config.OutputEncoding = O_UTF_8;
 
+    // WindowMaximized node
+    pElem = hXmlHandle.FirstChild("WindowMaximized").Element();
+    if (pElem && pElem->GetText())
+        config.WindowMaximized = _stricmp(pElem->GetText(), "true") == 0;
+
     // WindowWidth node
     pElem = hXmlHandle.FirstChild("WindowWidth").Element();
-    if (!pElem) return FALSE;
-    if (!pElem->GetText()) return FALSE;
-    config.WindowWidth = (LONG)strtol(pElem->GetText(), (char **)NULL, 10);
+    if (pElem && pElem->GetText())
+        config.WindowWidth = (LONG)strtol(pElem->GetText(), (char **)NULL, 10);
 
     // WindowHeight node
     pElem = hXmlHandle.FirstChild("WindowHeight").Element();
-    if (!pElem) return FALSE;
-    if (!pElem->GetText()) return FALSE;
-    config.WindowHeight = (LONG)strtol(pElem->GetText(), (char **)NULL, 10);
+    if (pElem && pElem->GetText())
+        config.WindowHeight = (LONG)strtol(pElem->GetText(), (char **)NULL, 10);
 
     // SilentModeForceConvert node
     pElem = hXmlHandle.FirstChild("SilentModeForceConvert").Element();
@@ -281,6 +284,11 @@ BOOL SaveConfigFile(LPCTSTR configPath, const CConfig &config)
     WindowHeight->LinkEndChild(WindowHeightValue);
     configure->LinkEndChild(WindowHeight);
 
+    TiXmlElement *WindowMaximized = new TiXmlElement("WindowMaximized");
+    TiXmlText *WindowMaximizedValue = new TiXmlText(config.WindowMaximized ? "true" : "false");
+    WindowMaximized->LinkEndChild(WindowMaximizedValue);
+    configure->LinkEndChild(WindowMaximized);
+
     TiXmlElement *SilentModeForceConvert = new TiXmlElement("SilentModeForceConvert");
     TiXmlText *SilentModeForceConvertValue = new TiXmlText(config.SilentModeForceConvert ? "true" : "false");
     SilentModeForceConvert->LinkEndChild(SilentModeForceConvertValue);
@@ -326,6 +334,7 @@ void SetDefault(CConfig &config)
     config.TemplateStr = _T(".utf-8");
     config.WindowWidth = 793;
     config.WindowHeight = 717;
+    config.WindowMaximized = FALSE;
     config.SilentModeForceConvert = FALSE;
     config.SilentModeOverwrite = FALSE;
     config.SilentModeBackup = FALSE;

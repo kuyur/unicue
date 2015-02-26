@@ -62,7 +62,7 @@ public:
 
     LRESULT OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
     LRESULT OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& bHandled);
-    LRESULT OnResized(UINT, WPARAM, LPARAM lParam, BOOL&);
+    LRESULT OnResized(UINT, WPARAM wParam, LPARAM lParam, BOOL&);
     LRESULT OnGetMinMaxInfo(UINT, WPARAM, LPARAM lParam, BOOL&);
     LRESULT OnFileExit(WORD, WORD wID, HWND, BOOL&);
     LRESULT OnFileOpen(WORD, WORD, HWND, BOOL&);

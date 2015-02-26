@@ -85,8 +85,16 @@ LRESULT CMainFrame::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*
     return 1;
 }
 
-LRESULT CMainFrame::OnResized(UINT, WPARAM, LPARAM lParam, BOOL&)
+LRESULT CMainFrame::OnResized(UINT, WPARAM wParam, LPARAM lParam, BOOL&)
 {
+    if (wParam == SIZE_MINIMIZED)
+        return 0;
+
+    if (wParam == SIZE_MAXIMIZED)
+        _Config.WindowMaximized = TRUE;
+    else
+        _Config.WindowMaximized = FALSE;
+
     RECT rc;
     GetWindowRect(&rc);
 
