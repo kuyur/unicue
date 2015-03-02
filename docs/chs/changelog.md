@@ -3,6 +3,7 @@ Unicue
 
 ###1.3
 
+> * 增加拉丁文字母支持(CP1252)
 > * 一键转换
 > * 可调整界面大小
 > * 记忆最后使用的界面大小
@@ -21,7 +22,6 @@ Unicue
 >   　　1. 感谢小海对繁体中文界面提出的修改建议/Thanks for 小海's suggestions about Traditional Chinese GUI  
 >   　　2. 感谢lemphek对英文界面提出的修改建议/Thanks for lemphek's suggestions about English GUI
 > * 增加西里尔字母支持(CP1251)，涵括斯拉夫语族包括俄语，塞尔维亚语，保加利亚语等一大堆乱七八糟的语言
-> * 增加拉丁文字母支持(CP1252)
 > * Linux平台下通过Wine（1.4.1）能稳定运行（菜单不能正常显示） 
 
 ###1.1
