@@ -8,9 +8,8 @@
 /* Published under Apache License 2.0                                   */
 /* http://www.apache.org/licenses/LICENSE-2.0                           */
 /*                                                                      */
-/* Project URL: http://code.google.com/p/c4-lib                         */
-/*                                                                      */
-/* Copyright 2011 wei_w                                                 */
+/* Copyright 2016 Project c4                                            */
+/* https://github.com/kuyur/c4                                          */
 /*                                                                      */
 /************************************************************************/
 
