@@ -24,6 +24,7 @@
 #include <string>
 #include <sstream>
 #include <algorithm>
+#include <functional>
 #include <cctype>
 #include <locale>
 
@@ -55,14 +56,14 @@ inline void replace(std::basic_string<T> &str, const std::basic_string<T> &oldst
 template <typename T>
 inline std::basic_string<T> &trim_left(std::basic_string<T> &str)
 {
-    str.erase(str.begin(), std::find_if_not(str.begin(), str.end(), std::isspace));
+    str.erase(str.begin(), std::find_if(str.begin(), str.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
     return str;
 }
 
 template <typename T>
 inline std::basic_string<T> &trim_right(std::basic_string<T> &str)
 {
-    str.erase(std::find_if_not(str.rbegin(), str.rend(), std::isspace).base(), str.end());
+    str.erase(std::find_if(str.rbegin(), str.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), str.end());
     return str;
 }
 
