@@ -1,13 +1,12 @@
 /************************************************************************/
 /*                                                                      */
-/* Common helper functions for Unicue Project.                          */
-/* The file is a part of Unicue Project.                                */
+/* Win32 Common Modules Library                                         */
 /*                                                                      */
 /* Author:  kuyur (kuyur@kuyur.info)                                    */
-/* Published under GPLv3                                                */
-/* http://www.gnu.org/licenses/gpl-3.0.en.html                          */
+/* Published under LGPL-3.0                                             */
+/* https://www.gnu.org/licenses/lgpl-3.0.en.html                        */
 /*                                                                      */
-/* Project URL: http://github.com/kuyur/unicue                          */
+/* Project URL: https://github.com/kuyur/win32-common                   */
 /*                                                                      */
 /************************************************************************/
 

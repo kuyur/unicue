@@ -1,5 +1,7 @@
 /************************************************************************/
 /*                                                                      */
+/* Win32 Common Modules Library                                         */
+/*                                                                      */
 /* A Simple File Obejct using win 32 api.                               */
 /* It is simplified from CIOFile of win32-standard-expansion.           */
 /* See http://code.google.com/p/win32-standard-expansion/ for detail.   */
@@ -9,8 +11,8 @@
 /* Copyright memleak@darkc.at                                           */
 /*                                                                      */
 /* Author:  kuyur (kuyur@kuyur.info)                                    */
-/* winfile.h and winfile.cpp are published under Apache License 2.0     */
-/* http://www.apache.org/licenses/LICENSE-2.0                           */
+/* Published under LGPL-3.0                                             */
+/* https://www.gnu.org/licenses/lgpl-3.0.en.html                        */
 /*                                                                      */
 /* Project URL: http://github.com/kuyur/unicue                          */
 /*                                                                      */
