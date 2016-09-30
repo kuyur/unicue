@@ -55,7 +55,7 @@ If you find any text file can not be converted by Unicue, please send it to mail
 10. [Next generation of c4-lib](http://kuyur.info/blog/archives/3154)
 
 ##Link
-1. [c4-lib](https://code.google.com/p/c4-lib/)
+1. [c4-lib](https://github.com/kuyur/c4)
 2. [next-c4 lib](https://github.com/kuyur/next-c4)
 
 ***
@@ -117,5 +117,5 @@ Unicue 中文版说明
 10. [新一代通用字符转换环境(next-c4 lib)](http://kuyur.info/blog/archives/3154)
 
 ##相关链接
-1. [c4-lib](https://code.google.com/p/c4-lib/)
+1. [c4-lib](https://github.com/kuyur/c4)
 2. [next-c4 lib](https://github.com/kuyur/next-c4)
