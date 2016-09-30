@@ -5,8 +5,8 @@
 /*                                                                      */
 /* Version: 0.1                                                         */
 /* Author:  wei_w (weiwl07@gmail.com)                                   */
-/* Published under Apache License 2.0                                   */
-/* http://www.apache.org/licenses/LICENSE-2.0                           */
+/* Published under LGPL-3.0                                             */
+/* https://www.gnu.org/licenses/lgpl-3.0.en.html                        */
 /*                                                                      */
 /* Copyright 2016 Project c4                                            */
 /* https://github.com/kuyur/c4                                          */
@@ -40,14 +40,15 @@ public:
     std::list<std::wstring> getEncodesNameList() const;
 
 private:
-    bool                        m_bInitialized;
-    std::wstring                m_errorMessage;
-    std::wstring                m_basePath;
-    std::wstring                m_charmapConfPath;
-    std::vector<unsigned char*> m_mapBuffers;
-    std::vector<CC4Encode*>     m_encodes;
-    std::vector<CC4Segments*>   m_segments;
-    std::vector<CC4Policies*>   m_policies;
+    bool                          m_bInitialized;
+    std::wstring                  m_errorMessage;
+    std::wstring                  m_basePath;
+    std::wstring                  m_charmapConfPath;
+    std::vector<unsigned char*>   m_mapBuffers;
+    std::vector<CC4Encode*>       m_encodes;
+    std::vector<const CC4Encode*> m_constEncodes;
+    std::vector<CC4Segments*>     m_segments;
+    std::vector<CC4Policies*>     m_policies;
     bool loadCharmapConfig(const TiXmlDocument *xmlfile);
     bool loadCharmap(const TiXmlElement *charmap_node);
 };
