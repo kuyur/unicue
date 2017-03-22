@@ -10,39 +10,39 @@ The detail of customized charmaps is introduced in [aboutcharmap.md](docs/en/abo
 
 Currently UniCue contains 4 programs and one extension dll.
 
-###Unicue
+### Unicue
 Tool to convert a single text file from ANSI encoding to Unicode form (UTF-8 or UTF-16).
 
 ANSI encoding actually is not a single encoding, but a set of encodings defined by various countries as national standard to support non-ASCII characters of local languages. The word of **ANSI** is not accurate, because it is abbreviation of **A**merican **N**ational **S**tandards **I**nstitute. ANSI encoding is used by [Microsoft](http://support.microsoft.com/kb/138813/en-us) first. The right name should be Regional Variable-width encoding (RVW encoding) or pre-Unicode encoding.
 
-###Unicue Traveller
+### Unicue Traveller
 Tool to convert bunch of text files at a time.
 
-###Chinese Converter
+### Chinese Converter
 Tool to convert Simplified Chinese text into Traditional Chinese text or convert back.
 
-###ExtractAkaiito
+### ExtractAkaiito
 A little program to extract readable paragraph from script file of Akaiito, which is a PS2 Game published in 2004.
 
-###Traveller Ext
+### Traveller Ext
 A system extension to register Unicue Traveller entry into context menu.
 
-##Download
+## Download
 Click the link below to download the latest binary.  
 [Unicue 1.3beta6](http://kuyur.github.io/unicue/Unicue_1.3beta6.zip)
 
-##Feedback and Bug Report
+## Feedback and Bug Report
 If you find any bug or require some new feature, please report it at [Issues board](https://github.com/kuyur/unicue/issues).  
 If you find any text file can not be converted by Unicue, please send it to mail:unicue{at}kuyur.info (please replace **{at}** with **@**, and put **[Report Unknown Encoding]** at the head of mail title).
 
-##Documentation
+## Documentation
 1. [Change log](docs/en/changelog.md)
 2. [How to build](docs/en/howtobuild.md)
 3. [About charmaps](docs/en/aboutcharmap.md)
 4. [About registry entry of Unicue](docs/en/registry.md)
 5. [Use command line for Unicue](docs/en/argumentsusage.md)
 
-##Link of technology docs (in Chinese)
+## Link of technology docs (in Chinese)
 1. [How to output a UTF-8 encoding text file by tinyXml](http://kuyur.info/blog/archives/462)
 2. [An algorithm to convert encodings with O(n) time complexity](http://kuyur.info/blog/archives/578)
 3. [How to convert UTF-8 to UTF-16 and validate UTF-8 encoding](http://kuyur.info/blog/archives/633)
@@ -54,7 +54,7 @@ If you find any text file can not be converted by Unicue, please send it to mail
 9. [A solution to load customize charmaps dynamic: Common Code Converting Context (c4-lib)](http://kuyur.info/blog/archives/2250)
 10. [Next generation of c4-lib](http://kuyur.info/blog/archives/3154)
 
-##Link
+## Link
 1. [c4-lib](https://github.com/kuyur/c4)
 2. [next-c4 lib](https://github.com/kuyur/next-c4)
 
@@ -72,39 +72,39 @@ Unicue 中文版说明
 
 目前UniCue包含四个程序。
 
-###Unicue
+### Unicue
 用于转换单个文本编码的工具。输入编码是ANSI，输出编码是UTF-16或者UTF-8.
 
 注：ANSI编码实际上不是一种编码，而是各个国家/地区为了支持本地非ASCII字符而制定的编码标准的集合。"ANSI编码"这个名词最先被[微软](http://support.microsoft.com/kb/138813/en-us)使用，但它是一个古怪的叫法，因为ANSI是美国国家标准协会(**A**merican **N**ational **S**tandards **I**nstitute）)的缩写。准确的叫法应该是区域性的可变长字符编码(Regional Variable-width encoding或者RVW encoding)或者更简单的Unicode史前编码(Pre-Unicode encoding)。
 
-###Unicue Traveller
+### Unicue Traveller
 用于批量转换文本文件编码的工具。
 
-###Chinese Converter
+### Chinese Converter
 简繁繁简转换工具。
 
-###ExtractAkaiito
+### ExtractAkaiito
 提取PS2游戏红线(アカイイト)脚本的小工具。
 
-###Traveller Ext
+### Traveller Ext
 将Traveller注册到右键菜单的系统扩展。
 
-##下载
+## 下载
 点击下面的链接下载最新的程序:  
 [Unicue 1.3beta6](http://kuyur.github.io/unicue/Unicue_1.3beta6.zip)
 
-##反馈以及Bug报告
+## 反馈以及Bug报告
 如发现任何bug或者有新的特性需求，请前往[Issues board](https://github.com/kuyur/unicue/issues)报告。  
 如遇到任何Unicue无法转换的文本文件，欢迎附加到附件然后扔到邮箱：unicue{at}kuyur.info （请将**{at}**替换成**@**，标题请注明【报告乱码文件】）。
 
-##文档
+## 文档
 1. [版本升级日志](docs/chs/changelog.md)
 2. [编译要点](docs/chs/howtobuild.md)
 3. [字符映射表说明](docs/chs/aboutcharmap.md)
 4. [有关Unicue的注册表项](docs/chs/registry.md)
 5. [Unicue命令行使用方法](docs/chs/argumentsusage.md)
 
-##技术文档链接
+## 技术文档链接
 1. [tinyXml输出utf-8文档](http://kuyur.info/blog/archives/462)
 2. [一个线性时间复杂度的字符编码转换算法](http://kuyur.info/blog/archives/578)
 3. [UTF-8到Unicode的转换以及UTF-8编码的检测](http://kuyur.info/blog/archives/633)
@@ -116,6 +116,6 @@ Unicue 中文版说明
 9. [动态加载字符映射表的字符转换环境方案(c4-lib)](http://kuyur.info/blog/archives/2250)
 10. [新一代通用字符转换环境(next-c4 lib)](http://kuyur.info/blog/archives/3154)
 
-##相关链接
+## 相关链接
 1. [c4-lib](https://github.com/kuyur/c4)
 2. [next-c4 lib](https://github.com/kuyur/next-c4)
