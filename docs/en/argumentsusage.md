@@ -1,4 +1,4 @@
-﻿Arguments
+Arguments
 =========
 
 `-c` or `--config`: Specify config file path. Default is config-unicue.xml.
