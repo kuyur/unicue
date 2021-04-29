@@ -63,9 +63,9 @@ LRESULT CSettingDlg::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/
     return 0;
 }
 
-WTL::CString CSettingDlg::FindRegKey(LPCTSTR extension)
+ATL::CString CSettingDlg::FindRegKey(LPCTSTR extension)
 {
-    WTL::CString path(L"Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts\\");
+    ATL::CString path(L"Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts\\");
     path += extension;
     path += L"\\UserChoice";
     HKEY hKey;
@@ -79,7 +79,7 @@ WTL::CString CSettingDlg::FindRegKey(LPCTSTR extension)
             if (REG_SZ == valType)
             {
                 RegCloseKey(hKey);
-                return WTL::CString(fileType);
+                return ATL::CString(fileType);
             }
         }
         RegCloseKey(hKey);
@@ -94,22 +94,22 @@ WTL::CString CSettingDlg::FindRegKey(LPCTSTR extension)
             if (REG_SZ == ValueType) // 正确的键值类型
             {
                 RegCloseKey(hKey);
-                return WTL::CString(FileType);
+                return ATL::CString(FileType);
             }
         }
         RegCloseKey(hKey);
     }
-    return WTL::CString();
+    return ATL::CString();
 }
 
 // 注册到关联文件右键菜单
 LRESULT CSettingDlg::OnBnClickedSettingRegisterbutton(WORD, WORD, HWND, BOOL&)
 {
-    WTL::CString normal_command("\"");
+    ATL::CString normal_command("\"");
     normal_command += Unicue::GetProcessPath();
     normal_command += _T("\" \"%1\"");
 
-    WTL::CString silent_command("\"");
+    ATL::CString silent_command("\"");
     silent_command += Unicue::GetProcessPath();
     silent_command += _T("\" -s -i \"%1\"");
 
@@ -136,18 +136,18 @@ LRESULT CSettingDlg::OnBnClickedSettingRegisterbutton(WORD, WORD, HWND, BOOL&)
     Unicue::AddRegKey(HKEY_CLASSES_ROOT,_T("txtfile\\shell\\unicueoneclick\\command"),_T(""),silent_command);           // [HKEY_CLASSES_ROOT\txtfile\shell\unicueoneclick\command], @="\"AppPathName\" -s -i \"%1\""
 
     // 查找txt文件的真正注册类型, 假定txt已经关联到Notepad++_file
-    WTL::CString &txtKey = FindRegKey(L".txt");
+    ATL::CString &txtKey = FindRegKey(L".txt");
     if (txtKey.GetLength() > 0)
     {
         if (txtKey != L"txtfile")
         {
-            WTL::CString txtKeyPath(txtKey);
+            ATL::CString txtKeyPath(txtKey);
             txtKeyPath += _T("\\shell\\unicue");
             Unicue::AddRegKey(HKEY_CLASSES_ROOT, txtKeyPath, _T(""), Unicue::GetString(IDS_CONVERTBYUNICUE));           // [HKEY_CLASSES_ROOT\Notepad++_file\shell\unicue], @="使用 UniCue 转换编码"
             txtKeyPath += _T("\\command");
             Unicue::AddRegKey(HKEY_CLASSES_ROOT, txtKeyPath, _T(""), normal_command);                                   // [HKEY_CLASSES_ROOT\Notepad++_file\shell\unicue\command], @="\"AppPathName\" \"%1\""
             // one clicking convert
-            WTL::CString txt_one_click_path(txtKey);
+            ATL::CString txt_one_click_path(txtKey);
             txt_one_click_path += L"\\shell\\unicueoneclick";
             Unicue::AddRegKey(HKEY_CLASSES_ROOT, txt_one_click_path, _T(""), Unicue::GetString(IDS_CONVERTSILENT));     // [HKEY_CLASSES_ROOT\Notepad++_file\shell\unicueoneclick], @="使用 UniCue 一键转换编码"
             txt_one_click_path += L"\\command";
@@ -160,10 +160,10 @@ LRESULT CSettingDlg::OnBnClickedSettingRegisterbutton(WORD, WORD, HWND, BOOL&)
     }
 
     // 查找cue文件的注册类型, 假定cue已经关联到foobar2000.CUE
-    WTL::CString &cueKey = FindRegKey(L".cue");
+    ATL::CString &cueKey = FindRegKey(L".cue");
     if (cueKey.GetLength() > 0)
     {
-        WTL::CString temp(cueKey);
+        ATL::CString temp(cueKey);
         temp.MakeLower();
         if (temp == L"unicue.uni") /* 历史遗存 */
         {
@@ -171,13 +171,13 @@ LRESULT CSettingDlg::OnBnClickedSettingRegisterbutton(WORD, WORD, HWND, BOOL&)
         }
         else if (temp != L"unicue.cue")
         {
-            WTL::CString cueKeyPath(cueKey);
+            ATL::CString cueKeyPath(cueKey);
             cueKeyPath += _T("\\shell\\unicue");
             Unicue::AddRegKey(HKEY_CLASSES_ROOT, cueKeyPath, _T(""), Unicue::GetString(IDS_CONVERTBYUNICUE));        // [HKEY_CLASSES_ROOT\foobar2000.CUE\shell\unicue], @="使用 UniCue 转换编码"
             cueKeyPath += _T("\\command");
             Unicue::AddRegKey(HKEY_CLASSES_ROOT, cueKeyPath, _T(""), normal_command);                                // [HKEY_CLASSES_ROOT\foobar2000.CUE\shell\unicue\command], @="\"AppPathName\" \"%1\""
             // one clicking convert
-            WTL::CString cue_one_click_path(cueKey);
+            ATL::CString cue_one_click_path(cueKey);
             cue_one_click_path += L"\\shell\\unicueoneclick";
             Unicue::AddRegKey(HKEY_CLASSES_ROOT, cue_one_click_path, _T(""), Unicue::GetString(IDS_CONVERTSILENT));  // [HKEY_CLASSES_ROOT\foobar2000.CUE\shell\unicueoneclick], @="使用 UniCue 一键转换编码"
             cue_one_click_path += L"\\command";
@@ -192,8 +192,8 @@ LRESULT CSettingDlg::OnBnClickedSettingRegisterbutton(WORD, WORD, HWND, BOOL&)
     Unicue::AddRegKey(HKEY_CLASSES_ROOT,_T("Applications\\Unicue.exe\\shell\\open\\command"),_T(""),normal_command); // [HKEY_CLASSES_ROOT\Applications\Unicue.exe\shell\open\command], @="\"AppPathName\" \"%1\""
 
     // icon
-    WTL::CString uniIco(Unicue::GetProcessFolder());
-    WTL::CString cueIco(Unicue::GetProcessFolder());
+    ATL::CString uniIco(Unicue::GetProcessFolder());
+    ATL::CString cueIco(Unicue::GetProcessFolder());
     uniIco += _T("icons\\uni.ico");
     cueIco += _T("icons\\cue.ico");
 
@@ -241,8 +241,8 @@ LRESULT CSettingDlg::OnBnClickedSettingUnregisterbutton(WORD, WORD, HWND, BOOL&)
     RegDeleteKey(HKEY_CLASSES_ROOT,_T("Applications\\ANSI2Unicode.exe\\shell"));                // 历史遗存
     RegDeleteKey(HKEY_CLASSES_ROOT,_T("Applications\\ANSI2Unicode.exe"));                       // 历史遗存
     // 恢复txt关联
-    WTL::CString &txtKey = FindRegKey(L".txt");
-    WTL::CString lower(txtKey);
+    ATL::CString &txtKey = FindRegKey(L".txt");
+    ATL::CString lower(txtKey);
     lower.MakeLower();
     if (lower == L"unicue.uni")
     {
@@ -250,20 +250,20 @@ LRESULT CSettingDlg::OnBnClickedSettingUnregisterbutton(WORD, WORD, HWND, BOOL&)
     }
     else
     {
-        WTL::CString txtKeyPath(txtKey);
+        ATL::CString txtKeyPath(txtKey);
         txtKeyPath += _T("\\shell\\unicue\\command");
         RegDeleteKey(HKEY_CLASSES_ROOT, txtKeyPath);
         txtKeyPath = txtKeyPath.Left(txtKeyPath.GetLength() - 8);
         RegDeleteKey(HKEY_CLASSES_ROOT, txtKeyPath);
         // remove one clicking convert registry
-        WTL::CString txt_one_click_path(txtKey);
+        ATL::CString txt_one_click_path(txtKey);
         txt_one_click_path += L"\\shell\\unicueoneclick\\command";
         RegDeleteKey(HKEY_CLASSES_ROOT, txt_one_click_path);
         txt_one_click_path = txt_one_click_path.Left(txt_one_click_path.GetLength() - 8);
         RegDeleteKey(HKEY_CLASSES_ROOT, txt_one_click_path);
     }
     // 卸载cue文件的右键菜单
-    WTL::CString &cueKey = FindRegKey(L".cue");
+    ATL::CString &cueKey = FindRegKey(L".cue");
     lower = cueKey;
     lower.MakeLower();
     if (lower == L"unicue.cue" || /* 历史遗存 */ lower == L"unicue.uni")
@@ -272,13 +272,13 @@ LRESULT CSettingDlg::OnBnClickedSettingUnregisterbutton(WORD, WORD, HWND, BOOL&)
     }
     else
     {
-        WTL::CString cueKeyPath(cueKey);
+        ATL::CString cueKeyPath(cueKey);
         cueKeyPath += _T("\\shell\\unicue\\command");
         RegDeleteKey(HKEY_CLASSES_ROOT, cueKeyPath);
         cueKeyPath = cueKeyPath.Left(cueKeyPath.GetLength() - 8);
         RegDeleteKey(HKEY_CLASSES_ROOT, cueKeyPath);
         // remove one clicking convert registry
-        WTL::CString cue_one_click_path(cueKey);
+        ATL::CString cue_one_click_path(cueKey);
         cue_one_click_path += L"\\shell\\unicueoneclick\\command";
         RegDeleteKey(HKEY_CLASSES_ROOT, cue_one_click_path);
         cue_one_click_path = cue_one_click_path.Left(cue_one_click_path.GetLength() - 8);
@@ -298,7 +298,7 @@ LRESULT CSettingDlg::OnBnClickedTxtutf8Button(WORD, WORD, HWND, BOOL&)
     if (RegOpenKeyEx(HKEY_CLASSES_ROOT,_T(".txt\\ShellNew"),0L,KEY_ALL_ACCESS,&hKey)==ERROR_SUCCESS)
         RegDeleteValue(hKey,_T("NullFile"));
 
-    WTL::CString PathValue(Unicue::GetProcessFolder());
+    ATL::CString PathValue(Unicue::GetProcessFolder());
     PathValue += _T("null.uni");
     /* [HKEY_CLASSES_ROOT\.txt\ShellNew], "FileName"="AppFolder\\null.uni" */
     Unicue::AddRegKey(HKEY_CLASSES_ROOT,_T(".txt\\ShellNew"),_T("FileName"),PathValue);

@@ -28,7 +28,7 @@ public:
     ~CSettingDlg() {};
     enum { IDD = IDD_SETTING };
     CConfig m_Config;
-    WTL::CString FindRegKey(LPCTSTR extension);
+    ATL::CString FindRegKey(LPCTSTR extension);
 
     BEGIN_MSG_MAP(CSettingDlg)
         MESSAGE_HANDLER(WM_INITDIALOG, OnInitDialog)

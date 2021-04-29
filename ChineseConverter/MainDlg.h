@@ -30,7 +30,7 @@ protected:
     UINT           m_StringLength;        // 字符串的长度（不含BOM）
     wchar_t*       m_UnicodeString;       // Unicode字符串
     UINT           m_UnicodeLength;       // Unicode字符串的长度
-    WTL::CString   m_FilePathName;        // 文本文件路径
+    ATL::CString   m_FilePathName;        // 文本文件路径
     CC4Context*    m_context;             // converting context
     std::unordered_map<int, RECT> m_itemRects; // Orignal size of dialog items
     RECT           m_dlgRect;             // Orinal rect of dialog

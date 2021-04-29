@@ -29,25 +29,25 @@
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseOfAtl>Static</UseOfAtl>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseOfAtl>Static</UseOfAtl>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseOfAtl>Static</UseOfAtl>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseOfAtl>Static</UseOfAtl>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -96,7 +96,7 @@
       </DllDataFileName>
       <InterfaceIdentifierFileName>TravellerExt_i.c</InterfaceIdentifierFileName>
       <ProxyFileName>TravellerExt_p.c</ProxyFileName>
-      <ValidateAllParameters>false</ValidateAllParameters>
+      <ValidateAllParameters>true</ValidateAllParameters>
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
@@ -114,7 +114,7 @@
       <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <RegisterOutput>true</RegisterOutput>
+      <RegisterOutput>false</RegisterOutput>
       <AdditionalDependencies>comsvcs.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>.\TravellerExt.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -133,6 +133,7 @@
       </DllDataFileName>
       <InterfaceIdentifierFileName>TravellerExt_i.c</InterfaceIdentifierFileName>
       <ProxyFileName>TravellerExt_p.c</ProxyFileName>
+      <ValidateAllParameters>true</ValidateAllParameters>
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
@@ -149,7 +150,7 @@
       <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <RegisterOutput>true</RegisterOutput>
+      <RegisterOutput>false</RegisterOutput>
       <AdditionalDependencies>comsvcs.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>.\TravellerExt.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -168,7 +169,7 @@
       </DllDataFileName>
       <InterfaceIdentifierFileName>TravellerExt_i.c</InterfaceIdentifierFileName>
       <ProxyFileName>TravellerExt_p.c</ProxyFileName>
-      <ValidateAllParameters>false</ValidateAllParameters>
+      <ValidateAllParameters>true</ValidateAllParameters>
     </Midl>
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
@@ -184,7 +185,7 @@
       <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <RegisterOutput>true</RegisterOutput>
+      <RegisterOutput>false</RegisterOutput>
       <AdditionalDependencies>comsvcs.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>.\TravellerExt.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -208,6 +209,7 @@
       </DllDataFileName>
       <InterfaceIdentifierFileName>TravellerExt_i.c</InterfaceIdentifierFileName>
       <ProxyFileName>TravellerExt_p.c</ProxyFileName>
+      <ValidateAllParameters>true</ValidateAllParameters>
     </Midl>
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
@@ -223,7 +225,7 @@
       <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <RegisterOutput>true</RegisterOutput>
+      <RegisterOutput>false</RegisterOutput>
       <AdditionalDependencies>comsvcs.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>.\TravellerExt.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>

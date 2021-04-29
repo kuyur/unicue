@@ -40,8 +40,8 @@ enum OUTPUT_ENCODING {
 
 typedef struct CConfig_tag
 {
-    WTL::CString TemplateStr;              // Template string used at saving as
-    WTL::CString MapConfName;              // Config file path for charmaps
+    ATL::CString TemplateStr;              // Template string used at saving as
+    ATL::CString MapConfName;              // Config file path for charmaps
     LANG Lang;                             // Language for GUI
     LONG CurrentChoice;                    // Current encoding choice
     OUTPUT_ENCODING OutputEncoding;        // Output encoding

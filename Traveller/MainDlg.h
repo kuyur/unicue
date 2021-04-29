@@ -22,7 +22,7 @@ class CMainDlg : public CDialogImpl<CMainDlg>, public CUpdateUI<CMainDlg>,
         public CMessageFilter, public CIdleHandler
 {
 private:
-    WTL::CString m_configPath;
+    ATL::CString m_configPath;
     CConfig      m_config;
 public:
     enum { IDD = IDD_MAINDLG };

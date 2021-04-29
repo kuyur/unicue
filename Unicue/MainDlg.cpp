@@ -239,7 +239,7 @@ BOOL CMainDlg::DealFile()
     if (m_FilePathName.IsEmpty()) return FALSE;
 
     m_bCueFile=FALSE;
-    WTL::CString extendName = m_FilePathName.Right(m_FilePathName.GetLength() - m_FilePathName.ReverseFind('.') - 1);
+    ATL::CString extendName = m_FilePathName.Right(m_FilePathName.GetLength() - m_FilePathName.ReverseFind('.') - 1);
     extendName.MakeLower();
     if (extendName == _T("cue"))
         m_bCueFile = TRUE;
@@ -396,9 +396,9 @@ BOOL CMainDlg::DealFile()
 void CMainDlg::OpenFile(LPCWSTR filePath)
 {
     m_FilePathName = filePath;
-    WTL::CString &ExtensionName = m_FilePathName.Right(m_FilePathName.GetLength() - m_FilePathName.ReverseFind('.') - 1);
+    ATL::CString &ExtensionName = m_FilePathName.Right(m_FilePathName.GetLength() - m_FilePathName.ReverseFind('.') - 1);
     ExtensionName.MakeLower();
-    WTL::CString &FileName = m_FilePathName.Right(m_FilePathName.GetLength() - m_FilePathName.ReverseFind('\\') - 1);
+    ATL::CString &FileName = m_FilePathName.Right(m_FilePathName.GetLength() - m_FilePathName.ReverseFind('\\') - 1);
     if ((ExtensionName == _T("tak"))  ||
         (ExtensionName == _T("flac")) ||
         (ExtensionName == _T("ape")))
@@ -437,7 +437,7 @@ void CMainDlg::SaveFile(LPCWSTR filePath)
         MessageBox(Unicue::GetString(IDS_WRITEFAILED), _T("Unicue"), MB_OK);
         return;
     }
-    WTL::CString UnicodeStr;
+    ATL::CString UnicodeStr;
     Unicue::GetWindowText(GetDlgItem(IDC_EDIT_UNICODE), UnicodeStr);
 
     switch (_Config.OutputEncoding)
@@ -532,7 +532,7 @@ LRESULT CMainDlg::OnDropFiles(UINT, WPARAM wParam, LPARAM, BOOL&)
     else
     {
         // 抓取文件名
-        WTL::CString LeftStr;
+        ATL::CString LeftStr;
         for (int i = 0; i < nFileCount; i++)
         {
             TCHAR szFileName[MAX_PATH+1];
@@ -562,7 +562,7 @@ LRESULT CMainDlg::OnCbnSelchangeComboSelectcode(WORD, WORD, HWND, BOOL&)
         Unicue::GetWindowText(theCombo, m_StringCodeType);
 
         // 左
-        WTL::CString LeftStr;
+        ATL::CString LeftStr;
         Unicue::GetWindowText(GetDlgItem(IDC_EDIT_ANSI), LeftStr);
         std::string &LeftAnsiStr = Unicue::msConvertBack(LeftStr);
         // 右
@@ -595,7 +595,7 @@ LRESULT CMainDlg::OnBnClickedButtonDo(WORD, WORD, HWND, BOOL&)
     if (m_bTransferString)
     {
         // 左
-        WTL::CString LeftStr;
+        ATL::CString LeftStr;
         Unicue::GetWindowText(GetDlgItem(IDC_EDIT_ANSI), LeftStr);
         std::string &LeftAnsiStr = Unicue::msConvertBack(LeftStr);
 
@@ -644,8 +644,8 @@ LRESULT CMainDlg::OnBnClickedButtonSave(WORD, WORD, HWND, BOOL&)
 LRESULT CMainDlg::OnBnClickedButtonSaveas(WORD, WORD, HWND, BOOL&)
 {
     int position = m_FilePathName.ReverseFind('.');
-    WTL::CString &FileType = m_FilePathName.Right(m_FilePathName.GetLength() - position);
-    WTL::CString &FilePath = m_FilePathName.Left(position);
+    ATL::CString &FileType = m_FilePathName.Right(m_FilePathName.GetLength() - position);
+    ATL::CString &FilePath = m_FilePathName.Left(position);
     FilePath += _Config.TemplateStr;
     FilePath += FileType;
 
@@ -744,7 +744,7 @@ LRESULT CMainDlg::OnClickFileLink(int, LPNMHDR, BOOL&)
     return 0;  
 }
 
-BOOL CMainDlg::ExtractTakInternalCue(const WTL::CString& AudioFileName)
+BOOL CMainDlg::ExtractTakInternalCue(const ATL::CString& AudioFileName)
 {
 
     m_CodeStatus = _T("UTF-8 (Internal Cue File)");
@@ -774,7 +774,7 @@ BOOL CMainDlg::ExtractTakInternalCue(const WTL::CString& AudioFileName)
     if (m_FilePathName.IsEmpty())
         return FALSE;
 
-    WTL::CString cueContent(L"");
+    ATL::CString cueContent(L"");
     int cueRawContentLength = 0;
     if (Unicue::ExtractTakInternalCue(m_FilePathName, cueContent, cueRawContentLength))
     {
@@ -801,7 +801,7 @@ BOOL CMainDlg::ExtractTakInternalCue(const WTL::CString& AudioFileName)
 
 // flac文件结构
 // http://flac.sourceforge.net/format.html
-BOOL CMainDlg::ExtractFlacInternalCue(const WTL::CString& AudioFileName)
+BOOL CMainDlg::ExtractFlacInternalCue(const ATL::CString& AudioFileName)
 {
     m_CodeStatus=_T("UTF-8 (Internal Cue File)");
     m_bNeedConvert=FALSE;
@@ -830,7 +830,7 @@ BOOL CMainDlg::ExtractFlacInternalCue(const WTL::CString& AudioFileName)
     if (m_FilePathName.IsEmpty())
         return FALSE;
 
-    WTL::CString cueContent(L"");
+    ATL::CString cueContent(L"");
     int cueRawContentLength = 0;
     if (Unicue::ExtractFlacInternalCue(m_FilePathName, cueContent, cueRawContentLength))
     {
@@ -859,7 +859,7 @@ void CMainDlg::FixCue()
 {
     if (!m_bCueFile) return;
 
-    WTL::CString cueContent(L"");
+    ATL::CString cueContent(L"");
     Unicue::GetWindowText(GetDlgItem(IDC_EDIT_UNICODE), cueContent);
     Unicue::FixTTAOutdatedTag(cueContent);
     bool cue_file_has_error = false;
@@ -873,9 +873,9 @@ void CMainDlg::FixCue()
     }
 }
 
-void CMainDlg::FixInternalCue(const WTL::CString& AudioFileName)
+void CMainDlg::FixInternalCue(const ATL::CString& AudioFileName)
 {
-    WTL::CString CueString;
+    ATL::CString CueString;
     Unicue::GetWindowText(GetDlgItem(IDC_EDIT_UNICODE), CueString);
     bool cue_file_has_error = false;
     if (Unicue::FixInternalCue(AudioFileName, CueString, cue_file_has_error))
@@ -893,7 +893,7 @@ void CMainDlg::FixTTACue()
     if (!m_bCueFile)
         return;
 
-    WTL::CString cueString(L"");
+    ATL::CString cueString(L"");
     Unicue::GetWindowText(GetDlgItem(IDC_EDIT_UNICODE), cueString);
     if (Unicue::FixTTAOutdatedTag(cueString))
         GetDlgItem(IDC_EDIT_UNICODE).SetWindowText(cueString);

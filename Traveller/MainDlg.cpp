@@ -124,18 +124,18 @@ LRESULT CMainDlg::OnBnClickedRegister(WORD, WORD, HWND, BOOL&)
     // copy dll file
     if (GetFileAttributes(_T("TravellerExt.dll")) == INVALID_FILE_ATTRIBUTES)
     {
-        WTL::CString dllPath(Unicue::GetProcessFolder());
+        ATL::CString dllPath(Unicue::GetProcessFolder());
         if (Unicue::IsWow64())
             dllPath += _T("TravellerExt64.dll");
         else
             dllPath += _T("TravellerExt32.dll");
 
-        WTL::CString target(Unicue::GetProcessFolder());
+        ATL::CString target(Unicue::GetProcessFolder());
         target += _T("TravellerExt.dll");
         bool success = CWinFile::CopyFile(dllPath, target);
         if (!success)
         {
-            WTL::CString errorMessage(L"Failed to copy ");
+            ATL::CString errorMessage(L"Failed to copy ");
             errorMessage += dllPath;
             errorMessage += L" to ";
             errorMessage += target;
@@ -157,7 +157,7 @@ LRESULT CMainDlg::OnBnClickedRegister(WORD, WORD, HWND, BOOL&)
     GetSystemDirectory(path, sizeof(path));
     _tcscat_s(path, _T("\\RegSvr32.exe"));
 
-    WTL::CString dll(L"\"");
+    ATL::CString dll(L"\"");
     dll += Unicue::GetProcessFolder();
     dll += _T("TravellerExt.dll\"");
 
@@ -172,7 +172,7 @@ LRESULT CMainDlg::OnBnClickedUnregister(WORD, WORD, HWND, BOOL&)
     GetSystemDirectory(path, sizeof(path));
     _tcscat_s(path, _T("\\RegSvr32.exe"));
 
-    WTL::CString dll(L"/u \"");
+    ATL::CString dll(L"/u \"");
     dll += Unicue::GetProcessFolder();
     dll += _T("TravellerExt.dll\"");
 

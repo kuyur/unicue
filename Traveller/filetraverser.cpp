@@ -16,7 +16,7 @@
 #include "filetraverser.h"
 #include "..\common\utils.h"
 
-CFileTraverser::CFileTraverser(const WTL::CString &folderPath, UINT mode)
+CFileTraverser::CFileTraverser(const ATL::CString &folderPath, UINT mode)
     :m_folder(folderPath), m_mode(mode), m_ignoredFolderName(L"")
 {
 }
@@ -108,18 +108,18 @@ void CFileTraverser::setIgnoredFolderName(const wchar_t *folderName)
     m_ignoredFolderName = folderName;
 }
 
-std::vector<WTL::CString> CFileTraverser::getFiles()
+std::vector<ATL::CString> CFileTraverser::getFiles()
 {
     if (m_isIgnoreHidden && (GetFileAttributes(m_folder) & FILE_ATTRIBUTE_HIDDEN))
-        return std::vector<WTL::CString>();
+        return std::vector<ATL::CString>();
 
-    std::vector<WTL::CString> vec;
+    std::vector<ATL::CString> vec;
     if (m_folder.GetLength() > 0)
         getFiles_(vec, m_folder);
     return vec;
 }
 
-void CFileTraverser::getFiles_(std::vector<WTL::CString> &vec, const WTL::CString &folder)
+void CFileTraverser::getFiles_(std::vector<ATL::CString> &vec, const ATL::CString &folder)
 {
     if ((m_ignoredFolderName.GetLength() > 0) && (folder.Right(m_ignoredFolderName.GetLength()) == m_ignoredFolderName))
         return;
@@ -127,7 +127,7 @@ void CFileTraverser::getFiles_(std::vector<WTL::CString> &vec, const WTL::CStrin
     WIN32_FIND_DATA FindFileData;
     HANDLE hFind = INVALID_HANDLE_VALUE;
 
-    WTL::CString spec(folder);
+    ATL::CString spec(folder);
     spec += L"\\*";
 
     hFind = FindFirstFile(spec, &FindFileData);
@@ -141,7 +141,7 @@ void CFileTraverser::getFiles_(std::vector<WTL::CString> &vec, const WTL::CStrin
         while (FindNextFile(hFind, &FindFileData))
         {
             if (m_isIgnoreHidden && (FindFileData.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN)) continue;
-            WTL::CString &find = folder + L"\\" + FindFileData.cFileName;
+            ATL::CString &find = folder + L"\\" + FindFileData.cFileName;
             if ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0)
             {
                 if (wcscmp(FindFileData.cFileName, L".") == 0 || wcscmp(FindFileData.cFileName, L"..") == 0)

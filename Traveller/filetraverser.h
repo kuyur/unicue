@@ -34,21 +34,21 @@ public:
         FILE_AND_FOLDER = FILE | FOLDER
     };
     CFileTraverser(const wchar_t* folderPath, UINT mode);
-    CFileTraverser(const WTL::CString &folderPath, UINT mode);
+    CFileTraverser(const ATL::CString &folderPath, UINT mode);
     ~CFileTraverser();
     void addFilter(const wchar_t* extension);
     void removeFilter(const wchar_t* extension);
     void setIgnoreHidden(BOOL isIgnoreHidden);
     void setIgnoredFolderName(const wchar_t *folderName);
-    std::vector<WTL::CString> getFiles();
+    std::vector<ATL::CString> getFiles();
 
 private:
-    WTL::CString m_folder;
-    WTL::CString m_ignoredFolderName;
+    ATL::CString m_folder;
+    ATL::CString m_ignoredFolderName;
     UINT         m_mode;
     BOOL         m_isIgnoreHidden;
     std::map<std::wstring, bool> m_extensions;
-    void getFiles_(std::vector<WTL::CString> &vec, const WTL::CString &folder);
+    void getFiles_(std::vector<ATL::CString> &vec, const ATL::CString &folder);
 };
 
 #endif // FILETRAVERSER_H__

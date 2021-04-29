@@ -31,7 +31,7 @@ class ATL_NO_VTABLE CTravellerBgMenuExt :
 {
 private:
     TCHAR        m_szPathName[MAX_PATH+1];
-    WTL::CString m_travellerPath;
+    ATL::CString m_travellerPath;
 public:
     CTravellerBgMenuExt() : m_travellerPath(_T("")) {};
     ~CTravellerBgMenuExt() {};

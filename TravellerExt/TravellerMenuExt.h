@@ -40,7 +40,7 @@ class ATL_NO_VTABLE CTravellerMenuExt :
 {
 private:
     TCHAR**      m_pszFileNames;
-    WTL::CString m_travellerPath;
+    ATL::CString m_travellerPath;
     UINT         m_fileCount;
     HBITMAP      m_hBitmap;
     CHAR         m_pszVerb[32];

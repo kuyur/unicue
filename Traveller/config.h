@@ -31,9 +31,9 @@ typedef struct CConfig_tag
     BOOL isOverride;
     BOOL isBackupOrig;
     BOOL isAutoFixCueError;
-    WTL::CString extensions;
-    WTL::CString templateString;
-    WTL::CString charmapConfig;
+    ATL::CString extensions;
+    ATL::CString templateString;
+    ATL::CString charmapConfig;
 }CConfig;
 
 BOOL LoadConfigFile(TiXmlDocument *xmlfile, CConfig &config);

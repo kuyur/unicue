@@ -23,11 +23,11 @@
 #include <atlapp.h>
 #include <atlmisc.h>
 
-class CStringElementTraitX : public CElementTraitsBase<WTL::CString>
+class CStringElementTraitX : public CElementTraitsBase<ATL::CString>
 {
 public:
-    typedef const WTL::CString& INARGTYPE;
-    typedef WTL::CString& OUTARGTYPE;
+    typedef const ATL::CString& INARGTYPE;
+    typedef ATL::CString& OUTARGTYPE;
 
     static ULONG Hash(_In_ INARGTYPE str)
     {

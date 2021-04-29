@@ -38,7 +38,7 @@ STDMETHODIMP CTravellerBgMenuExt::InvokeCommand(LPCMINVOKECOMMANDINFO pInfo)
     
     if (0 != LOWORD( pInfo->lpVerb))    // 菜单项的ID必须为0，因为只添加了一个菜单项
         return E_FAIL;
-    WTL::CString folder(_T("\""));
+    ATL::CString folder(_T("\""));
     folder += m_szPathName;
     folder += _T("\"");
     ShellExecute(NULL, _T("open"), m_travellerPath, folder, NULL, SW_SHOWNORMAL);

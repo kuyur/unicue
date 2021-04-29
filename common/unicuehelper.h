@@ -21,13 +21,13 @@
 #include "wtlhelper.h"
 
 namespace Unicue {
-bool FixTTAOutdatedTag(WTL::CString &cue_string);
-bool FixTTAOutdatedTag(const WTL::CString &cue_string, WTL::CString &fixed_string);
-bool FixAudioFilePath(const WTL::CString &cue_file_path, WTL::CString &cue_string, bool &cue_file_error);
-bool FixAudioFilePath(const WTL::CString &cue_file_path, const WTL::CString &cue_string, WTL::CString &fixed_string, bool &cue_file_error);
-bool FixInternalCue(const WTL::CString &audio_file_path, WTL::CString &cue_string, bool &cue_file_error);
-bool ExtractTakInternalCue(const WTL::CString &audio_file_path, WTL::CString &cue_string, int &cue_rawstring_length);
-bool ExtractFlacInternalCue(const WTL::CString &audio_file_path, WTL::CString &cue_string, int &cue_rawstring_length);
+bool FixTTAOutdatedTag(ATL::CString &cue_string);
+bool FixTTAOutdatedTag(const ATL::CString &cue_string, ATL::CString &fixed_string);
+bool FixAudioFilePath(const ATL::CString &cue_file_path, ATL::CString &cue_string, bool &cue_file_error);
+bool FixAudioFilePath(const ATL::CString &cue_file_path, const ATL::CString &cue_string, ATL::CString &fixed_string, bool &cue_file_error);
+bool FixInternalCue(const ATL::CString &audio_file_path, ATL::CString &cue_string, bool &cue_file_error);
+bool ExtractTakInternalCue(const ATL::CString &audio_file_path, ATL::CString &cue_string, int &cue_rawstring_length);
+bool ExtractFlacInternalCue(const ATL::CString &audio_file_path, ATL::CString &cue_string, int &cue_rawstring_length);
 };
 
 #endif // UNICUE_HELPER_H

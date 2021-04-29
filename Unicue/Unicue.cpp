@@ -32,7 +32,7 @@ CAppModule _Module;
 CConfig _Config; // the global instance for config
 CommandLine *_CommandLine = NULL; // the global instance for command line.
 
-void LoadConfig(const WTL::CString &configPath)
+void LoadConfig(const ATL::CString &configPath)
 {
     SetDefault(_Config);
     // Load config file...
@@ -83,16 +83,16 @@ void LoadConfig(const WTL::CString &configPath)
     }
 }
 
-bool SaveFile(const WTL::CString &outputFilePath, const wchar_t* unicodeString, int length, OUTPUT_ENCODING output_encoding, bool reallyOverwrite, bool fixCue)
+bool SaveFile(const ATL::CString &outputFilePath, const wchar_t* unicodeString, int length, OUTPUT_ENCODING output_encoding, bool reallyOverwrite, bool fixCue)
 {
     // backup first
     if (reallyOverwrite && _Config.SilentModeBackup)
     {
-        WTL::CString backupFilePath(outputFilePath);
+        ATL::CString backupFilePath(outputFilePath);
         backupFilePath += L".bak";
         if (!CWinFile::CopyFile(outputFilePath, backupFilePath))
         {
-            WTL::CString &errorMessage = Unicue::GetString(IDS_BACKUPFAILED);
+            ATL::CString &errorMessage = Unicue::GetString(IDS_BACKUPFAILED);
             errorMessage += L" path=";
             errorMessage += outputFilePath;
             MessageBox(NULL, errorMessage, _T("Unicue"), MB_OK);
@@ -103,14 +103,14 @@ bool SaveFile(const WTL::CString &outputFilePath, const wchar_t* unicodeString, 
     CWinFile file(outputFilePath, CWinFile::openCreateAlways|CWinFile::modeWrite|CWinFile::shareExclusive);
     if (!file.open())
     {
-        WTL::CString &errorMessage = Unicue::GetString(IDS_READFAILED);
+        ATL::CString &errorMessage = Unicue::GetString(IDS_READFAILED);
         errorMessage += L" path=";
         errorMessage += outputFilePath;
         MessageBox(NULL, errorMessage, _T("Unicue"), MB_OK);
         return false;
     }
 
-    WTL::CString fixed_string(L"");
+    ATL::CString fixed_string(L"");
     if (fixCue)
     {
         fixed_string += unicodeString;
@@ -157,12 +157,12 @@ bool SaveFile(const WTL::CString &outputFilePath, const wchar_t* unicodeString, 
     return true;
 }
 
-int RunSilent(const WTL::CString &inputFilePath)
+int RunSilent(const ATL::CString &inputFilePath)
 {
     // when called from command line with param "-s" or "--silent"
     if (NULL != _CommandLine)
     {
-        WTL::CString errorMessage(L"");
+        ATL::CString errorMessage(L"");
         // init C4 Context and load charmaps
         CC4Context* c4context = new CC4Context(std::wstring(_Config.MapConfName), Unicue::GetProcessFolder());
         if (!c4context->init())
@@ -175,8 +175,8 @@ int RunSilent(const WTL::CString &inputFilePath)
         }
 
         bool extract_internal_cue = false;
-        WTL::CString incue_content(L"");
-        WTL::CString &extension_name = inputFilePath.Right(inputFilePath.GetLength() - inputFilePath.ReverseFind('.') - 1);
+        ATL::CString incue_content(L"");
+        ATL::CString &extension_name = inputFilePath.Right(inputFilePath.GetLength() - inputFilePath.ReverseFind('.') - 1);
         extension_name.MakeLower();
         if ((extension_name.Compare(L"tak") == 0 ) ||
             (extension_name.Compare(L"flac") == 0) ||
@@ -208,7 +208,7 @@ int RunSilent(const WTL::CString &inputFilePath)
             }
         }
 
-        WTL::CString outputFilePath(L"");
+        ATL::CString outputFilePath(L"");
         if (extract_internal_cue)
         {
             outputFilePath += inputFilePath;
@@ -263,7 +263,7 @@ int RunSilent(const WTL::CString &inputFilePath)
             return 0;
         }
 
-        WTL::CString &output_extension_name = outputFilePath.Right(outputFilePath.GetLength() - outputFilePath.ReverseFind('.') - 1);
+        ATL::CString &output_extension_name = outputFilePath.Right(outputFilePath.GetLength() - outputFilePath.ReverseFind('.') - 1);
         // read input file
         CWinFile openFile(inputFilePath, CWinFile::modeRead | CWinFile::openOnly | CWinFile::shareDenyWrite);
         if (!openFile.open())
@@ -440,7 +440,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR lp
         configFileName = _CommandLine->getParamValue(L"-c");
     else if (_CommandLine->hasToken(L"--config"))
         configFileName = _CommandLine->getParamValue(L"--config");
-    WTL::CString configPath(Unicue::GetProcessFolder());
+    ATL::CString configPath(Unicue::GetProcessFolder());
     if (NULL != configFileName)
         configPath += configFileName;
     else
@@ -453,7 +453,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR lp
     if (_Config.WindowMaximized)
         nCmdShow = SW_SHOWMAXIMIZED;
 
-    WTL::CString inputFilePath(L"");
+    ATL::CString inputFilePath(L"");
     if (_CommandLine->hasToken(L"-i"))
         inputFilePath += _CommandLine->getParamValue(L"-i");
     else if (_CommandLine->hasToken(L"--input"))

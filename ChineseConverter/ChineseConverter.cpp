@@ -25,7 +25,7 @@
 CAppModule _Module;
 CConfig _Config; // The global instance for config
 
-void LoadConfig(const WTL::CString &configPath) {
+void LoadConfig(const ATL::CString &configPath) {
     SetDefault(_Config);
     // Load config file...
     // Because TiXml does not support wchar_t file name,
@@ -75,7 +75,7 @@ void LoadConfig(const WTL::CString &configPath) {
     }
 }
 
-int Run(const WTL::CString &configPath, LPTSTR /*lpstrCmdLine*/ = NULL, int nCmdShow = SW_SHOWDEFAULT)
+int Run(const ATL::CString &configPath, LPTSTR /*lpstrCmdLine*/ = NULL, int nCmdShow = SW_SHOWDEFAULT)
 {
     CMessageLoop theLoop;
     _Module.AddMessageLoop(&theLoop);
@@ -120,7 +120,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR lp
     hRes = _Module.Init(NULL, hInstance);
     ATLASSERT(SUCCEEDED(hRes));
 
-    WTL::CString configPath(Unicue::GetProcessFolder());
+    ATL::CString configPath(Unicue::GetProcessFolder());
     configPath += L"config-chnconverter.xml";
 
     int nRet = Run(configPath, lpstrCmdLine, nCmdShow);

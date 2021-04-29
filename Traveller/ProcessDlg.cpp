@@ -27,9 +27,9 @@
 
 static const WCHAR TRAVELLER_BACKUP[] = L"\\ut-orig";
 
-WTL::CString CueStatusToString(UINT status)
+ATL::CString CueStatusToString(UINT status)
 {
-    WTL::CString msg(L"");
+    ATL::CString msg(L"");
 
     if (status & NOT_A_FILE)           msg += L"非文件, ";
     if (status & READONLY_FILE)        msg += L"只读文件, ";
@@ -201,7 +201,7 @@ LRESULT CProcessDlg::OnBnClickedDo(WORD, WORD, HWND, BOOL&)
     ctrl.SetPos(0);
     CStatic &status = (CStatic)GetDlgItem(IDC_STATUS);
     status.SetWindowText(L"正在转换...");
-    std::vector<WTL::CString>::iterator iter = m_files.begin();
+    std::vector<ATL::CString>::iterator iter = m_files.begin();
     for (; iter != m_files.end(); ++iter, ctrl.StepIt())
     {
         CFileInfo &fileInfo = m_fileInfoMap[*iter];
@@ -221,7 +221,7 @@ LRESULT CProcessDlg::OnBnClickedDo(WORD, WORD, HWND, BOOL&)
                 if (m_config.isOverride && m_config.isBackupOrig)
                     backupFile(*iter, buffer, length);
                 // convert
-                WTL::CString outputTarget(*iter);
+                ATL::CString outputTarget(*iter);
                 if (!m_config.isOverride)
                     outputTarget.Insert(outputTarget.ReverseFind(L'.'), m_config.templateString);
                 CWinFile outFile(outputTarget, CWinFile::openCreateAlways|CWinFile::modeWrite|CWinFile::shareExclusive);
@@ -236,7 +236,7 @@ LRESULT CProcessDlg::OnBnClickedDo(WORD, WORD, HWND, BOOL&)
                 {
                     if ((fileInfo.status & IS_A_CUEFILE) && m_config.isAutoFixCueError)
                     {
-                        WTL::CString unicodeStr(CC4EncodeUTF8::convert2unicode(buffer, length).c_str());
+                        ATL::CString unicodeStr(CC4EncodeUTF8::convert2unicode(buffer, length).c_str());
                         processCueContent(unicodeStr, *iter);
                         std::string &utf8str = CC4EncodeUTF16::convert2utf8(unicodeStr, unicodeStr.GetLength());
                         outFile.write(utf8str.c_str(), utf8str.length());
@@ -252,7 +252,7 @@ LRESULT CProcessDlg::OnBnClickedDo(WORD, WORD, HWND, BOOL&)
                         if ((length & 1) == 0)
                         {
                             if (!isLitterEndian) convertBEtoLE((wchar_t*)buffer, length>>1);
-                            WTL::CString unicodeStr((wchar_t*)buffer, length>>1);
+                            ATL::CString unicodeStr((wchar_t*)buffer, length>>1);
                             processCueContent(unicodeStr, *iter);
                             std::string &utf8str = CC4EncodeUTF16::convert2utf8(unicodeStr, unicodeStr.GetLength());
                             outFile.write(utf8str.c_str(), utf8str.length());
@@ -269,7 +269,7 @@ LRESULT CProcessDlg::OnBnClickedDo(WORD, WORD, HWND, BOOL&)
                     std::wstring &unicodeStr = encode->wconvertText(buffer, length);
                     if ((fileInfo.status & IS_A_CUEFILE) && m_config.isAutoFixCueError)
                     {
-                        WTL::CString unicodeStr(unicodeStr.c_str());
+                        ATL::CString unicodeStr(unicodeStr.c_str());
                         processCueContent(unicodeStr, *iter);
                         std::string &utf8str = CC4EncodeUTF16::convert2utf8(unicodeStr, unicodeStr.GetLength());
                         outFile.write(utf8str.c_str(), utf8str.length());
@@ -315,10 +315,10 @@ LRESULT CProcessDlg::OnListDBClicked(int idCtrl, LPNMHDR pnmh, BOOL& /*bHandled*
         UINT index = (UINT)list.GetItemData(row);
         if (index > m_files.size() - 1)
             return 0;
-        WTL::CString unicuePath(L"\"");
+        ATL::CString unicuePath(L"\"");
         unicuePath += Unicue::GetProcessFolder();
         unicuePath += L"Unicue.exe\"";
-        WTL::CString cuePath(L"\"");
+        ATL::CString cuePath(L"\"");
         cuePath += m_files[index];
         cuePath += L"\"";
         HINSTANCE hi = ShellExecute(NULL, _T("open"), unicuePath, cuePath, NULL, SW_SHOW);
@@ -386,8 +386,8 @@ void CProcessDlg::loadCueFiles()
         t.addFilter(m_config.extensions);
         t.setIgnoreHidden(m_config.isIgnoreHidden);
         t.setIgnoredFolderName(TRAVELLER_BACKUP);
-        std::vector<WTL::CString> &files = t.getFiles();
-        std::vector<WTL::CString>::iterator iter = files.begin();
+        std::vector<ATL::CString> &files = t.getFiles();
+        std::vector<ATL::CString>::iterator iter = files.begin();
         for (; iter != files.end(); ++iter)
         {
             if (m_fileInfoMap.Lookup(*iter) == NULL)
@@ -405,7 +405,7 @@ void CProcessDlg::preProcess()
 {
     CListViewCtrl &list = (CListViewCtrl)GetDlgItem(IDC_FILELIST);
     list.DeleteAllItems();
-    std::vector<WTL::CString>::iterator iter = m_files.begin();
+    std::vector<ATL::CString>::iterator iter = m_files.begin();
     // progress ctrl
     CProgressBarCtrl &ctrl = (CProgressBarCtrl)GetDlgItem(IDC_PROGRESS);
     ctrl.SetRange(0, m_files.size());
@@ -435,7 +435,7 @@ void CProcessDlg::rerenderFileInfo()
 {
     CListViewCtrl &list = (CListViewCtrl)GetDlgItem(IDC_FILELIST);
     list.DeleteAllItems();
-    std::vector<WTL::CString>::iterator iter = m_files.begin();
+    std::vector<ATL::CString>::iterator iter = m_files.begin();
     for (int i = 0; iter != m_files.end(); ++iter, ++i)
     {
         CFileInfo &fileInfo = m_fileInfoMap[*iter];
@@ -451,7 +451,7 @@ void CProcessDlg::rerenderFileInfo()
     }
 }
 
-void CProcessDlg::getFileInfo(const WTL::CString &filePath, CFileInfo &fileInfo)
+void CProcessDlg::getFileInfo(const ATL::CString &filePath, CFileInfo &fileInfo)
 {
     fileInfo.isSelected = false;
     fileInfo.status = EMPTY_STATUS;
@@ -535,11 +535,11 @@ void CProcessDlg::getFileInfo(const WTL::CString &filePath, CFileInfo &fileInfo)
     delete []buffer;
 }
 
-BOOL CProcessDlg::backupFile(const WTL::CString &origPath, const char* buffer, UINT length)
+BOOL CProcessDlg::backupFile(const ATL::CString &origPath, const char* buffer, UINT length)
 {
-    WTL::CString &backupFolder = origPath.Left(origPath.ReverseFind(L'\\'));
+    ATL::CString &backupFolder = origPath.Left(origPath.ReverseFind(L'\\'));
     backupFolder += TRAVELLER_BACKUP;
-    WTL::CString backupFilePath(origPath);
+    ATL::CString backupFilePath(origPath);
     backupFilePath.Insert(backupFilePath.ReverseFind(L'\\'), TRAVELLER_BACKUP);
     if (!PathIsDirectory(backupFolder))
     {
@@ -555,7 +555,7 @@ BOOL CProcessDlg::backupFile(const WTL::CString &origPath, const char* buffer, U
     return TRUE;
 }
 
-void CProcessDlg::processCueContent(WTL::CString &cueContent, const WTL::CString &cueFilePath)
+void CProcessDlg::processCueContent(ATL::CString &cueContent, const ATL::CString &cueFilePath)
 {
     if (m_config.isAutoFixCueError)
     {

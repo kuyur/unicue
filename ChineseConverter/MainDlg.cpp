@@ -376,7 +376,7 @@ BOOL CMainDlg::DealFile()
     CEdit &RightEdit=(CEdit)GetDlgItem(IDC_EDIT_RIGHT);
     LeftEdit.SetWindowText(m_String);
     CComboBox &theCombo = (CComboBox)GetDlgItem(IDC_COMBO_SELECTCODE);
-    WTL::CString encodeName;
+    ATL::CString encodeName;
     Unicue::GetWindowText(theCombo, encodeName);
     const CC4Encode *encode = m_context->getEncode((LPCTSTR)encodeName);
     if (encode)
@@ -423,7 +423,7 @@ LRESULT CMainDlg::OnBnClickedButtonSave(WORD, WORD, HWND, BOOL&)
 
 LRESULT CMainDlg::OnBnClickedButtonSaveas(WORD, WORD, HWND, BOOL&)
 {
-    WTL::CString FilePath,FileType;
+    ATL::CString FilePath,FileType;
     int position = m_FilePathName.ReverseFind('.');
     FilePath = m_FilePathName.Left(position);
     FileType = m_FilePathName.Right(m_FilePathName.GetLength()-position);
@@ -444,7 +444,7 @@ LRESULT CMainDlg::OnCbnSelchangeComboSelectcode(WORD, WORD, HWND, BOOL&)
         return 0;
 
     CEdit &RightEdit=(CEdit)GetDlgItem(IDC_EDIT_RIGHT);
-    WTL::CString encodeName;
+    ATL::CString encodeName;
     Unicue::GetWindowText(theCombo, encodeName);
     const CC4Encode *encode = m_context->getEncode((LPCTSTR)encodeName);
     if (encode)
@@ -472,7 +472,7 @@ LRESULT CMainDlg::OnCbnSelchangeComboSavecode(WORD, WORD, HWND, BOOL&)
 {
     CComboBox &savingCombo = (CComboBox)GetDlgItem(IDC_COMBO_SAVECODE);
     // get saving encoding
-    WTL::CString encoding;
+    ATL::CString encoding;
     Unicue::GetLBText(savingCombo, savingCombo.GetCurSel(), encoding);
     if (encoding == _T("UTF-8"))
         _Config.OutputEncoding = O_UTF_8;

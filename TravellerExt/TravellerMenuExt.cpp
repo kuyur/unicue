@@ -119,7 +119,7 @@ STDMETHODIMP CTravellerMenuExt::InvokeCommand(LPCMINVOKECOMMANDINFO lpici)
     }
     else
     {
-        WTL::CString params(_T(""));
+        ATL::CString params(_T(""));
         if (m_pszFileNames)
         {
             for (UINT i=0; i<m_fileCount; ++i)

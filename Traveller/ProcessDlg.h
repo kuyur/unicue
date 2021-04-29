@@ -44,28 +44,28 @@ typedef struct FileInfo_tag
 {
     bool         isSelected;
     UINT         status;
-    WTL::CString encodeName;
+    ATL::CString encodeName;
 }CFileInfo;
 
-WTL::CString CueStatusToString(UINT status);
+ATL::CString CueStatusToString(UINT status);
 void SetConvertedCueStatus(CFileInfo &fileInfo, BOOL isUtf8IgnoredByConfig);
 
 class CProcessDlg : public CDialogImpl<CProcessDlg>, public CUpdateUI<CProcessDlg>,
         public CMessageFilter, public CIdleHandler
 {
 private:
-    WTL::CString m_configPath;
+    ATL::CString m_configPath;
     CConfig      m_config;
     wchar_t**    m_cueFolders;
     int          m_cueFoldersCount;
-    CAtlMap<WTL::CString, CFileInfo, CStringElementTraitX> m_fileInfoMap;
-    std::vector<WTL::CString> m_files;
+    CAtlMap<ATL::CString, CFileInfo, CStringElementTraitX> m_fileInfoMap;
+    std::vector<ATL::CString> m_files;
     CC4Context*  m_context;
     void preProcess();
     void rerenderFileInfo();
-    void getFileInfo(const WTL::CString &filePath, CFileInfo &fileInfo);
-    BOOL backupFile(const WTL::CString &origPath, const char* buffer, UINT length);
-    void processCueContent(WTL::CString &cueContent, const WTL::CString &cueFilePath);
+    void getFileInfo(const ATL::CString &filePath, CFileInfo &fileInfo);
+    BOOL backupFile(const ATL::CString &origPath, const char* buffer, UINT length);
+    void processCueContent(ATL::CString &cueContent, const ATL::CString &cueFilePath);
 public:
     enum { IDD = IDD_PROCESSDLG };
     CProcessDlg(void);

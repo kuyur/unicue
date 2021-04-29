@@ -24,7 +24,7 @@ void GetWindowText(ATL::CWindow &window, std::wstring &str)
     delete []buf;
 }
 
-void GetWindowText(ATL::CWindow &window, WTL::CString &str)
+void GetWindowText(ATL::CWindow &window, ATL::CString &str)
 {
     int len = window.GetWindowTextLengthW();
     wchar_t *buf = new wchar_t[len+1];
@@ -46,7 +46,7 @@ void GetLBText(WTL::CComboBox &combo, int index, std::wstring &str)
     delete []lbText;
 }
 
-void GetLBText(WTL::CComboBox &combo, int index, WTL::CString &str)
+void GetLBText(WTL::CComboBox &combo, int index, ATL::CString &str)
 {
     int lbTextLength = combo.GetLBTextLen(index);
     wchar_t *lbText = new wchar_t[lbTextLength + 1];
@@ -57,24 +57,24 @@ void GetLBText(WTL::CComboBox &combo, int index, WTL::CString &str)
     delete []lbText;
 }
 
-void GetListItemText(WTL::CListViewCtrl &ctrl, int row, int subItem, WTL::CString &str)
+void GetListItemText(WTL::CListViewCtrl &ctrl, int row, int subItem, ATL::CString &str)
 {
     // TODO
 }
 
-void GetFilePath(WTL::CFileDialog &dialog, WTL::CString &str)
+void GetFilePath(WTL::CFileDialog &dialog, ATL::CString &str)
 {
     str.Empty();
     str += dialog.m_szFileName;
 }
 
-WTL::CString GetString(int resourceId)
+ATL::CString GetString(int resourceId)
 {
     wchar_t buffer[256] = {0};
     if(LoadString(NULL, resourceId, buffer, 255) > 0)
-        return WTL::CString(buffer);
+        return ATL::CString(buffer);
     else
-        return WTL::CString();
+        return ATL::CString();
 }
 
 void SetThreadLocalSettings(LANGID Language, LANGID SubLanguage)
@@ -94,7 +94,7 @@ void SetThreadLocalSettings(LANGID Language, LANGID SubLanguage)
         ::SetThreadLocale(MAKELCID(MAKELANGID(Language, SubLanguage), SORT_DEFAULT)); // fallback
 }
 
-void RemoveFromEnd(WTL::CString &str, int count)
+void RemoveFromEnd(ATL::CString &str, int count)
 {
     int length = str.GetLength();
     for (int i=0; i<count; ++i)

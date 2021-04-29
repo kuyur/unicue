@@ -18,9 +18,9 @@
 
 namespace Unicue {
 
-bool FixTTAOutdatedTag(WTL::CString &cue_string)
+bool FixTTAOutdatedTag(ATL::CString &cue_string)
 {
-    WTL::CString low_cue_string(cue_string);
+    ATL::CString low_cue_string(cue_string);
     low_cue_string.MakeLower();
 
     int pos = low_cue_string.Find(L"the true audio");
@@ -30,14 +30,14 @@ bool FixTTAOutdatedTag(WTL::CString &cue_string)
     return true;
 }
 
-bool FixTTAOutdatedTag(const WTL::CString &cue_string, WTL::CString &fixed_string)
+bool FixTTAOutdatedTag(const ATL::CString &cue_string, ATL::CString &fixed_string)
 {
     fixed_string.Empty();
     fixed_string += cue_string;
     return FixTTAOutdatedTag(fixed_string);
 }
 
-bool FixAudioFilePath(const WTL::CString &cue_file_path, WTL::CString &cue_string, bool &cue_file_error)
+bool FixAudioFilePath(const ATL::CString &cue_file_path, ATL::CString &cue_string, bool &cue_file_error)
 {
     cue_file_error = false;
     int begin_pos = cue_string.Find(L"FILE \"");
@@ -59,8 +59,8 @@ bool FixAudioFilePath(const WTL::CString &cue_file_path, WTL::CString &cue_strin
         return false;
     }
 
-    WTL::CString &audio_file_name = cue_string.Mid(begin_pos, end_pos - begin_pos); // origin audio file name
-    WTL::CString &audio_file_path = cue_file_path.Left(cue_file_path.ReverseFind(L'\\'));
+    ATL::CString &audio_file_name = cue_string.Mid(begin_pos, end_pos - begin_pos); // origin audio file name
+    ATL::CString &audio_file_path = cue_file_path.Left(cue_file_path.ReverseFind(L'\\'));
     audio_file_path += L"\\";
     audio_file_path += audio_file_name;
 
@@ -69,7 +69,7 @@ bool FixAudioFilePath(const WTL::CString &cue_file_path, WTL::CString &cue_strin
     // 替换扩展名查找
     int pos = audio_file_name.ReverseFind(L'.');
     int extension_length = 0;
-    WTL::CString audio_file_name_found(L"");
+    ATL::CString audio_file_name_found(L"");
     if (-1 != pos)
     {
         extension_length += audio_file_name.GetLength() - pos; // contain .
@@ -109,8 +109,8 @@ bool FixAudioFilePath(const WTL::CString &cue_file_path, WTL::CString &cue_strin
     }
 
     // also guess from cue file name
-    WTL::CString audio_file_path_implicit(cue_file_path);
-    WTL::CString &audio_file_name_implicit = cue_file_path.Right(cue_file_path.GetLength() - cue_file_path.ReverseFind(L'\\') - 1);
+    ATL::CString audio_file_path_implicit(cue_file_path);
+    ATL::CString &audio_file_name_implicit = cue_file_path.Right(cue_file_path.GetLength() - cue_file_path.ReverseFind(L'\\') - 1);
     // For first time, length is 4 (.cue)
     extension_length = 4;
     RemoveFromEnd(audio_file_name_implicit, extension_length);
@@ -133,14 +133,14 @@ bool FixAudioFilePath(const WTL::CString &cue_file_path, WTL::CString &cue_strin
     return false;
 }
 
-bool FixAudioFilePath(const WTL::CString &cue_file_path, const WTL::CString &cue_string, WTL::CString &fixed_string, bool &cue_file_error)
+bool FixAudioFilePath(const ATL::CString &cue_file_path, const ATL::CString &cue_string, ATL::CString &fixed_string, bool &cue_file_error)
 {
     fixed_string.Empty();
     fixed_string += cue_string;
     return FixAudioFilePath(cue_file_path, fixed_string, cue_file_error);
 }
 
-bool FixInternalCue(const WTL::CString &audio_file_name, WTL::CString &cue_string, bool &cue_file_error)
+bool FixInternalCue(const ATL::CString &audio_file_name, ATL::CString &cue_string, bool &cue_file_error)
 {
     cue_file_error = false;
     int begin_pos = cue_string.Find(_T("FILE \""));
@@ -163,7 +163,7 @@ bool FixInternalCue(const WTL::CString &audio_file_name, WTL::CString &cue_strin
         return false;
     }
 
-    WTL::CString &old_file_name = cue_string.Mid(begin_pos, end_pos - begin_pos); // 音频文件名
+    ATL::CString &old_file_name = cue_string.Mid(begin_pos, end_pos - begin_pos); // 音频文件名
     if (old_file_name != audio_file_name)
     {
         cue_string.Replace(old_file_name, audio_file_name);
@@ -173,7 +173,7 @@ bool FixInternalCue(const WTL::CString &audio_file_name, WTL::CString &cue_strin
     return false;
 }
 
-bool ExtractTakInternalCue(const WTL::CString &audio_file_path, WTL::CString &cue_string, int &cue_rawstring_length)
+bool ExtractTakInternalCue(const ATL::CString &audio_file_path, ATL::CString &cue_string, int &cue_rawstring_length)
 {
     cue_string.Empty();
     cue_rawstring_length = 0;
@@ -299,7 +299,7 @@ bool ExtractTakInternalCue(const WTL::CString &audio_file_path, WTL::CString &cu
     return true;
 }
 
-bool ExtractFlacInternalCue(const WTL::CString &audio_file_path, WTL::CString &cue_string, int &cue_rawstring_length)
+bool ExtractFlacInternalCue(const ATL::CString &audio_file_path, ATL::CString &cue_string, int &cue_rawstring_length)
 {
     cue_string.Empty();
     cue_rawstring_length = 0;

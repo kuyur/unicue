@@ -18,6 +18,7 @@
 
 #include <string>
 #include <Windows.h>
+#include <atlstr.h>
 #include <atlbase.h>
 #include <atlapp.h>
 #include <atlwin.h>
@@ -35,13 +36,13 @@ typedef BOOL (WINAPI* SET_PROCESS_PREFERRED_UI_LANGUAGES) (DWORD, PCWSTR, PULONG
 
 namespace Unicue {
 void GetWindowText(ATL::CWindow &window, std::wstring &str);
-void GetWindowText(ATL::CWindow &window, WTL::CString &str);
+void GetWindowText(ATL::CWindow &window, ATL::CString &str);
 void GetLBText(WTL::CComboBox &combo, int index, std::wstring &str);
-void GetLBText(WTL::CComboBox &combo, int index, WTL::CString &str);
-void GetListItemText(WTL::CListViewCtrl &ctrl, int row, int subItem, WTL::CString &str);
-void GetFilePath(WTL::CFileDialog &dialog, WTL::CString &str);
-WTL::CString GetString(int resourceId);
+void GetLBText(WTL::CComboBox &combo, int index, ATL::CString &str);
+void GetListItemText(WTL::CListViewCtrl &ctrl, int row, int subItem, ATL::CString &str);
+void GetFilePath(WTL::CFileDialog &dialog, ATL::CString &str);
+ATL::CString GetString(int resourceId);
 void SetThreadLocalSettings(LANGID Language, LANGID SubLanguage);
-void RemoveFromEnd(WTL::CString &str, int count);
+void RemoveFromEnd(ATL::CString &str, int count);
 };
 #endif // UNICUE_WTLHELPER_H_

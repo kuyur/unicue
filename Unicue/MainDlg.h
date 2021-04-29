@@ -33,11 +33,11 @@ protected:
     UINT            m_RawStringLength;         // Length of m_RawString
     char*           m_String;                  // String without BOM, contained in m_RawString
     UINT            m_StringLength;            // Length of m_String, without length of BOM
-    WTL::CString    m_StringCodeType;          // Encoding type.
+    ATL::CString    m_StringCodeType;          // Encoding type.
     wchar_t*        m_UnicodeString;           // Unicode String to save converted result
     UINT            m_UnicodeLength;           // Length of m_UnicodeString
-    WTL::CString    m_FilePathName;            // File path to be converted
-    WTL::CString    m_CodeStatus;              // Encoding check result
+    ATL::CString    m_FilePathName;            // File path to be converted
+    ATL::CString    m_CodeStatus;              // Encoding check result
     BOOL            m_bCueFile;                // Type of file to be converted is a cue
     BOOL            m_bTransferString;         // Transfer string mode if TRUE, Transfer file mode if FALSE
     CC4Context*     m_context;                 // Converting context
@@ -47,12 +47,12 @@ protected:
     RECT            m_dlgRect;                 // Orinal rect of dialog
 
     void FixCue();
-    void FixInternalCue(const WTL::CString& AudioFileName);
+    void FixInternalCue(const ATL::CString& AudioFileName);
     void FixTTACue();
     void SetMainWndPos();
     BOOL DealFile();
-    BOOL ExtractTakInternalCue(const WTL::CString& AudioFileName);
-    BOOL ExtractFlacInternalCue(const WTL::CString& AudioFileName);
+    BOOL ExtractTakInternalCue(const ATL::CString& AudioFileName);
+    BOOL ExtractFlacInternalCue(const ATL::CString& AudioFileName);
 
 public:
     enum { IDD = IDD_MAINDLG };
