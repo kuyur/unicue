@@ -29,7 +29,7 @@ A system extension to register Unicue Traveller entry into context menu.
 
 ## Download
 Click the link below to download the latest binary.  
-[Unicue 1.3beta6](http://kuyur.github.io/unicue/Unicue_1.3beta6.zip)
+[Unicue 1.3beta6](https://kuyur.github.io/unicue/Unicue_1.3beta6.zip)
 
 ## Feedback and Bug Report
 If you find any bug or require some new feature, please report it at [Issues board](https://github.com/kuyur/unicue/issues).  
