@@ -10,7 +10,7 @@ A. Yes, it is possible. Follow the steps below.
 
 3. Right click the shortcut on desktop and click **Properties**. 
 
-4. Append ` -s -i` to **Target** and apply. Notice that there is a space between `-s` and `Unicue.exe`. If the path of `Unicue.exe` itself contains space, this part should be quoted by double-quote(`"`) .
+4. Append ` -s -i` to **Target** and apply. Notice that there is a space between `-s` and `Unicue.exe`. If the path of `Unicue.exe` itself contains space, this part should be quoted by double-quote(`"`) .  
 ![01.png](../images/01.png)
 
 5. Drag and drop any text file to the shortcut.  
