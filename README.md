@@ -41,6 +41,7 @@ If you find any text file can not be converted by Unicue, please send it to mail
 3. [About charmaps](docs/en/aboutcharmap.md)
 4. [About registry entry of Unicue](docs/en/registry.md)
 5. [Use command line for Unicue](docs/en/argumentsusage.md)
+6. [Advanced usage of Unicue](docs/en/advancedusage.md)
 
 ## Link of technology docs (in Chinese)
 1. [How to output a UTF-8 encoding text file by tinyXml](http://kuyur.info/blog/archives/462)
@@ -103,6 +104,7 @@ Unicue 中文版说明
 3. [字符映射表说明](docs/chs/aboutcharmap.md)
 4. [有关Unicue的注册表项](docs/chs/registry.md)
 5. [Unicue命令行使用方法](docs/chs/argumentsusage.md)
+6. [Unicue进阶用法](docs/chs/advancedusage.md)
 
 ## 技术文档链接
 1. [tinyXml输出utf-8文档](http://kuyur.info/blog/archives/462)
