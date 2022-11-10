@@ -58,6 +58,7 @@ If you find any text file can not be converted by Unicue, please send it to mail
 ## Link
 1. [c4-lib](https://github.com/kuyur/c4)
 2. [next-c4 lib](https://github.com/kuyur/next-c4)
+3. [nextc4.js](https://github.com/kuyur/nextc4js)
 
 ***
 
@@ -121,3 +122,4 @@ Unicue 中文版说明
 ## 相关链接
 1. [c4-lib](https://github.com/kuyur/c4)
 2. [next-c4 lib](https://github.com/kuyur/next-c4)
+3. [nextc4.js](https://github.com/kuyur/nextc4js)
