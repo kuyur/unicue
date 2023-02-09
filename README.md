@@ -33,7 +33,7 @@ Click the link below to download the latest binary.
 
 ## Feedback and Bug Report
 If you find any bug or require some new feature, please report it at [Issues board](https://github.com/kuyur/unicue/issues).  
-If you find any text file can not be converted by Unicue, please send it to mail:unicue{at}kuyur.info (please replace **{at}** with **@**, and put **[Report Unknown Encoding]** at the head of mail title).
+If you find any text file can not be converted by Unicue, please send it to mail:unicue{at}kuyur.net (please replace **{at}** with **@**, and put **[Report Unknown Encoding]** at the head of mail title).
 
 ## Documentation
 1. [Change log](docs/en/changelog.md)
@@ -44,16 +44,16 @@ If you find any text file can not be converted by Unicue, please send it to mail
 6. [Advanced usage of Unicue](docs/en/advancedusage.md)
 
 ## Link of technology docs (in Chinese)
-1. [How to output a UTF-8 encoding text file by tinyXml](http://kuyur.info/blog/archives/462)
-2. [An algorithm to convert encodings with O(n) time complexity](http://kuyur.info/blog/archives/578)
-3. [How to convert UTF-8 to UTF-16 and validate UTF-8 encoding](http://kuyur.info/blog/archives/633)
-4. [An algorithm of auto detection for GBK, Shift-JIS and BIG5 encodings](http://kuyur.info/blog/archives/635)
-5. [Analyze file structure of Akaiito's script file and extract script](http://kuyur.info/blog/archives/793)
-6. [How to read and write UTF-8 node by tinyXml](http://kuyur.info/blog/archives/848)
-7. [How to extract internal cuesheet of tak](http://kuyur.info/blog/archives/858)
-8. [How to extract internal cuesheet of flac](http://kuyur.info/blog/archives/862)
-9. [A solution to load customize charmaps dynamic: Common Code Converting Context (c4-lib)](http://kuyur.info/blog/archives/2250)
-10. [Next generation of c4-lib](http://kuyur.info/blog/archives/3154)
+1. [How to output a UTF-8 encoding text file by tinyXml](https://kuyur.net/blog/archives/462)
+2. [An algorithm to convert encodings with O(n) time complexity](https://kuyur.net/blog/archives/578)
+3. [How to convert UTF-8 to UTF-16 and validate UTF-8 encoding](https://kuyur.net/blog/archives/633)
+4. [An algorithm of auto detection for GBK, Shift-JIS and BIG5 encodings](https://kuyur.net/blog/archives/635)
+5. [Analyze file structure of Akaiito's script file and extract script](https://kuyur.net/blog/archives/793)
+6. [How to read and write UTF-8 node by tinyXml](https://kuyur.net/blog/archives/848)
+7. [How to extract internal cuesheet of tak](https://kuyur.net/blog/archives/858)
+8. [How to extract internal cuesheet of flac](https://kuyur.net/blog/archives/862)
+9. [A solution to load customize charmaps dynamic: Common Code Converting Context (c4-lib)](https://kuyur.net/blog/archives/2250)
+10. [Next generation of c4-lib](https://kuyur.net/blog/archives/3154)
 
 ## Link
 1. [c4-lib](https://github.com/kuyur/c4)
@@ -97,7 +97,7 @@ Unicue 中文版说明
 
 ## 反馈以及Bug报告
 如发现任何bug或者有新的特性需求，请前往[Issues board](https://github.com/kuyur/unicue/issues)报告。  
-如遇到任何Unicue无法转换的文本文件，欢迎附加到附件然后扔到邮箱：unicue{at}kuyur.info （请将**{at}**替换成**@**，标题请注明【报告乱码文件】）。
+如遇到任何Unicue无法转换的文本文件，欢迎附加到附件然后扔到邮箱：unicue{at}kuyur.net （请将**{at}**替换成**@**，标题请注明【报告乱码文件】）。
 
 ## 文档
 1. [版本升级日志](docs/chs/changelog.md)
@@ -108,16 +108,16 @@ Unicue 中文版说明
 6. [Unicue进阶用法](docs/chs/advancedusage.md)
 
 ## 技术文档链接
-1. [tinyXml输出utf-8文档](http://kuyur.info/blog/archives/462)
-2. [一个线性时间复杂度的字符编码转换算法](http://kuyur.info/blog/archives/578)
-3. [UTF-8到Unicode的转换以及UTF-8编码的检测](http://kuyur.info/blog/archives/633)
-4. [GBK、Shift-JIS、BIG5编码检测算法](http://kuyur.info/blog/archives/635)
-5. [アカイイト 游戏脚本文件分析及脚本提取](http://kuyur.info/blog/archives/793)
-6. [tinyXml处理UTF-8编码详解——写入和读取](http://kuyur.info/blog/archives/848)
-7. [tak的内嵌cue提取](http://kuyur.info/blog/archives/858)
-8. [flac的内嵌cue提取](http://kuyur.info/blog/archives/862)
-9. [动态加载字符映射表的字符转换环境方案(c4-lib)](http://kuyur.info/blog/archives/2250)
-10. [新一代通用字符转换环境(next-c4 lib)](http://kuyur.info/blog/archives/3154)
+1. [tinyXml输出utf-8文档](https://kuyur.net/blog/archives/462)
+2. [一个线性时间复杂度的字符编码转换算法](https://kuyur.net/blog/archives/578)
+3. [UTF-8到Unicode的转换以及UTF-8编码的检测](https://kuyur.net/blog/archives/633)
+4. [GBK、Shift-JIS、BIG5编码检测算法](https://kuyur.net/blog/archives/635)
+5. [アカイイト 游戏脚本文件分析及脚本提取](https://kuyur.net/blog/archives/793)
+6. [tinyXml处理UTF-8编码详解——写入和读取](https://kuyur.net/blog/archives/848)
+7. [tak的内嵌cue提取](https://kuyur.net/blog/archives/858)
+8. [flac的内嵌cue提取](https://kuyur.net/blog/archives/862)
+9. [动态加载字符映射表的字符转换环境方案(c4-lib)](https://kuyur.net/blog/archives/2250)
+10. [新一代通用字符转换环境(next-c4 lib)](https://kuyur.net/blog/archives/3154)
 
 ## 相关链接
 1. [c4-lib](https://github.com/kuyur/c4)
