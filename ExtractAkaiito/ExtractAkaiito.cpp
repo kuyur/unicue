@@ -4,7 +4,7 @@
 /* Extract script from Akaiito which is a PS2 game put on sale in 2004. */
 /* The tool is a part of Unicue Project.                                */
 /*                                                                      */
-/* Author:  kuyur (kuyur@kuyur.info)                                    */
+/* Author:  kuyur (kuyur@kuyur.net)                                    */
 /* Published under GPLv3                                                */
 /* http://www.gnu.org/licenses/gpl-3.0.en.html                          */
 /*                                                                      */

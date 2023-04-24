@@ -3,7 +3,7 @@
 /* Unicue 1.3                                                           */
 /* A tool to convert file from ansi code-page to Unicode                */
 /*                                                                      */
-/* Author:  kuyur (kuyur@kuyur.info)                                    */
+/* Author:  kuyur (kuyur@kuyur.net)                                    */
 /* Published under GPLv3                                                */
 /* http://www.gnu.org/licenses/gpl-3.0.en.html                          */
 /*                                                                      */
@@ -23,7 +23,7 @@ LRESULT CAboutDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPara
     m_link.SubclassWindow(GetDlgItem(IDC_STATIC_KUYUR));
     DWORD linkStyle = m_link.GetHyperLinkExtendedStyle() | HLINK_NOTIFYBUTTON | HLINK_COMMANDBUTTON;
     m_link.SetHyperLinkExtendedStyle(linkStyle);
-    m_link.SetHyperLink(L"http://kuyur.info/blog");
+    m_link.SetHyperLink(L"http://kuyur.net/blog");
 
     // Use CImage to load resource from Stream or file
     HGLOBAL  hGlobal = NULL;
@@ -98,6 +98,6 @@ LRESULT CAboutDlg::OnPaint(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, 
 
 LRESULT CAboutDlg::OnClickHyperLink(int /*idCtrl*/, LPNMHDR /*pnmh*/, BOOL& /*bHandled*/)
 {
-    ::ShellExecute(NULL, L"open", L"http://kuyur.info/blog/", NULL, NULL, SW_SHOWNORMAL);
+    ::ShellExecute(NULL, L"open", L"http://kuyur.net/blog/", NULL, NULL, SW_SHOWNORMAL);
     return 0;  
 }

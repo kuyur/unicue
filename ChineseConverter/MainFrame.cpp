@@ -4,7 +4,7 @@
 /* A tool to convert Simplified Chinese into Traditional Chinese and    */
 /* convert back. It is a part of Unicue Project.                        */
 /*                                                                      */
-/* Author:  kuyur (kuyur@kuyur.info)                                    */
+/* Author:  kuyur (kuyur@kuyur.net)                                    */
 /* Published under GPLv3                                                */
 /* http://www.gnu.org/licenses/gpl-3.0.en.html                          */
 /*                                                                      */
