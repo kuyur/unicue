@@ -1,6 +1,6 @@
 /************************************************************************/
 /*                                                                      */
-/* ChineseConverter 1.3                                                 */
+/* ChineseConverter 1.4                                                 */
 /* A tool to convert Simplified Chinese into Traditional Chinese and    */
 /* convert back. It is a part of Unicue Project.                        */
 /*                                                                      */

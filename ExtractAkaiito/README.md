@@ -21,4 +21,4 @@ You can use Unicue to convert them into UTF-8 and merge the txt files.
 Some characters are obviously not words of scripts. It is very easy to remove them. Now you get a readable text with lots of numbers which may have some unknown meanings. It is recommended to use Replacing Function(Regular expression) of Notepad++ to deal with those numbers. 
 
 You will finally get the clean scripts of Akaiito, just as this one: 
-[akaiito\_script\_step4.pdf](http://kuyur.net/blog/uploads/2010/08/akaiito_script_step4.pdf)
+[akaiito\_script\_step4.pdf](https://kuyur.net/blog/uploads/2010/08/akaiito_script_step4.pdf)

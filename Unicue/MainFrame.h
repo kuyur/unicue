@@ -1,6 +1,6 @@
 /************************************************************************/
 /*                                                                      */
-/* Unicue 1.3                                                           */
+/* Unicue 1.4                                                           */
 /* A tool to convert file from ansi code-page to Unicode                */
 /*                                                                      */
 /* Author:  kuyur (kuyur@kuyur.net)                                    */
