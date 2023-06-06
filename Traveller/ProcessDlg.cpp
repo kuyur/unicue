@@ -1,6 +1,6 @@
 ﻿/************************************************************************/
 /*                                                                      */
-/* Traveller 1.3                                                        */
+/* Traveller 1.4                                                        */
 /* A batch tool to convert files from ansi code-page to Unicode.        */
 /* It is a part of Unicue Project.                                      */
 /*                                                                      */
