@@ -93,7 +93,7 @@ Unicue 中文版说明
 
 ## 下载
 点击下面的链接下载最新的程序:  
-[Unicue 1.3beta6](http://kuyur.github.io/unicue/Unicue_1.3beta6.zip)
+[Unicue 1.4](http://kuyur.github.io/unicue/Unicue_1.4.zip)
 
 ## 反馈以及Bug报告
 如发现任何bug或者有新的特性需求，请前往[Issues board](https://github.com/kuyur/unicue/issues)报告。  
