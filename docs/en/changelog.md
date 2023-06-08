@@ -1,6 +1,10 @@
 Unicue
 ======
 
+### 1.4
+
+> * Update the domain in "about".
+
 ### 1.3
 
 > * 增加拉丁文字母支持(CP1252)
@@ -70,6 +74,10 @@ Unicue Traveller
 
 Chinese Converter
 =================
+
+### 1.4
+
+> * Update the domain in "about".
 
 ### 1.3
 
